@@ -3,7 +3,30 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+}
+
+model Certificate {
+  id            String   @id @default(uuid())
+  enterprise_id String
+  description   String?
+  permissions   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  enterprise    Enterprise @relation(fields: [enterprise_id], references: [id])
+  @@map("certificates")
+}
+
+model Enterprise {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  address       String?
+  status        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  certificates  Certificate[]
+  @@map("enterprises")
 }
