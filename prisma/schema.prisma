@@ -7,25 +7,28 @@ datasource db {
 }
 
 model Certificate {
-  id            String   @id @default(uuid())
-  enterprise_id String
+  id            Int       @id @default(autoincrement())
+  uuid          String    @unique() @db.Uuid
+  enterprise_id Int
   description   String?
   permissions   String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  is_halal      Boolean?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   enterprise    Enterprise @relation(fields: [enterprise_id], references: [id])
   @@map("certificates")
 }
 
 model Enterprise {
-  id            String   @id @default(uuid())
+  id            Int       @id @default(autoincrement())
+  uuid          String    @unique() @db.Uuid
   name          String
   description   String?
   address       String?
   status        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   certificates  Certificate[]
   @@map("enterprises")
