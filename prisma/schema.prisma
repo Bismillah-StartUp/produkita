@@ -62,6 +62,23 @@ model Product {
   @@map("products")
 }
 
+model NutritionInfo{
+  id              Int       @id @default(autoincrement())
+  servings        Float?
+  energy          Float?
+  fat             Float?
+  saturated_fat   Float?
+  protein         Float?
+  carbo           Float?
+  sugar           Float?
+  natrium         Float?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("nutrition_infos")
+}
+
 enum ProductType {
   food
   beverage
