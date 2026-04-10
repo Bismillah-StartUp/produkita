@@ -27,14 +27,20 @@ export function Carousel({ children, className }: CarouselProps) {
   return (
     <div className={cn("relative w-full", className)}>
       <div className="overflow-hidden">
-        <div className="relative flex transition-transform duration-500 ease-out">
+        <div 
+          className="relative flex"
+          style={{
+            width: `${children.length * 100}%`,
+            transform: `translateX(-${current * (100 / children.length)}%)`,
+            transition: "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
           {children.map((child, index) => (
             <div
               key={index}
-              className="w-full shrink-0"
+              className="shrink-0"
               style={{
-                transform: `translateX(${(index - current) * 100}%)`,
-                transition: "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)",
+                width: `${100 / children.length}%`,
               }}
             >
               {child}

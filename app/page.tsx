@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Carousel } from "@/components/ui/carousel"
+import { InfiniteCarousel } from "@/components/ui/infinite-carousel"
 import { TestimonialCard } from "@/components/testimonial-card"
 import {
   CheckCircle,
@@ -143,6 +144,55 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-20 md:py-32 bg-white">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-16 text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Dipercaya oleh UMKM Indonesia
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Ribuan UMKM telah mempercayai EntreCertivy untuk mengelola sertifikasi produk mereka
+            </p>
+          </div>
+
+          <InfiniteCarousel speed={10}>
+            {[
+              <div key="logo1" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-blue-600">BPOM</div>
+                </div>
+              </div>,
+              <div key="logo2" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-red-600">HALAL</div>
+                </div>
+              </div>,
+              <div key="logo3" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-green-600">PIRT</div>
+                </div>
+              </div>,
+              <div key="logo4" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-purple-600">SNI</div>
+                </div>
+              </div>,
+              <div key="logo5" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-orange-600">UMKM+</div>
+                </div>
+              </div>,
+              <div key="logo6" className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <div className="text-xs font-bold text-indigo-600">ISO</div>
+                </div>
+              </div>,
+            ]}
+          </InfiniteCarousel>
         </div>
       </section>
 
