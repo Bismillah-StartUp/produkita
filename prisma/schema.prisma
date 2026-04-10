@@ -11,28 +11,48 @@ model Certificate {
   uuid                String    @unique() @db.Uuid
   enterprise_id       Int
   product_id          Int
-  description         String?
-  bpom_type           String?     
+  description         String?    
   bpom_number         String?
   pirt_number         String?
   lisence_number      String?
   is_halal            Boolean?
+  halal_id            Int?
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   enterprise    Enterprise @relation(fields: [enterprise_id], references: [id])
   product       Product    @relation(fields: [product_id], references: [id])
+  halal         Halal?     @relation(fields: [halal_id], references: [id])
+
   @@map("certificates")
+}
+
+model Halal {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique() @db.Uuid
+  number          String
+  authority       String?
+  valid_until     DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  certificates    Certificate[]
+
+  @@map("halals")
 }
 
 model Enterprise {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique() @db.Uuid
   name          String
+  phone         String?
+  email         String?
   description   String?
   address       String?
   status        String
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -51,7 +71,7 @@ model Product {
   brand           String?
   description     String?
   enterprise_id   Int
-  type            ProductType
+  type            ProductCategory
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -79,9 +99,8 @@ model NutritionInfo{
   @@map("nutrition_infos")
 }
 
-enum ProductType {
-  food
-  beverage
+enum ProductCategory {
+  fnb
   cosmetic
   pharmaceutical
 }
