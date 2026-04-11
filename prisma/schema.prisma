@@ -15,7 +15,6 @@ model Certificate {
   bpom_number         String?
   pirt_number         String?
   lisence_number      String?
-  is_halal            Boolean?
   halal_id            Int?
 
   createdAt     DateTime  @default(now())
@@ -72,18 +71,21 @@ model Product {
   description     String?
   enterprise_id   Int
   type            ProductCategory
+  barcode         String?   @unique()
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   enterprise      Enterprise @relation(fields: [enterprise_id], references: [id])
   certificates    Certificate[]
+  nutrition_info  NutritionInfo?
 
   @@map("products")
 }
 
 model NutritionInfo{
   id              Int       @id @default(autoincrement())
+  product_id      Int       @unique()
   servings        Float?
   energy          Float?
   fat             Float?
@@ -95,6 +97,8 @@ model NutritionInfo{
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  product         Product   @relation(fields: [product_id], references: [id])
   
   @@map("nutrition_infos")
 }
