@@ -27,7 +27,7 @@ export function Carousel({ children, className }: CarouselProps) {
   return (
     <div className={cn("relative w-full", className)}>
       <div className="overflow-hidden">
-        <div 
+        <div
           className="relative flex"
           style={{
             width: `${children.length * 100}%`,
@@ -53,7 +53,7 @@ export function Carousel({ children, className }: CarouselProps) {
       <Button
         variant="outline"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+        className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
         onClick={handlePrev}
       >
         <ChevronLeft className="h-4 w-4" />
@@ -62,7 +62,7 @@ export function Carousel({ children, className }: CarouselProps) {
       <Button
         variant="outline"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+        className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
         onClick={handleNext}
       >
         <ChevronRight className="h-4 w-4" />

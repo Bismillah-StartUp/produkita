@@ -37,7 +37,7 @@ export function InfiniteCarousel({
         {duplicatedItems.map((item, index) => (
           <div
             key={index}
-            className="shrink-0 flex items-center justify-center"
+            className="flex shrink-0 items-center justify-center"
             style={{ width: `${itemPercentage}%` }}
           >
             {item}
@@ -46,8 +46,8 @@ export function InfiniteCarousel({
       </div>
 
       {/* Gradient overlay untuk fade effect */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-white to-transparent pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-white to-transparent pointer-events-none" />
+      <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-16 bg-linear-to-r from-white to-transparent" />
+      <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-16 bg-linear-to-l from-white to-transparent" />
     </div>
   )
 }
