@@ -1,7 +1,11 @@
-import { Navbar } from "./landing/navbar"
-import { Footer } from "./landing/footer"
+import { Navbar as NavbarLanding } from "./landing/navbar"
+import { Footer as FooterLanding } from "./landing/footer"
+import { Header as HeaderLicences } from "./licences/header"
+import { Navbar as NavbarLicences } from "./licences/navbar"
 
 export { 
-  Navbar as NavbarLanding, 
-  Footer as FooterLanding 
+  NavbarLanding, 
+  FooterLanding,
+  HeaderLicences,
+  NavbarLicences
 }

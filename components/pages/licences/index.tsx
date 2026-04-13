@@ -2,6 +2,7 @@ import ProductOverview from './partials/product-overview'
 import CertificationsSection from './partials/certifications-section'
 import NutritionFacts from './partials/nutrition-facts'
 import CompanyInfo from './partials/company-info'
+import { HeaderLicences, NavbarLicences } from '@/components/navigations'
 
 interface CertificationData {
   type: 'BPOM' | 'HALAL' | 'PIRT'
@@ -103,28 +104,14 @@ export const LicenceLayout = ({ code }: LicenceLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Tabs */}
-      <nav className="border-b border-slate-200 sticky top-0 bg-white z-10">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex gap-6 overflow-x-auto">
-          <button className="whitespace-nowrap pb-2 border-b-2 border-blue-600 text-blue-600 font-medium">
-            Overview
-          </button>
-          {nutrition_info && (
-            <button className="text-slate-600 whitespace-nowrap pb-2 hover:text-slate-900">
-              Nutrition
-            </button>
-          )}
-          <button className="text-slate-600 whitespace-nowrap pb-2 hover:text-slate-900">
-            Certifications
-          </button>
-          <button className="text-slate-600 whitespace-nowrap pb-2 hover:text-slate-900">
-            Company
-          </button>
-        </div>
-      </nav>
+      {/* Header */}
+      <HeaderLicences 
+        companyName={enterprise?.name || 'Company Name'}
+        isVerified={true}
+      />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-6 py-12 pb-32">
         {/* Product Overview Section */}
         <section className="pb-16">
           <ProductOverview
@@ -177,6 +164,8 @@ export const LicenceLayout = ({ code }: LicenceLayoutProps) => {
           />
         </section>
       </main>
+
+      <NavbarLicences />
     </div>
   )
 }
