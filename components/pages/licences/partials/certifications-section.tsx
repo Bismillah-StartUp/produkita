@@ -75,57 +75,57 @@ export default function CertificationsSection({ certifications }: Certifications
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div>
-        <h2 className="text-2xl font-bold">Legal Certifications</h2>
-        <p className="text-slate-600">All licenses and permits</p>
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Legal Certifications</h2>
+        <p className="text-xs sm:text-sm text-slate-600 mt-1">All licenses and permits</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-5">
         {certifications.map((cert, index) => {
           const IconComponent = getCertIcon(cert.type)
           return (
             <div
               key={index}
-              className={`border rounded-lg p-6 space-y-4 ${getCertColor(cert.type)}`}
+              className={`border rounded-lg p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 ${getCertColor(cert.type)}`}
             >
-              <div className="flex items-center gap-3">
-                <IconComponent size={32} className={getCertIconColor(cert.type)} />
-                <h3 className="text-lg font-bold text-slate-900">{getCertTitle(cert.type)}</h3>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <IconComponent size={24} className={`${getCertIconColor(cert.type)} sm:size-8 lg:size-9`} />
+                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-slate-900">{getCertTitle(cert.type)}</h3>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex justify-between gap-2 text-xs sm:text-sm">
                   <span className="text-slate-700">
                     {cert.type === 'BPOM' ? 'BPOM Number' : cert.type === 'HALAL' ? 'Halal Number' : 'PIRT Number'}
                   </span>
-                  <span className="font-medium text-slate-900">{cert.number}</span>
+                  <span className="font-medium text-slate-900 text-right">{cert.number}</span>
                 </div>
 
                 {cert.authority && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
                     <span className="text-slate-700">
                       {cert.type === 'HALAL' ? 'Certified by' : 'Authority'}
                     </span>
-                    <span className="font-medium text-slate-900">{cert.authority}</span>
+                    <span className="font-medium text-slate-900 text-right">{cert.authority}</span>
                   </div>
                 )}
 
                 {cert.issueDate && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
                     <span className="text-slate-700">
                       {cert.type === 'HALAL' ? 'Issue Date' : 'Registration Date'}
                     </span>
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-slate-900 text-right">
                       {format(new Date(cert.issueDate), 'MMMM dd, yyyy', { locale: idLocale })}
                     </span>
                   </div>
                 )}
 
                 {cert.validUntil && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2 text-xs sm:text-sm">
                     <span className="text-slate-700">Valid Until</span>
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-slate-900 text-right">
                       {format(new Date(cert.validUntil), 'MMMM dd, yyyy', { locale: idLocale })}
                     </span>
                   </div>
@@ -133,7 +133,7 @@ export default function CertificationsSection({ certifications }: Certifications
               </div>
 
               {cert.authority && (
-                <div className="text-sm text-slate-700 pt-2 border-t">
+                <div className="text-xs sm:text-sm text-slate-700 pt-2 sm:pt-3 border-t-2 border-current/20">
                   Verified by {cert.authority}
                 </div>
               )}

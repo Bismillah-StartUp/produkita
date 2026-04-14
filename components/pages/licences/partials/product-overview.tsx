@@ -26,11 +26,11 @@ export default function ProductOverview({
   certifications,
 }: ProductOverviewProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Product Image */}
       <div className="flex justify-center">
         {productImage ? (
-          <div className="relative h-64 w-64 rounded-lg overflow-hidden bg-slate-200">
+          <div className="relative h-48 w-48 sm:h-64 sm:w-64 lg:h-80 lg:w-80 rounded-lg overflow-hidden bg-slate-200">
             <Image
               src={productImage}
               alt={productName}
@@ -40,55 +40,55 @@ export default function ProductOverview({
             />
           </div>
         ) : (
-          <div className="h-64 w-64 bg-slate-200 rounded-lg flex items-center justify-center">
-            <span className="text-slate-500">Tidak ada gambar</span>
+          <div className="h-48 w-48 sm:h-64 sm:w-64 lg:h-80 lg:w-80 bg-slate-200 rounded-lg flex items-center justify-center">
+            <span className="text-slate-500 text-sm">Tidak ada gambar</span>
           </div>
         )}
       </div>
 
       {/* Product Info */}
       <div>
-        <p className="text-sm text-slate-600">{enterpriseName}</p>
-        <h1 className="text-3xl font-bold">{productName}</h1>
+        <p className="text-xs sm:text-sm text-slate-600">{enterpriseName}</p>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-1">{productName}</h1>
         {price && (
-          <p className="text-2xl font-bold text-slate-800 mt-2">
+          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mt-2 sm:mt-3">
             Rp {price.toLocaleString('id-ID')}
-            {volume && <span className="text-sm font-normal text-slate-600 ml-2">• {volume}</span>}
+            {volume && <span className="text-xs sm:text-sm font-normal text-slate-600 ml-2">• {volume}</span>}
           </p>
         )}
       </div>
 
       {/* Certification Badges */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
         {certifications.hasBPOM && (
-          <div className="bg-blue-50 rounded-lg p-4 text-center space-y-2">
-            <div className="flex justify-center"><Shield size={32} className="text-blue-500" /></div>
-            <p className="text-sm font-medium text-blue-600">BPOM</p>
+          <div className="bg-blue-50 rounded-lg p-3 sm:p-4 text-center space-y-1 sm:space-y-2">
+            <div className="flex justify-center"><Shield size={24} className="text-blue-500 sm:size-8 lg:size-9" /></div>
+            <p className="text-xs sm:text-sm font-medium text-blue-600">BPOM</p>
           </div>
         )}
         {certifications.hasPIRT && (
-          <div className="bg-green-50 rounded-lg p-4 text-center space-y-2">
-            <div className="flex justify-center"><FileCheck size={32} className="text-green-500" /></div>
-            <p className="text-sm font-medium text-green-600">PIRT</p>
+          <div className="bg-green-50 rounded-lg p-3 sm:p-4 text-center space-y-1 sm:space-y-2">
+            <div className="flex justify-center"><FileCheck size={24} className="text-green-500 sm:size-8 lg:size-9" /></div>
+            <p className="text-xs sm:text-sm font-medium text-green-600">PIRT</p>
           </div>
         )}
         {certifications.hasHalal && (
-          <div className="bg-green-50 rounded-lg p-4 text-center space-y-2">
-            <div className="flex justify-center"><Leaf size={32} className="text-green-500" /></div>
-            <p className="text-sm font-medium text-green-600">Halal</p>
+          <div className="bg-green-50 rounded-lg p-3 sm:p-4 text-center space-y-1 sm:space-y-2">
+            <div className="flex justify-center"><Leaf size={24} className="text-green-500 sm:size-8 lg:size-9" /></div>
+            <p className="text-xs sm:text-sm font-medium text-green-600">Halal</p>
           </div>
         )}
         {certifications.isLicensed && (
-          <div className="bg-purple-50 rounded-lg p-4 text-center space-y-2">
-            <div className="flex justify-center"><FileBadge size={32} className="text-purple-500" /></div>
-            <p className="text-sm font-medium text-purple-600">Licensed</p>
+          <div className="bg-purple-50 rounded-lg p-3 sm:p-4 text-center space-y-1 sm:space-y-2">
+            <div className="flex justify-center"><FileBadge size={24} className="text-purple-500 sm:size-8 lg:size-9" /></div>
+            <p className="text-xs sm:text-sm font-medium text-purple-600">Licensed</p>
           </div>
         )}
       </div>
 
       {/* Verification Status */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-        <p className="text-sm text-slate-900">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 text-center">
+        <p className="text-xs sm:text-sm text-slate-900">
           <span className="text-green-600 font-medium">✓</span> Semua sertifikasi terverifikasi dan
           up to date
         </p>
