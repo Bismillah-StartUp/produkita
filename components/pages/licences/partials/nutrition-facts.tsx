@@ -21,7 +21,6 @@ export default function NutritionFacts({
   protein,
   sodium,
   sugar,
-  testedDate,
 }: NutritionFactsProps) {
   const hasNutritionData =
     calories ||
@@ -39,22 +38,22 @@ export default function NutritionFacts({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Nutritional Facts</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Nutritional Facts</h2>
         <p className="text-slate-600">Lab tested and certified</p>
       </div>
 
-      <div className="border-2 border-black rounded-lg p-6 space-y-4 max-w-sm">
-        <h3 className="text-lg font-bold">Nutrition Facts</h3>
+      <div className="border-2 border-black rounded-lg p-6 space-y-4 max-w-sm bg-white">
+        <h3 className="text-lg font-bold text-slate-900">Nutrition Facts</h3>
 
         {servings && (
           <div className="text-sm">
-            <p className="text-slate-700">Per Serving ({servings})</p>
+            <p className="text-slate-900">Per Serving ({servings})</p>
           </div>
         )}
 
         <div className="border-b-4 border-black pb-4">
           {calories && (
-            <div className="flex justify-between font-bold text-lg">
+            <div className="flex justify-between font-bold text-lg text-slate-900">
               <span>Calories</span>
               <span>{calories} kcal</span>
             </div>
@@ -62,10 +61,10 @@ export default function NutritionFacts({
         </div>
 
         <div className="border-b border-black pb-2 mb-2">
-          <p className="text-sm font-bold">Amount per serving</p>
+          <p className="text-sm font-bold text-slate-900">Amount per serving</p>
         </div>
 
-        <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-sm text-slate-900">
           {fat !== undefined && (
             <div className="flex justify-between">
               <span>Total Fat</span>
@@ -110,7 +109,7 @@ export default function NutritionFacts({
         </div>
       </div>
 
-      <div className="text-sm text-slate-600">
+      <div className="text-sm text-slate-700">
         <p>* Tested by certified food testing facility</p>
         <p>* Values are approximate and may vary</p>
       </div>

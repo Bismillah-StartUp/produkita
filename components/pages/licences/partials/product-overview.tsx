@@ -1,7 +1,7 @@
 'use client'
 
-import { Badge } from '@/components/ui/button'
 import Image from 'next/image'
+import { Shield, CheckCircle, Leaf, Lock, FileBadge, FileCheck } from 'lucide-react'
 
 interface ProductOverviewProps {
   productName: string
@@ -61,34 +61,34 @@ export default function ProductOverview({
       {/* Certification Badges */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {certifications.hasBPOM && (
-          <div className="bg-slate-100 rounded-lg p-4 text-center space-y-2">
-            <div className="text-3xl">🛡️</div>
-            <p className="text-sm font-medium">BPOM</p>
+          <div className="bg-blue-50 rounded-lg p-4 text-center space-y-2">
+            <div className="flex justify-center"><Shield size={32} className="text-blue-500" /></div>
+            <p className="text-sm font-medium text-blue-600">BPOM</p>
           </div>
         )}
         {certifications.hasPIRT && (
-          <div className="bg-slate-100 rounded-lg p-4 text-center space-y-2">
-            <div className="text-3xl">📋</div>
-            <p className="text-sm font-medium">PIRT</p>
+          <div className="bg-green-50 rounded-lg p-4 text-center space-y-2">
+            <div className="flex justify-center"><FileCheck size={32} className="text-green-500" /></div>
+            <p className="text-sm font-medium text-green-600">PIRT</p>
           </div>
         )}
         {certifications.hasHalal && (
-          <div className="bg-slate-100 rounded-lg p-4 text-center space-y-2">
-            <div className="text-3xl">🌿</div>
-            <p className="text-sm font-medium">Halal</p>
+          <div className="bg-green-50 rounded-lg p-4 text-center space-y-2">
+            <div className="flex justify-center"><Leaf size={32} className="text-green-500" /></div>
+            <p className="text-sm font-medium text-green-600">Halal</p>
           </div>
         )}
         {certifications.isLicensed && (
-          <div className="bg-slate-100 rounded-lg p-4 text-center space-y-2">
-            <div className="text-3xl">📜</div>
-            <p className="text-sm font-medium">Licensed</p>
+          <div className="bg-purple-50 rounded-lg p-4 text-center space-y-2">
+            <div className="flex justify-center"><FileBadge size={32} className="text-purple-500" /></div>
+            <p className="text-sm font-medium text-purple-600">Licensed</p>
           </div>
         )}
       </div>
 
       {/* Verification Status */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-        <p className="text-sm">
+        <p className="text-sm text-slate-900">
           <span className="text-green-600 font-medium">✓</span> Semua sertifikasi terverifikasi dan
           up to date
         </p>

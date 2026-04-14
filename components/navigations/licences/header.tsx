@@ -1,3 +1,5 @@
+import { FileText, CheckCircle } from 'lucide-react'
+
 interface HeaderLicencesProps {
   companyName?: string
   isVerified?: boolean
@@ -8,12 +10,12 @@ export const Header = ({ companyName = 'Company Name', isVerified = true }: Head
     <div className="border-b border-slate-200 bg-white">
       <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">📋</span>
+          <FileText size={28} className="text-slate-900" />
           <h1 className="text-2xl font-bold text-gray-900">{companyName}</h1>
         </div>
         {isVerified && (
           <div className="flex items-center gap-2 text-green-600">
-            <span>✓</span>
+            <CheckCircle size={20} />
             <span className="font-medium">Verified</span>
           </div>
         )}

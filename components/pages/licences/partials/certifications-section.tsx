@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import { Shield, Leaf, FileText, FileCheck } from 'lucide-react'
 
 interface CertificationData {
   type: 'BPOM' | 'HALAL' | 'PIRT'
@@ -24,13 +25,13 @@ export default function CertificationsSection({ certifications }: Certifications
   const getCertIcon = (type: string) => {
     switch (type) {
       case 'BPOM':
-        return '🛡️'
+        return Shield
       case 'HALAL':
-        return '🌿'
+        return Leaf
       case 'PIRT':
-        return '📋'
+        return FileCheck
       default:
-        return '📄'
+        return FileText
     }
   }
 
@@ -60,6 +61,19 @@ export default function CertificationsSection({ certifications }: Certifications
     }
   }
 
+  const getCertIconColor = (type: string) => {
+    switch (type) {
+      case 'BPOM':
+        return 'text-blue-600'
+      case 'HALAL':
+        return 'text-green-600'
+      case 'PIRT':
+        return 'text-purple-600'
+      default:
+        return 'text-slate-600'
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -68,61 +82,64 @@ export default function CertificationsSection({ certifications }: Certifications
       </div>
 
       <div className="space-y-4">
-        {certifications.map((cert, index) => (
-          <div
-            key={index}
-            className={`border rounded-lg p-6 space-y-4 ${getCertColor(cert.type)}`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{getCertIcon(cert.type)}</span>
-              <h3 className="text-lg font-bold">{getCertTitle(cert.type)}</h3>
-            </div>
+        {certifications.map((cert, index) => {
+          const IconComponent = getCertIcon(cert.type)
+          return (
+            <div
+              key={index}
+              className={`border rounded-lg p-6 space-y-4 ${getCertColor(cert.type)}`}
+            >
+              <div className="flex items-center gap-3">
+                <IconComponent size={32} className={getCertIconColor(cert.type)} />
+                <h3 className="text-lg font-bold text-slate-900">{getCertTitle(cert.type)}</h3>
+              </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-slate-600">
-                  {cert.type === 'BPOM' ? 'BPOM Number' : cert.type === 'HALAL' ? 'Halal Number' : 'PIRT Number'}
-                </span>
-                <span className="font-medium">{cert.number}</span>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-slate-700">
+                    {cert.type === 'BPOM' ? 'BPOM Number' : cert.type === 'HALAL' ? 'Halal Number' : 'PIRT Number'}
+                  </span>
+                  <span className="font-medium text-slate-900">{cert.number}</span>
+                </div>
+
+                {cert.authority && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-700">
+                      {cert.type === 'HALAL' ? 'Certified by' : 'Authority'}
+                    </span>
+                    <span className="font-medium text-slate-900">{cert.authority}</span>
+                  </div>
+                )}
+
+                {cert.issueDate && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-700">
+                      {cert.type === 'HALAL' ? 'Issue Date' : 'Registration Date'}
+                    </span>
+                    <span className="font-medium text-slate-900">
+                      {format(new Date(cert.issueDate), 'MMMM dd, yyyy', { locale: idLocale })}
+                    </span>
+                  </div>
+                )}
+
+                {cert.validUntil && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-700">Valid Until</span>
+                    <span className="font-medium text-slate-900">
+                      {format(new Date(cert.validUntil), 'MMMM dd, yyyy', { locale: idLocale })}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {cert.authority && (
-                <div className="flex justify-between">
-                  <span className="text-slate-600">
-                    {cert.type === 'HALAL' ? 'Certified by' : 'Authority'}
-                  </span>
-                  <span className="font-medium">{cert.authority}</span>
-                </div>
-              )}
-
-              {cert.issueDate && (
-                <div className="flex justify-between">
-                  <span className="text-slate-600">
-                    {cert.type === 'HALAL' ? 'Issue Date' : 'Registration Date'}
-                  </span>
-                  <span className="font-medium">
-                    {format(new Date(cert.issueDate), 'MMMM dd, yyyy', { locale: idLocale })}
-                  </span>
-                </div>
-              )}
-
-              {cert.validUntil && (
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Valid Until</span>
-                  <span className="font-medium">
-                    {format(new Date(cert.validUntil), 'MMMM dd, yyyy', { locale: idLocale })}
-                  </span>
+                <div className="text-sm text-slate-700 pt-2 border-t">
+                  Verified by {cert.authority}
                 </div>
               )}
             </div>
-
-            {cert.authority && (
-              <div className="text-sm text-slate-600 pt-2 border-t">
-                Verified by {cert.authority}
-              </div>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
