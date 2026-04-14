@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Shield, CheckCircle, Leaf, Lock, FileBadge, FileCheck } from 'lucide-react'
+import { Shield, Leaf, FileBadge, FileCheck } from 'lucide-react'
 
 interface ProductOverviewProps {
   productName: string

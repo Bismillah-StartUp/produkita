@@ -1,26 +1,35 @@
 'use client'
 
 interface NutritionFactsProps {
-  servings?: string
   calories?: number
   fat?: number
+  fatDaily?: number
   saturatedFat?: number
+  saturatedFatDaily?: number
   carbs?: number
+  carbsDaily?: number
   protein?: number
+  proteinDaily?: number
   sodium?: number
+  sodiumDaily?: number
   sugar?: number
-  testedDate?: Date
+  sugarDaily?: number
 }
 
 export default function NutritionFacts({
-  servings,
   calories,
   fat,
+  fatDaily,
   saturatedFat,
+  saturatedFatDaily,
   carbs,
+  carbsDaily,
   protein,
+  proteinDaily,
   sodium,
+  sodiumDaily,
   sugar,
+  sugarDaily,
 }: NutritionFactsProps) {
   const hasNutritionData =
     calories ||
@@ -36,82 +45,113 @@ export default function NutritionFacts({
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">Nutritional Facts</h2>
-        <p className="text-slate-600">Lab tested and certified</p>
-      </div>
+    <div className="flex flex-col items-center w-full py-8">
+      <div className="w-full max-w-3xl border-4 border-black bg-white">
+        {/* Header */}
+        <div className="border-b-4 border-black px-6 py-4 text-center bg-white">
+          <p className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            Informasi Nilai Gizi / Nutritional Information
+          </p>
+        </div>
 
-      <div className="border-2 border-black rounded-lg p-6 space-y-4 max-w-sm bg-white">
-        <h3 className="text-lg font-bold text-slate-900">Nutrition Facts</h3>
+        {/* Main Content */}
+        <div className="border-b-4 border-black px-6 py-4">
+          {/* Amount Per Serving */}
+          <div className="mb-4">
+            <p className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-3">
+              Jumlah per sajian / Amount per serving
+            </p>
 
-        {servings && (
-          <div className="text-sm">
-            <p className="text-slate-900">Per Serving ({servings})</p>
+            {calories && (
+              <div className="flex justify-between items-baseline mb-4 pb-4 border-b-2 border-black">
+                <span className="font-bold text-slate-900">Energi total / Total energy</span>
+                <span className="font-bold text-lg text-slate-900">{calories} kcal</span>
+              </div>
+            )}
           </div>
-        )}
 
-        <div className="border-b-4 border-black pb-4">
-          {calories && (
-            <div className="flex justify-between font-bold text-lg text-slate-900">
-              <span>Calories</span>
-              <span>{calories} kcal</span>
-            </div>
-          )}
+          {/* Nutrition Table */}
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-slate-900">
+                <th className="text-left py-2 pr-4 text-xs font-bold text-slate-900">Item</th>
+                <th className="text-right py-2 px-2 text-xs font-bold text-slate-900 w-24">Value</th>
+                <th className="text-right py-2 pl-2 text-xs font-bold text-slate-900 w-20">% AKG *</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fat !== undefined && (
+                <>
+                  <tr className="border-b border-slate-300">
+                    <td className="text-left py-3 pr-4 text-sm text-slate-900">
+                      <span className="font-semibold">Lemak Total / Total Fat</span>
+                    </td>
+                    <td className="text-right py-3 px-2 text-sm text-slate-900">{fat} g</td>
+                    <td className="text-right py-3 pl-2 text-sm text-slate-900">{fatDaily || '-'}%</td>
+                  </tr>
+
+                  {saturatedFat !== undefined && (
+                    <tr className="border-b border-slate-300">
+                      <td className="text-left py-3 pr-4 pl-8 text-sm text-slate-900">
+                        Lemak Jenuh / Saturated Fat
+                      </td>
+                      <td className="text-right py-3 px-2 text-sm text-slate-900">{saturatedFat} g</td>
+                      <td className="text-right py-3 pl-2 text-sm text-slate-900">{saturatedFatDaily || '-'}%</td>
+                    </tr>
+                  )}
+                </>
+              )}
+
+              {protein !== undefined && (
+                <tr className="border-b border-slate-300">
+                  <td className="text-left py-3 pr-4 text-sm text-slate-900">
+                    <span className="font-semibold">Protein / Protein</span>
+                  </td>
+                  <td className="text-right py-3 px-2 text-sm text-slate-900">{protein} g</td>
+                  <td className="text-right py-3 pl-2 text-sm text-slate-900">{proteinDaily || '-'}%</td>
+                </tr>
+              )}
+
+              {carbs !== undefined && (
+                <tr className="border-b border-slate-300">
+                  <td className="text-left py-3 pr-4 text-sm text-slate-900">
+                    <span className="font-semibold">Karbohidrat Total / Total Carbohydrate</span>
+                  </td>
+                  <td className="text-right py-3 px-2 text-sm text-slate-900">{carbs} g</td>
+                  <td className="text-right py-3 pl-2 text-sm text-slate-900">{carbsDaily || '-'}%</td>
+                </tr>
+              )}
+
+              {sugar !== undefined && (
+                <tr className="border-b border-slate-300">
+                  <td className="text-left py-3 pr-4 text-sm text-slate-900">
+                    <span className="font-semibold">Gula / Sugar</span>
+                  </td>
+                  <td className="text-right py-3 px-2 text-sm text-slate-900">{sugar} g</td>
+                  <td className="text-right py-3 pl-2 text-sm text-slate-900">{sugarDaily || '-'}%</td>
+                </tr>
+              )}
+
+              {sodium !== undefined && (
+                <tr>
+                  <td className="text-left py-3 pr-4 text-sm text-slate-900">
+                    <span className="font-semibold">Garam (natrium) / Salt (sodium)</span>
+                  </td>
+                  <td className="text-right py-3 px-2 text-sm text-slate-900">{sodium} mg</td>
+                  <td className="text-right py-3 pl-2 text-sm text-slate-900">{sodiumDaily || '-'}%</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        <div className="border-b border-black pb-2 mb-2">
-          <p className="text-sm font-bold text-slate-900">Amount per serving</p>
+        {/* Footer */}
+        <div className="px-6 py-3 bg-slate-50 text-xs text-slate-700 leading-relaxed">
+          <p>
+            *Persen AKG berdasarkan kebutuhan energi 2150 kkal. Kebutuhan energi anda mungkin lebih tinggi atau lebih
+            rendah. / *Percent AKG based on energy requirements of 2150 kcal. Your energy needs may be higher or lower
+          </p>
         </div>
-
-        <div className="space-y-2 text-sm text-slate-900">
-          {fat !== undefined && (
-            <div className="flex justify-between">
-              <span>Total Fat</span>
-              <span className="font-medium">{fat} g</span>
-            </div>
-          )}
-
-          {saturatedFat !== undefined && (
-            <div className="flex justify-between ml-4">
-              <span>Saturated Fat</span>
-              <span className="font-medium">{saturatedFat} g</span>
-            </div>
-          )}
-
-          {carbs !== undefined && (
-            <div className="flex justify-between">
-              <span>Carbohydrates</span>
-              <span className="font-medium">{carbs} g</span>
-            </div>
-          )}
-
-          {protein !== undefined && (
-            <div className="flex justify-between">
-              <span>Protein</span>
-              <span className="font-medium">{protein} g</span>
-            </div>
-          )}
-
-          {sodium !== undefined && (
-            <div className="flex justify-between">
-              <span>Sodium</span>
-              <span className="font-medium">{sodium} mg</span>
-            </div>
-          )}
-
-          {sugar !== undefined && (
-            <div className="flex justify-between">
-              <span>Sugar</span>
-              <span className="font-medium">{sugar} g</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="text-sm text-slate-700">
-        <p>* Tested by certified food testing facility</p>
-        <p>* Values are approximate and may vary</p>
       </div>
     </div>
   )
