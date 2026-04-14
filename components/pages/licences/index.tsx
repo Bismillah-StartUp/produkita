@@ -2,7 +2,6 @@ import ProductOverview from './partials/product-overview'
 import CertificationsSection from './partials/certifications-section'
 import NutritionFacts from './partials/nutrition-facts'
 import CompanyInfo from './partials/company-info'
-import { HeaderLicences, NavbarLicences } from '@/components/navigations'
 
 interface CertificationData {
   type: 'BPOM' | 'HALAL' | 'PIRT'
@@ -103,69 +102,56 @@ export const LicenceLayout = ({ code }: LicenceLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <HeaderLicences 
-        companyName={enterprise?.name || 'Company Name'}
-        isVerified={true}
-      />
+    <>
+      {/* Product Overview Section */}
+      <section id="section-overview" className="pb-16">
+        <ProductOverview
+          productName={product?.name || 'Product Name'}
+          productImage={product?.image_url}
+          price={product?.price}
+          volume={`${product?.description || '250 ml'}`}
+          enterpriseName={enterprise?.name || 'Enterprise'}
+          certifications={{
+            hasBPOM: !!certificate?.bpom_number,
+            hasPIRT: !!certificate?.pirt_number,
+            hasHalal: !!halal,
+            isLicensed: !!certificate?.license_number,
+          }}
+        />
+      </section>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12 pb-32">
-        {/* Product Overview Section */}
-        <section className="pb-16">
-          <ProductOverview
-            productName={product?.name || 'Product Name'}
-            productImage={product?.image_url}
-            price={product?.price}
-            volume={`${product?.description || '250 ml'}`}
-            enterpriseName={enterprise?.name || 'Enterprise'}
-            certifications={{
-              hasBPOM: !!certificate?.bpom_number,
-              hasPIRT: !!certificate?.pirt_number,
-              hasHalal: !!halal,
-              isLicensed: !!certificate?.license_number,
-            }}
+      {/* Nutrition Facts Section */}
+      {nutrition_info && (
+        <section id="section-nutrition" className="pb-16 border-t border-slate-200 pt-16">
+          <NutritionFacts
+            calories={nutrition_info?.energy}
+            fat={nutrition_info?.fat}
+            saturatedFat={nutrition_info?.saturated_fat}
+            carbs={nutrition_info?.carbo}
+            protein={nutrition_info?.protein}
+            sodium={nutrition_info?.natrium}
+            sugar={nutrition_info?.sugar}
           />
         </section>
+      )}
 
-        {/* Nutrition Facts Section */}
-        {nutrition_info && (
-          <section className="pb-16 border-t border-slate-200 pt-16" id="nutrition">
-            <NutritionFacts
-              servings={nutrition_info?.servings ? `${nutrition_info.servings} ml (1 sdm)` : undefined}
-              calories={nutrition_info?.energy}
-              fat={nutrition_info?.fat}
-              saturatedFat={nutrition_info?.saturated_fat}
-              carbs={nutrition_info?.carbo}
-              protein={nutrition_info?.protein}
-              sodium={nutrition_info?.natrium}
-              sugar={nutrition_info?.sugar}
-              testedDate={new Date()}
-            />
-          </section>
-        )}
-
-        {/* Certifications Section */}
-        {certifications.length > 0 && (
-          <section className="pb-16 border-t border-slate-200 pt-16" id="certifications">
-            <CertificationsSection certifications={certifications} />
-          </section>
-        )}
-
-        {/* Company Info Section */}
-        <section className="border-t border-slate-200 pt-16" id="company">
-          <CompanyInfo
-            name={enterprise?.name || 'Company Name'}
-            address={enterprise?.address}
-            phone={enterprise?.phone}
-            email={enterprise?.email}
-            description={enterprise?.description}
-          />
+      {/* Certifications Section */}
+      {certifications.length > 0 && (
+        <section id="section-certifications" className="pb-16 border-t border-slate-200 pt-16">
+          <CertificationsSection certifications={certifications} />
         </section>
-      </main>
+      )}
 
-      <NavbarLicences />
-    </div>
+      {/* Company Info Section */}
+      <section id="section-company" className="border-t border-slate-200 pt-16">
+        <CompanyInfo
+          name={enterprise?.name || 'Company Name'}
+          address={enterprise?.address}
+          phone={enterprise?.phone}
+          email={enterprise?.email}
+          description={enterprise?.description}
+        />
+      </section>
+    </>
   )
 }
