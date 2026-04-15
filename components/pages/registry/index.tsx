@@ -3,15 +3,15 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ProductFormData, ProductInfoForm, LegalFormData, LegalInfoForm, NutritionForm, NutritionFormData } from './partials'
+import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData } from './partials'
 
 interface RegistryPageProps {
   onSubmitProductInfo?: (data: ProductFormData) => void
-  onSubmitLegalInfo?: (data: LegalFormData) => void
+  onSubmitEnterpriseInfo?: (data: EnterpriseFormData) => void
   onSubmitNutritionInfo?: (data: NutritionFormData) => void
 }
 
-export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo, onSubmitNutritionInfo }: RegistryPageProps) {
+export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSubmitNutritionInfo }: RegistryPageProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 4
 
@@ -29,10 +29,10 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo, onSubmitN
     }
   }
 
-  const handleSubmitLegal = (formData: LegalFormData) => {
-    console.log('Legal Info Form Data:', formData)
-    if (onSubmitLegalInfo) {
-      onSubmitLegalInfo(formData)
+  const handleSubmitEnterprise = (formData: EnterpriseFormData) => {
+    console.log('Enterprise Info Form Data:', formData)
+    if (onSubmitEnterpriseInfo) {
+      onSubmitEnterpriseInfo(formData)
     }
   }
 
@@ -44,6 +44,7 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo, onSubmitN
     { id: 2, label: 'Informasi Nutrisi' },
     { id: 3, label: 'Sertifikasi & Legalitas' },
     { id: 4, label: 'Informasi Perusahaan' },
+    { id: 5, label: 'Rekap Data' },
   ]
 
   return (
@@ -106,7 +107,12 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo, onSubmitN
             <p className="text-gray-600">Sertifikasi & Legalitas - Coming Soon</p>
           </div>
         )}
-        {currentStep === 4 && <LegalInfoForm onSubmit={handleSubmitLegal} />}
+        {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} />}
+        {currentStep === 5 && (
+          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+            <p className="text-gray-600">Rekap Data - Coming Soon</p>
+          </div>
+        )}
       </div>
     </div>
   )

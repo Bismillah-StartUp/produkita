@@ -399,7 +399,7 @@ export function NutritionForm({ onSubmit, isLoading = false }: NutritionFormProp
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex gap-3 pt-6">
+          <div className="flex gap-3 pt-8">
             <Button
               type="button"
               variant="outline"
@@ -411,9 +411,9 @@ export function NutritionForm({ onSubmit, isLoading = false }: NutritionFormProp
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-green-600 py-6 text-base font-semibold hover:bg-green-700"
+              className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700"
             >
-              {isLoading ? 'Memproses...' : 'Daftarkan Produk'}
+              {isLoading ? 'Memproses...' : 'Selanjutnya'}
             </Button>
           </div>
         </div>
