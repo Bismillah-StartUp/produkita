@@ -3,14 +3,15 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ProductFormData, ProductInfoForm, LegalFormData, LegalInfoForm } from './partials'
+import { ProductFormData, ProductInfoForm, LegalFormData, LegalInfoForm, NutritionForm, NutritionFormData } from './partials'
 
 interface RegistryPageProps {
   onSubmitProductInfo?: (data: ProductFormData) => void
   onSubmitLegalInfo?: (data: LegalFormData) => void
+  onSubmitNutritionInfo?: (data: NutritionFormData) => void
 }
 
-export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo }: RegistryPageProps) {
+export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo, onSubmitNutritionInfo }: RegistryPageProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 4
 
@@ -18,6 +19,13 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo }: Registr
     console.log('Product Info Form Data:', formData)
     if (onSubmitProductInfo) {
       onSubmitProductInfo(formData)
+    }
+  }
+
+  const handleSubmitNutrition = (formData: NutritionFormData) => {
+    console.log('Nutrition Info Form Data:', formData)
+    if (onSubmitNutritionInfo) {
+      onSubmitNutritionInfo(formData)
     }
   }
 
@@ -92,11 +100,7 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitLegalInfo }: Registr
       {/* Content */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} />}
-        {currentStep === 2 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-600">Informasi Nutrisi - Coming Soon</p>
-          </div>
-        )}
+        {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} />}
         {currentStep === 3 && (
           <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
             <p className="text-gray-600">Sertifikasi & Legalitas - Coming Soon</p>
