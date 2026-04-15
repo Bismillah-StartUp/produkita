@@ -1,5 +1,5 @@
 import { Carousel } from "@/components/ui/carousel"
-import { TestimonialCard } from "@/components/testimonial-card"
+import { TestimonialCard } from "@/components/ui/custom/testimonial-card"
 
 const TESTIMONIALS = [
   {

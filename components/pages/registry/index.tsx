@@ -3,15 +3,16 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData } from './partials'
+import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData, LegalityForm, LegalityFormData } from './partials'
 
 interface RegistryPageProps {
   onSubmitProductInfo?: (data: ProductFormData) => void
   onSubmitEnterpriseInfo?: (data: EnterpriseFormData) => void
   onSubmitNutritionInfo?: (data: NutritionFormData) => void
+  onSubmitLegalityInfo?: (data: LegalityFormData) => void
 }
 
-export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSubmitNutritionInfo }: RegistryPageProps) {
+export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSubmitNutritionInfo, onSubmitLegalityInfo }: RegistryPageProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 4
 
@@ -33,6 +34,13 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
     console.log('Enterprise Info Form Data:', formData)
     if (onSubmitEnterpriseInfo) {
       onSubmitEnterpriseInfo(formData)
+    }
+  }
+
+  const handleSubmitLegality = (formData: LegalityFormData) => {
+    console.log('Legality Info Form Data:', formData)
+    if (onSubmitLegalityInfo) {
+      onSubmitLegalityInfo(formData)
     }
   }
 
@@ -102,11 +110,7 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} />}
         {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} />}
-        {currentStep === 3 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-600">Sertifikasi & Legalitas - Coming Soon</p>
-          </div>
-        )}
+        {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} />}
         {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} />}
         {currentStep === 5 && (
           <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
