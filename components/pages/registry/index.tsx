@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData, LegalityForm, LegalityFormData } from './partials'
+import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData, LegalityForm, LegalityFormData, Rekap } from './partials'
 
 interface RegistryPageProps {
   onSubmitProductInfo?: (data: ProductFormData) => void
@@ -14,10 +14,17 @@ interface RegistryPageProps {
 
 export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSubmitNutritionInfo, onSubmitLegalityInfo }: RegistryPageProps) {
   const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 4
+  const totalSteps = 5
+
+  const [productData, setProductData] = useState<ProductFormData | undefined>()
+  const [nutritionData, setNutritionData] = useState<NutritionFormData | undefined>()
+  const [legalityData, setLegalityData] = useState<LegalityFormData | undefined>()
+  const [enterpriseData, setEnterpriseData] = useState<EnterpriseFormData | undefined>()
 
   const handleSubmitProduct = (formData: ProductFormData) => {
     console.log('Product Info Form Data:', formData)
+    setProductData(formData)
+    setCurrentStep(2)
     if (onSubmitProductInfo) {
       onSubmitProductInfo(formData)
     }
@@ -25,6 +32,8 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
 
   const handleSubmitNutrition = (formData: NutritionFormData) => {
     console.log('Nutrition Info Form Data:', formData)
+    setNutritionData(formData)
+    setCurrentStep(3)
     if (onSubmitNutritionInfo) {
       onSubmitNutritionInfo(formData)
     }
@@ -32,6 +41,8 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
 
   const handleSubmitEnterprise = (formData: EnterpriseFormData) => {
     console.log('Enterprise Info Form Data:', formData)
+    setEnterpriseData(formData)
+    setCurrentStep(5)
     if (onSubmitEnterpriseInfo) {
       onSubmitEnterpriseInfo(formData)
     }
@@ -39,9 +50,25 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
 
   const handleSubmitLegality = (formData: LegalityFormData) => {
     console.log('Legality Info Form Data:', formData)
+    setLegalityData(formData)
+    setCurrentStep(4)
     if (onSubmitLegalityInfo) {
       onSubmitLegalityInfo(formData)
     }
+  }
+
+  const handleEditStep = (step: number) => {
+    setCurrentStep(step)
+  }
+
+  const handleFinalSubmit = () => {
+    console.log('Final submission with all data:', {
+      productData,
+      nutritionData,
+      legalityData,
+      enterpriseData,
+    })
+    // Add your final submission logic here
   }
 
   // Calculate progress percentage
@@ -113,9 +140,14 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
         {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} />}
         {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} />}
         {currentStep === 5 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-600">Rekap Data - Coming Soon</p>
-          </div>
+          <Rekap
+            productData={productData}
+            nutritionData={nutritionData}
+            legalityData={legalityData}
+            enterpriseData={enterpriseData}
+            onSubmit={handleFinalSubmit}
+            onEdit={handleEditStep}
+          />
         )}
       </div>
     </div>
