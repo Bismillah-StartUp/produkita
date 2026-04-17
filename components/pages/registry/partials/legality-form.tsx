@@ -18,19 +18,20 @@ export interface LegalityFormData {
 interface LegalityFormProps {
   onSubmit?: (data: LegalityFormData) => void
   onPrevious?: () => void
+  initialData?: Partial<LegalityFormData>
   isLoading?: boolean
 }
 
-export function LegalityForm({ onSubmit, onPrevious, isLoading = false }: LegalityFormProps) {
+export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = false }: LegalityFormProps) {
   const [formData, setFormData] = useState<LegalityFormData>({
-    bpomNumber: '',
-    productCategory: '',
-    bpomRegistrationDate: '',
-    bpomValidUntil: '',
-    halalCertificateNumber: '',
-    halalCertifiedBy: '',
-    halalIssuanceDate: '',
-    halalValidUntil: '',
+    bpomNumber: initialData?.bpomNumber ?? '',
+    productCategory: initialData?.productCategory ?? '',
+    bpomRegistrationDate: initialData?.bpomRegistrationDate ?? '',
+    bpomValidUntil: initialData?.bpomValidUntil ?? '',
+    halalCertificateNumber: initialData?.halalCertificateNumber ?? '',
+    halalCertifiedBy: initialData?.halalCertifiedBy ?? '',
+    halalIssuanceDate: initialData?.halalIssuanceDate ?? '',
+    halalValidUntil: initialData?.halalValidUntil ?? '',
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})

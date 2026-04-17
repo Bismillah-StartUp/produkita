@@ -135,10 +135,10 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
 
       {/* Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} />}
-        {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} onPrevious={() => setCurrentStep(1)} />}
-        {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} onPrevious={() => setCurrentStep(2)} />}
-        {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} onPrevious={() => setCurrentStep(3)} />}
+        {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} initialData={productData} />}
+        {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} onPrevious={() => setCurrentStep(1)} initialData={nutritionData} />}
+        {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} onPrevious={() => setCurrentStep(2)} initialData={legalityData} />}
+        {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} onPrevious={() => setCurrentStep(3)} initialData={enterpriseData} />}
         {currentStep === 5 && (
           <Rekap
             productData={productData}

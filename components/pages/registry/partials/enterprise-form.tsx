@@ -14,15 +14,16 @@ export interface EnterpriseFormData {
 interface EnterpriseFormProps {
   onSubmit?: (data: EnterpriseFormData) => void
   onPrevious?: () => void
+  initialData?: Partial<EnterpriseFormData>
   isLoading?: boolean
 }
 
-export function EnterpriseForm({ onSubmit, onPrevious, isLoading = false }: EnterpriseFormProps) {
+export function EnterpriseForm({ onSubmit, onPrevious, initialData, isLoading = false }: EnterpriseFormProps) {
   const [formData, setFormData] = useState<EnterpriseFormData>({
-    companyName: '',
-    address: '',
-    phone: '',
-    email: '',
+    companyName: initialData?.companyName ?? '',
+    address: initialData?.address ?? '',
+    phone: initialData?.phone ?? '',
+    email: initialData?.email ?? '',
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})

@@ -24,25 +24,26 @@ export interface NutritionFormData {
 interface NutritionFormProps {
   onSubmit?: (data: NutritionFormData) => void
   onPrevious?: () => void
+  initialData?: Partial<NutritionFormData>
   isLoading?: boolean
 }
 
-export function NutritionForm({ onSubmit, onPrevious, isLoading = false }: NutritionFormProps) {
+export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = false }: NutritionFormProps) {
   const [formData, setFormData] = useState<NutritionFormData>({
-    servingSize: '',
-    calories: '',
-    totalFat: '',
-    fatDaily: '',
-    saturatedFat: '',
-    saturatedFatDaily: '',
-    carbohydrates: '',
-    carbohydratesDaily: '',
-    protein: '',
-    proteinDaily: '',
-    sodium: '',
-    sodiumDaily: '',
-    sugar: '',
-    sugarDaily: '',
+    servingSize: initialData?.servingSize ?? '',
+    calories: initialData?.calories ?? '',
+    totalFat: initialData?.totalFat ?? '',
+    fatDaily: initialData?.fatDaily ?? '',
+    saturatedFat: initialData?.saturatedFat ?? '',
+    saturatedFatDaily: initialData?.saturatedFatDaily ?? '',
+    carbohydrates: initialData?.carbohydrates ?? '',
+    carbohydratesDaily: initialData?.carbohydratesDaily ?? '',
+    protein: initialData?.protein ?? '',
+    proteinDaily: initialData?.proteinDaily ?? '',
+    sodium: initialData?.sodium ?? '',
+    sodiumDaily: initialData?.sodiumDaily ?? '',
+    sugar: initialData?.sugar ?? '',
+    sugarDaily: initialData?.sugarDaily ?? '',
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
