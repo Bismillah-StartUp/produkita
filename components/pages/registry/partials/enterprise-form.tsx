@@ -13,10 +13,11 @@ export interface EnterpriseFormData {
 
 interface EnterpriseFormProps {
   onSubmit?: (data: EnterpriseFormData) => void
+  onPrevious?: () => void
   isLoading?: boolean
 }
 
-export function EnterpriseForm({ onSubmit, isLoading = false }: EnterpriseFormProps) {
+export function EnterpriseForm({ onSubmit, onPrevious, isLoading = false }: EnterpriseFormProps) {
   const [formData, setFormData] = useState<EnterpriseFormData>({
     companyName: '',
     address: '',
@@ -68,16 +69,6 @@ export function EnterpriseForm({ onSubmit, isLoading = false }: EnterpriseFormPr
     if (validateForm() && onSubmit) {
       onSubmit(formData)
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      companyName: '',
-      address: '',
-      phone: '',
-      email: '',
-    })
-    setErrors({})
   }
 
   return (
@@ -185,7 +176,7 @@ export function EnterpriseForm({ onSubmit, isLoading = false }: EnterpriseFormPr
               type="button"
               variant="outline"
               className="flex-1 py-6 font-semibold"
-              onClick={resetForm}
+              onClick={onPrevious}
             >
               Sebelumnya
             </Button>

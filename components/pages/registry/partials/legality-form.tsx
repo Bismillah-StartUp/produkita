@@ -17,10 +17,11 @@ export interface LegalityFormData {
 
 interface LegalityFormProps {
   onSubmit?: (data: LegalityFormData) => void
+  onPrevious?: () => void
   isLoading?: boolean
 }
 
-export function LegalityForm({ onSubmit, isLoading = false }: LegalityFormProps) {
+export function LegalityForm({ onSubmit, onPrevious, isLoading = false }: LegalityFormProps) {
   const [formData, setFormData] = useState<LegalityFormData>({
     bpomNumber: '',
     productCategory: '',
@@ -88,20 +89,6 @@ export function LegalityForm({ onSubmit, isLoading = false }: LegalityFormProps)
     if (validateForm() && onSubmit) {
       onSubmit(formData)
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      bpomNumber: '',
-      productCategory: '',
-      bpomRegistrationDate: '',
-      bpomValidUntil: '',
-      halalCertificateNumber: '',
-      halalCertifiedBy: '',
-      halalIssuanceDate: '',
-      halalValidUntil: '',
-    })
-    setErrors({})
   }
 
   return (
@@ -308,7 +295,7 @@ export function LegalityForm({ onSubmit, isLoading = false }: LegalityFormProps)
             type="button"
             variant="outline"
             className="flex-1 py-6 font-semibold"
-            onClick={resetForm}
+            onClick={onPrevious}
           >
             Sebelumnya
           </Button>

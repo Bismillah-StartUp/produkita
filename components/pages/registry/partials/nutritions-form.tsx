@@ -23,10 +23,11 @@ export interface NutritionFormData {
 
 interface NutritionFormProps {
   onSubmit?: (data: NutritionFormData) => void
+  onPrevious?: () => void
   isLoading?: boolean
 }
 
-export function NutritionForm({ onSubmit, isLoading = false }: NutritionFormProps) {
+export function NutritionForm({ onSubmit, onPrevious, isLoading = false }: NutritionFormProps) {
   const [formData, setFormData] = useState<NutritionFormData>({
     servingSize: '',
     calories: '',
@@ -92,26 +93,6 @@ export function NutritionForm({ onSubmit, isLoading = false }: NutritionFormProp
     if (validateForm() && onSubmit) {
       onSubmit(formData)
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      servingSize: '',
-      calories: '',
-      totalFat: '',
-      fatDaily: '',
-      saturatedFat: '',
-      saturatedFatDaily: '',
-      carbohydrates: '',
-      carbohydratesDaily: '',
-      protein: '',
-      proteinDaily: '',
-      sodium: '',
-      sodiumDaily: '',
-      sugar: '',
-      sugarDaily: '',
-    })
-    setErrors({})
   }
 
   return (
@@ -404,7 +385,7 @@ export function NutritionForm({ onSubmit, isLoading = false }: NutritionFormProp
               type="button"
               variant="outline"
               className="flex-1 py-6 font-semibold"
-              onClick={resetForm}
+              onClick={onPrevious}
             >
               Sebelumnya
             </Button>
