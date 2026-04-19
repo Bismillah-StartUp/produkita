@@ -4,11 +4,6 @@ import { createHash, randomBytes } from "crypto"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
-type PropsData = {
-  productName: string
-  productType: string
-}
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -24,17 +19,6 @@ export const generateLicencesCode = (productName: string, productType: string) =
   return codeResult
 }
 
-const generateBarcode = (licencesCode: string) => {
+export const generateBarcode = (licencesCode: string) => {
   return `${BASE_URL}/licences/${licencesCode}`
 }
-
-export const generateBarcodeUrl = ({productName, productType}: PropsData) => {
-  const licencesCode = generateLicencesCode(productName, productType)
-  return `${BASE_URL}/api/barcode?code=${licencesCode}`
-}
-
-export const generateQRCode = (licencesCode: string) => {
-  return `${BASE_URL}/licences/${licencesCode}`
-}
-
-
