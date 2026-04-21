@@ -23,6 +23,12 @@ interface SectionItemProps {
   showValue?: boolean
 }
 
+interface NutritionItemProps {
+  label: string
+  value: string | undefined
+  percent: string | undefined
+}
+
 function SectionItem({ label, value, showValue = true }: SectionItemProps) {
   return (
     <div className="flex justify-between border-b border-gray-100 px-4 py-2 last:border-0">
@@ -30,6 +36,19 @@ function SectionItem({ label, value, showValue = true }: SectionItemProps) {
       <span className="text-xs font-semibold text-gray-900">
         {showValue ? value || '-' : '•••'}
       </span>
+    </div>
+  )
+}
+
+function NutritionItem({ label, value, percent }: NutritionItemProps) {
+  const displayValue = value || '-'
+  const displayPercent = percent?.trim() ? `${percent}%` : '-'
+
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-gray-100 px-4 py-2 last:border-0">
+      <span className="text-xs font-medium text-gray-600">{label}</span>
+      <span className="text-right text-xs font-semibold text-gray-900">{displayValue}</span>
+      <span className="text-right text-xs font-semibold text-gray-900">{displayPercent}</span>
     </div>
   )
 }
@@ -130,17 +149,27 @@ export function Rekap({
           stepNumber={2}
           onEdit={onEdit}
         >
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-gray-100 px-4 py-2 text-xs font-semibold text-gray-500">
+            <span>Nama Nutrisi</span>
+            <span className="text-right">Nilai</span>
+            <span className="text-right">% AKG</span>
+          </div>
           <SectionItem label="Takaran Saji" value={nutritionData.servingSize} />
           <SectionItem label="Energi Total" value={`${nutritionData.calories} kkal`} />
-          <SectionItem label="Total Lemak" value={`${nutritionData.totalFat} g`} />
-          <SectionItem
+          <NutritionItem label="Total Lemak" value={`${nutritionData.totalFat} g`} percent={nutritionData.fatDaily} />
+          <NutritionItem
             label="Lemak Jenuh"
             value={`${nutritionData.saturatedFat} g`}
+            percent={nutritionData.saturatedFatDaily}
           />
-          <SectionItem label="Karbohidrat" value={`${nutritionData.carbohydrates} g`} />
-          <SectionItem label="Protein" value={`${nutritionData.protein} g`} />
-          <SectionItem label="Gula" value={`${nutritionData.sugar || '-'} g`} />
-          <SectionItem label="Natrium" value={`${nutritionData.sodium} mg`} />
+          <NutritionItem
+            label="Karbohidrat"
+            value={`${nutritionData.carbohydrates} g`}
+            percent={nutritionData.carbohydratesDaily}
+          />
+          <NutritionItem label="Protein" value={`${nutritionData.protein} g`} percent={nutritionData.proteinDaily} />
+          <NutritionItem label="Gula" value={`${nutritionData.sugar || '-'} g`} percent={nutritionData.sugarDaily} />
+          <NutritionItem label="Natrium" value={`${nutritionData.sodium} mg`} percent={nutritionData.sodiumDaily} />
         </RecapSection>
       )}
 
@@ -153,27 +182,45 @@ export function Rekap({
           stepNumber={3}
           onEdit={onEdit}
         >
-          <div className="px-4 py-2 bg-blue-50">
-            <p className="text-xs font-semibold text-blue-900 mb-2">BPOM Distribution Permit</p>
-          </div>
-          <SectionItem label="Nomor BPOM" value={legalityData.bpomNumber} />
           <SectionItem label="Kategori Produk" value={legalityData.productCategory} />
-          <SectionItem
-            label="Tanggal Registrasi"
-            value={legalityData.bpomRegistrationDate}
-          />
-          <SectionItem label="Berlaku Hingga" value={legalityData.bpomValidUntil} />
 
-          <div className="px-4 py-2 bg-green-50 border-t border-gray-100">
-            <p className="text-xs font-semibold text-green-900">Halal Certification</p>
-          </div>
-          <SectionItem label="Nomor Sertifikat Halal" value={legalityData.halalCertificateNumber} />
-          <SectionItem label="Disertifikasi oleh" value={legalityData.halalCertifiedBy} />
-          <SectionItem
-            label="Tanggal Terbit"
-            value={legalityData.halalIssuanceDate}
-          />
-          <SectionItem label="Berlaku Hingga" value={legalityData.halalValidUntil} />
+          {legalityData.hasBpom && (
+            <>
+              <div className="px-4 py-2 bg-blue-50">
+                <p className="mb-2 text-xs font-semibold text-blue-900">BPOM Distribution Permit</p>
+              </div>
+              <SectionItem label="Nomor BPOM" value={legalityData.bpomNumber} />
+              <SectionItem label="Tanggal Registrasi" value={legalityData.bpomRegistrationDate} />
+              <SectionItem label="Berlaku Hingga" value={legalityData.bpomValidUntil} />
+            </>
+          )}
+
+          {legalityData.hasPirt && (
+            <>
+              <div className="border-t border-gray-100 px-4 py-2 bg-purple-50">
+                <p className="mb-2 text-xs font-semibold text-purple-900">PIRT Permit</p>
+              </div>
+              <SectionItem label="Nomor PIRT" value={legalityData.pirtNumber} />
+              <SectionItem label="Tanggal Registrasi" value={legalityData.pirtRegistrationDate} />
+              <SectionItem label="Berlaku Hingga" value={legalityData.pirtValidUntil} />
+            </>
+          )}
+
+          {legalityData.hasHalal && (
+            <>
+              <div className="border-t border-gray-100 px-4 py-2 bg-green-50">
+                <p className="mb-2 text-xs font-semibold text-green-900">Halal Certification</p>
+              </div>
+              <SectionItem label="Nomor Sertifikat Halal" value={legalityData.halalCertificateNumber} />
+              <SectionItem label="Disertifikasi oleh" value={legalityData.halalCertifiedBy} />
+              <SectionItem label="Tanggal Terbit" value={legalityData.halalIssuanceDate} />
+              <SectionItem label="Berlaku Hingga" value={legalityData.halalValidUntil} />
+            </>
+          )}
+
+          {!legalityData.hasBpom && !legalityData.hasPirt && !legalityData.hasHalal && (
+            <div className="px-4 py-3 text-sm text-gray-600">Tidak ada sertifikat tambahan yang diinput.</div>
+          )}
         </RecapSection>
       )}
 

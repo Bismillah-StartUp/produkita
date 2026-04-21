@@ -4,6 +4,7 @@ export const CLOUDINARY_FOLDERS = {
   USERS: "certivy/users",
   AVATARS: "certivy/avatars",
   DOCUMENTS: "certivy/documents",
+  PRODUCTS: "certivy/products",
 } as const
 
 // Cloudinary Upload Options
@@ -19,8 +20,13 @@ export const CLOUDINARY_UPLOAD_OPTIONS = {
     height: 300,
   },
   DOCUMENTS: {
-    folder: CLOUDINARY_FOLDERS.DOCUMENTS,
-    resource_type: "raw" as const,
+    folder: CLOUDINARY_FOLDERS.PRODUCTS,
+    resource_type: "auto" as const,
+    quality: "auto" as const,
+    fetch_format: "auto" as const,
+    width: 1200,
+    height: 1200,
+    crop: "fit" as const,
   },
   CERTIFICATIONS: {
     folder: CLOUDINARY_FOLDERS.CERTIFICATIONS,

@@ -1,15 +1,12 @@
-import { LicenceLayout } from '@/components/pages/licences'
+import { redirect } from 'next/navigation'
 
-type LicencePageProps = {
+type LicenceAliasPageProps = {
   params: Promise<{
     code: string
   }>
 }
 
-const LicencePage = async ({ params }: LicencePageProps) => {
+export default async function LicenceAliasPage({ params }: LicenceAliasPageProps) {
   const { code } = await params
-
-  return <LicenceLayout code={code} />
+  redirect(`/licenses/${code}`)
 }
-
-export default LicencePage

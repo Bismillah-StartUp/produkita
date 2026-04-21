@@ -5,9 +5,9 @@ import { Shield, Leaf, FileBadge, FileCheck } from 'lucide-react'
 
 interface ProductOverviewProps {
   productName: string
-  productImage?: string
-  price?: number
-  volume?: string
+  productImage?: string | null
+  price?: number | null
+  volume?: string | null
   enterpriseName: string
   certifications: {
     hasBPOM: boolean
