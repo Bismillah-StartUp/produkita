@@ -25,12 +25,12 @@ export const Hero = () => {
             </p>
 
             <div className="flex flex-col gap-4 pt-2 sm:flex-row">
-              <Link href="/dashboard">
-                <Button size="lg" className="w-full sm:w-auto">
+              <Link href="/registry">
+                <Button size="lg" className="w-full sm:w-auto cursor-pointer">
                   Mulai Sekarang
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto cursor-pointer">
                 Pelajari Lebih Lanjut
               </Button>
             </div>

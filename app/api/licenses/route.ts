@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { generateBarcode, generateLicensesCode, generateQRCode, sendBarcodeEmail } from "@/lib/utils"
+import { generateBarcode, generateLicensesCode, generateQRCode } from "@/lib/utils"
+import { sendBarcodeEmail } from "@/lib/send-barcode-email"
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!

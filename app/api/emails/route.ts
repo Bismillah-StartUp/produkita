@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY!);
+import { sendMail } from "@/lib/mailer";
 
 export async function POST() {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
-      to: ['delivered@resend.dev'],
-      subject: 'Hello world',
-      text: 'Hello world',
-    });
+    const recipient = process.env.SMTP_TEST_RECIPIENT || process.env.SMTP_FROM_EMAIL;
 
-    if (error) {
-      return NextResponse.json({ error }, { status: 500 });
+    if (!recipient) {
+      return NextResponse.json(
+        { error: "Missing SMTP_TEST_RECIPIENT or SMTP_FROM_EMAIL" },
+        { status: 500 },
+      );
     }
+
+    const data = await sendMail({
+      to: recipient,
+      subject: "Hello world",
+      html: "<p>Hello world</p>",
+      text: "Hello world",
+    });
 
     return NextResponse.json(
       data, 
