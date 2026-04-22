@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
 }
 
 model Certificate {
@@ -47,10 +48,10 @@ model Enterprise {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique() @db.Uuid
   name          String
-  phone         String?
-  email         String?
   description   String?
   address       String?
+  email         String?
+  phone         String?
   status        String
   
   createdAt     DateTime  @default(now())
@@ -72,7 +73,7 @@ model Product {
   description     String?
   enterprise_id   Int
   type            ProductCategory
-  barcode         String?   @unique()
+  license_code    String?   @unique()
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

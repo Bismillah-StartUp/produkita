@@ -7,9 +7,10 @@ interface NavbarLicencesProps {
   activeTab?: 'overview' | 'nutrition' | 'certifications' | 'company'
   onTabChange?: (tab: 'overview' | 'nutrition' | 'certifications' | 'company') => void
   isMobileView?: boolean
+  showCertifications?: boolean
 }
 
-export const Navbar = ({ activeTab = 'overview', onTabChange, isMobileView = false }: NavbarLicencesProps) => {
+export const Navbar = ({ activeTab = 'overview', onTabChange, isMobileView = false, showCertifications = true }: NavbarLicencesProps) => {
   const [active, setActive] = useState<'overview' | 'nutrition' | 'certifications' | 'company'>(activeTab)
 
   const tabs = [
@@ -17,7 +18,7 @@ export const Navbar = ({ activeTab = 'overview', onTabChange, isMobileView = fal
     { id: 'nutrition', label: 'Nutrition', icon: ClipboardCheck },
     { id: 'certifications', label: 'Certifications', icon: ShieldCheck },
     { id: 'company', label: 'Company', icon: Building2 },
-  ]
+  ].filter((tab) => showCertifications || tab.id !== 'certifications')
 
   const handleTabChange = (tabId: 'overview' | 'nutrition' | 'certifications' | 'company') => {
     setActive(tabId)
@@ -39,7 +40,9 @@ export const Navbar = ({ activeTab = 'overview', onTabChange, isMobileView = fal
     if (isMobileView) return
 
     const handleScroll = () => {
-      const sections: Array<'overview' | 'nutrition' | 'certifications' | 'company'> = ['overview', 'nutrition', 'certifications', 'company']
+      const sections: Array<'overview' | 'nutrition' | 'certifications' | 'company'> = showCertifications
+        ? ['overview', 'nutrition', 'certifications', 'company']
+        : ['overview', 'nutrition', 'company']
       let currentSection: 'overview' | 'nutrition' | 'certifications' | 'company' = 'overview'
 
       for (const sectionId of sections) {
@@ -57,7 +60,7 @@ export const Navbar = ({ activeTab = 'overview', onTabChange, isMobileView = fal
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [isMobileView])
+  }, [isMobileView, showCertifications])
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">

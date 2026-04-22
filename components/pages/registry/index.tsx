@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Loader2, AlertCircle, CheckCircle2, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProductFormData, ProductInfoForm, EnterpriseFormData, EnterpriseForm, NutritionForm, NutritionFormData, LegalityForm, LegalityFormData, Rekap } from './partials'
+import { useRegistrySubmit } from '@/hooks/useRegistrySubmit'
 
 interface RegistryPageProps {
   onSubmitProductInfo?: (data: ProductFormData) => void
@@ -20,6 +21,9 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
   const [nutritionData, setNutritionData] = useState<NutritionFormData | undefined>()
   const [legalityData, setLegalityData] = useState<LegalityFormData | undefined>()
   const [enterpriseData, setEnterpriseData] = useState<EnterpriseFormData | undefined>()
+  const [submissionData, setSubmissionData] = useState<any>(null)
+
+  const { submit, loading, error, success } = useRegistrySubmit()
 
   const handleSubmitProduct = (formData: ProductFormData) => {
     console.log('Product Info Form Data:', formData)
@@ -61,14 +65,29 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
     setCurrentStep(step)
   }
 
-  const handleFinalSubmit = () => {
-    console.log('Final submission with all data:', {
-      productData,
-      nutritionData,
-      legalityData,
-      enterpriseData,
-    })
-    // Add your final submission logic here
+  const handleFinalSubmit = async () => {
+    if (!productData || !nutritionData || !legalityData || !enterpriseData) {
+      console.error('Missing required data')
+      return
+    }
+
+    try {
+      const result = await submit({
+        productData,
+        nutritionData,
+        legalityData,
+        enterpriseData,
+      })
+      setSubmissionData(result)
+    } catch (err) {
+      console.error('Submission failed:', err)
+    }
+  }
+
+  const handleCopyCode = () => {
+    if (submissionData?.data?.licenseCode) {
+      navigator.clipboard.writeText(submissionData.data.licenseCode)
+    }
   }
 
   // Calculate progress percentage
@@ -133,21 +152,97 @@ export function RegistryPage({ onSubmitProductInfo, onSubmitEnterpriseInfo, onSu
         </div>
       </div>
 
+      {/* Status Messages */}
+      {error && (
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <div>
+              <p className="font-semibold text-red-900">Terjadi Kesalahan</p>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {success && (
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="font-semibold text-green-900">Berhasil!</p>
+              <p className="text-sm text-green-700">Data produk Anda telah berhasil disimpan ke database</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} initialData={productData} />}
-        {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} onPrevious={() => setCurrentStep(1)} initialData={nutritionData} />}
-        {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} onPrevious={() => setCurrentStep(2)} initialData={legalityData} />}
-        {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} onPrevious={() => setCurrentStep(3)} initialData={enterpriseData} />}
-        {currentStep === 5 && (
-          <Rekap
-            productData={productData}
-            nutritionData={nutritionData}
-            legalityData={legalityData}
-            enterpriseData={enterpriseData}
-            onSubmit={handleFinalSubmit}
-            onEdit={handleEditStep}
-          />
+        {success ? (
+          <div className="flex flex-col items-center justify-center space-y-6 rounded-lg border-2 border-dashed border-green-300 bg-green-50 p-12">
+            <CheckCircle2 className="h-16 w-16 text-green-600" />
+            <h2 className="text-2xl font-bold text-gray-900">Pendaftaran Berhasil!</h2>
+            <p className="text-center text-gray-600">
+              Terima kasih telah mendaftarkan produk Anda. Data Anda akan kami proses lebih lanjut.
+            </p>
+
+            {/* License Code Display */}
+            {submissionData?.data?.licenseCode && (
+              <div className="w-full max-w-md rounded-lg bg-white p-6 shadow">
+                <p className="mb-3 text-center text-sm font-semibold text-gray-700">
+                  Kode Lisensi Produk
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3">
+                    <p className="break-all font-mono text-sm text-gray-900">
+                      {submissionData.data.licenseCode}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCopyCode}
+                    className="flex items-center justify-center rounded-lg border border-gray-300 bg-white p-3 hover:bg-gray-50"
+                    title="Salin kode"
+                  >
+                    <Copy className="h-4 w-4 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                onClick={() => submissionData?.data?.licenseCode && (window.location.href = `/licenses/${submissionData.data.licenseCode}`)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Lihat Lisensi Produk
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = '/dashboard'}
+              >
+                Kembali ke Dashboard
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {currentStep === 1 && <ProductInfoForm onSubmit={handleSubmitProduct} initialData={productData} />}
+            {currentStep === 2 && <NutritionForm onSubmit={handleSubmitNutrition} onPrevious={() => setCurrentStep(1)} initialData={nutritionData} />}
+            {currentStep === 3 && <LegalityForm onSubmit={handleSubmitLegality} onPrevious={() => setCurrentStep(2)} initialData={legalityData} />}
+            {currentStep === 4 && <EnterpriseForm onSubmit={handleSubmitEnterprise} onPrevious={() => setCurrentStep(3)} initialData={enterpriseData} />}
+            {currentStep === 5 && (
+              <Rekap
+                productData={productData}
+                nutritionData={nutritionData}
+                legalityData={legalityData}
+                enterpriseData={enterpriseData}
+                onSubmit={handleFinalSubmit}
+                onEdit={handleEditStep}
+                isLoading={loading}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

@@ -4,6 +4,25 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
 
+export const AKG = {
+  energy: 2150,
+  fat: 67,
+  saturatedFat: 20,
+  protein: 60,
+  carbs: 325,
+  sugar: 50,
+  sodium: 1500,
+}
+
+export function percentAKG(value: number, dailyValue: number): number {
+  if (!dailyValue) return 0
+  return (value / dailyValue) * 100
+}
+
+export function roundLabel(value: number): number {
+  return Math.round(value)
+}
+
 export interface NutritionFormData {
   servingSize: string
   calories: string
@@ -29,21 +48,30 @@ interface NutritionFormProps {
 }
 
 export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = false }: NutritionFormProps) {
+  const getNumericValue = (value: string) => {
+    const parsedValue = Number.parseFloat(value.replace(/[^0-9.,-]/g, '').replace(',', '.'))
+    return Number.isFinite(parsedValue) ? parsedValue : 0
+  }
+
+  const getPercentValue = (value: string, dailyValue: number) => {
+    return roundLabel(percentAKG(getNumericValue(value), dailyValue)).toString()
+  }
+
   const [formData, setFormData] = useState<NutritionFormData>({
     servingSize: initialData?.servingSize ?? '',
     calories: initialData?.calories ?? '',
     totalFat: initialData?.totalFat ?? '',
-    fatDaily: initialData?.fatDaily ?? '',
+    fatDaily: initialData?.fatDaily ?? getPercentValue(initialData?.totalFat ?? '', AKG.fat),
     saturatedFat: initialData?.saturatedFat ?? '',
-    saturatedFatDaily: initialData?.saturatedFatDaily ?? '',
+    saturatedFatDaily: initialData?.saturatedFatDaily ?? getPercentValue(initialData?.saturatedFat ?? '', AKG.saturatedFat),
     carbohydrates: initialData?.carbohydrates ?? '',
-    carbohydratesDaily: initialData?.carbohydratesDaily ?? '',
+    carbohydratesDaily: initialData?.carbohydratesDaily ?? getPercentValue(initialData?.carbohydrates ?? '', AKG.carbs),
     protein: initialData?.protein ?? '',
-    proteinDaily: initialData?.proteinDaily ?? '',
+    proteinDaily: initialData?.proteinDaily ?? getPercentValue(initialData?.protein ?? '', AKG.protein),
     sodium: initialData?.sodium ?? '',
-    sodiumDaily: initialData?.sodiumDaily ?? '',
+    sodiumDaily: initialData?.sodiumDaily ?? getPercentValue(initialData?.sodium ?? '', AKG.sodium),
     sugar: initialData?.sugar ?? '',
-    sugarDaily: initialData?.sugarDaily ?? '',
+    sugarDaily: initialData?.sugarDaily ?? getPercentValue(initialData?.sugar ?? '', AKG.sugar),
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -53,6 +81,12 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
     setFormData(prev => ({
       ...prev,
       [name]: value,
+      ...(name === 'totalFat' ? { fatDaily: getPercentValue(value, AKG.fat) } : {}),
+      ...(name === 'saturatedFat' ? { saturatedFatDaily: getPercentValue(value, AKG.saturatedFat) } : {}),
+      ...(name === 'carbohydrates' ? { carbohydratesDaily: getPercentValue(value, AKG.carbs) } : {}),
+      ...(name === 'protein' ? { proteinDaily: getPercentValue(value, AKG.protein) } : {}),
+      ...(name === 'sodium' ? { sodiumDaily: getPercentValue(value, AKG.sodium) } : {}),
+      ...(name === 'sugar' ? { sugarDaily: getPercentValue(value, AKG.sugar) } : {}),
     }))
     if (errors[name]) {
       setErrors(prev => {
@@ -185,9 +219,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                   id="fatDaily"
                   name="fatDaily"
                   value={formData.fatDaily}
-                  onChange={handleChange}
-                  placeholder="Contoh: 2"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                  placeholder="Otomatis"
+                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -217,9 +253,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                   id="saturatedFatDaily"
                   name="saturatedFatDaily"
                   value={formData.saturatedFatDaily}
-                  onChange={handleChange}
-                  placeholder="Contoh: 1"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                  placeholder="Otomatis"
+                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -256,9 +294,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 id="carbohydratesDaily"
                 name="carbohydratesDaily"
                 value={formData.carbohydratesDaily}
-                onChange={handleChange}
-                placeholder="Contoh: 1"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                readOnly
+                aria-readonly="true"
+                tabIndex={-1}
+                placeholder="Otomatis"
+                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -294,9 +334,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 id="proteinDaily"
                 name="proteinDaily"
                 value={formData.proteinDaily}
-                onChange={handleChange}
-                placeholder="Contoh: 1"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                readOnly
+                aria-readonly="true"
+                tabIndex={-1}
+                placeholder="Otomatis"
+                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -326,9 +368,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                   id="sugarDaily"
                   name="sugarDaily"
                   value={formData.sugarDaily}
-                  onChange={handleChange}
-                  placeholder="Contoh: 0"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                  placeholder="Otomatis"
+                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -365,9 +409,11 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 id="sodiumDaily"
                 name="sodiumDaily"
                 value={formData.sodiumDaily}
-                onChange={handleChange}
-                placeholder="Contoh: 12"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                readOnly
+                aria-readonly="true"
+                tabIndex={-1}
+                placeholder="Otomatis"
+                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>

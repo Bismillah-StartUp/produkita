@@ -14,12 +14,16 @@ const LicenceContext = createContext<{
   onTabChange: (tab: 'overview' | 'nutrition' | 'certifications' | 'company') => void
   enterpriseName: string
   setEnterpriseName: (name: string) => void
+  showCertifications: boolean
+  setShowCertifications: (show: boolean) => void
 }>({
   isMobile: false,
   activeTab: 'overview',
   onTabChange: () => {},
   enterpriseName: 'Company',
   setEnterpriseName: () => {},
+  showCertifications: true,
+  setShowCertifications: () => {},
 })
 
 export const useLicenceContext = () => {
@@ -34,6 +38,7 @@ export default function LicenceLayout({ children }: LayoutProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'nutrition' | 'certifications' | 'company'>('overview')
   const [enterpriseName, setEnterpriseName] = useState('Company Name')
+  const [showCertifications, setShowCertifications] = useState(true)
 
   // Detect mobile view
   useEffect(() => {
@@ -65,12 +70,9 @@ export default function LicenceLayout({ children }: LayoutProps) {
     if (isMobile) return
 
     const handleScroll = () => {
-      const sections: Array<'overview' | 'nutrition' | 'certifications' | 'company'> = [
-        'overview',
-        'nutrition',
-        'certifications',
-        'company',
-      ]
+      const sections: Array<'overview' | 'nutrition' | 'certifications' | 'company'> = showCertifications
+        ? ['overview', 'nutrition', 'certifications', 'company']
+        : ['overview', 'nutrition', 'company']
       let currentSection: 'overview' | 'nutrition' | 'certifications' | 'company' = 'overview'
 
       for (const sectionId of sections) {
@@ -88,7 +90,7 @@ export default function LicenceLayout({ children }: LayoutProps) {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [isMobile])
+  }, [isMobile, showCertifications])
 
   // Mobile: filter children to show only active section
   const renderContent = () => {
@@ -112,6 +114,8 @@ export default function LicenceLayout({ children }: LayoutProps) {
         onTabChange: handleTabChange,
         enterpriseName,
         setEnterpriseName,
+        showCertifications,
+        setShowCertifications,
       }}
     >
       <style>{`
@@ -133,7 +137,7 @@ export default function LicenceLayout({ children }: LayoutProps) {
         </main>
 
         {/* Navigation */}
-        <NavbarLicences activeTab={activeTab} onTabChange={handleTabChange} isMobileView={isMobile} />
+        <NavbarLicences activeTab={activeTab} onTabChange={handleTabChange} isMobileView={isMobile} showCertifications={showCertifications} />
       </div>
     </LicenceContext.Provider>
   )
