@@ -12,8 +12,6 @@ import { cookies } from "next/headers"
 // Client-side utilities
 // ============================================================================
 
-export const supabaseClient = createBrowserClient()
-
 /**
  * Fetch enterprises from Supabase
  */
