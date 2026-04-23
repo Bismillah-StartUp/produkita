@@ -3,24 +3,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
+import { AKG, percentAKG, roundAKG } from '@/lib/nutrition'
 
-export const AKG = {
-  energy: 2150,
-  fat: 67,
-  saturatedFat: 20,
-  protein: 60,
-  carbs: 325,
-  sugar: 50,
-  sodium: 1500,
-}
-
-export function percentAKG(value: number, dailyValue: number): number {
-  if (!dailyValue) return 0
-  return (value / dailyValue) * 100
-}
-
-export function roundLabel(value: number): number {
-  return Math.round(value)
+function AKGValue({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">{label}</p>
+      <p className="mt-1 text-lg font-bold text-blue-900" aria-live="polite">
+        {value || '0'}%
+      </p>
+    </div>
+  )
 }
 
 export interface NutritionFormData {
@@ -54,7 +47,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
   }
 
   const getPercentValue = (value: string, dailyValue: number) => {
-    return roundLabel(percentAKG(getNumericValue(value), dailyValue)).toString()
+    return roundAKG(percentAKG(getNumericValue(value), dailyValue)).toString()
   }
 
   const [formData, setFormData] = useState<NutritionFormData>({
@@ -143,7 +136,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
         </div>
 
         {/* Content */}
-        <div className="space-y-6 px-8 py-8">
+        <div className="space-y-8 px-8 py-8">
           {/* Serving Size */}
           <div>
             <label htmlFor="servingSize" className="block text-sm font-semibold text-gray-700">
@@ -188,7 +181,6 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
 
           {/* Total Fat and Saturated Fat */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900">Lemak</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="totalFat" className="block text-sm font-semibold text-gray-700">
@@ -211,20 +203,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
               </div>
 
               <div>
-                <label htmlFor="fatDaily" className="block text-sm font-semibold text-gray-700">
-                  % AKG (Lemak)
-                </label>
-                <input
-                  type="text"
-                  id="fatDaily"
-                  name="fatDaily"
-                  value={formData.fatDaily}
-                  readOnly
-                  aria-readonly="true"
-                  tabIndex={-1}
-                  placeholder="Otomatis"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                <AKGValue label="AKG Lemak" value={formData.fatDaily} />
               </div>
             </div>
 
@@ -245,20 +224,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
               </div>
 
               <div>
-                <label htmlFor="saturatedFatDaily" className="block text-sm font-semibold text-gray-700">
-                  % AKG (Lemak Jenuh)
-                </label>
-                <input
-                  type="text"
-                  id="saturatedFatDaily"
-                  name="saturatedFatDaily"
-                  value={formData.saturatedFatDaily}
-                  readOnly
-                  aria-readonly="true"
-                  tabIndex={-1}
-                  placeholder="Otomatis"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                <AKGValue label="AKG Lemak Jenuh" value={formData.saturatedFatDaily} />
               </div>
             </div>
           </div>
@@ -286,20 +252,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
             </div>
 
             <div>
-              <label htmlFor="carbohydratesDaily" className="block text-sm font-semibold text-gray-700">
-                % AKG (Karbohidrat)
-              </label>
-              <input
-                type="text"
-                id="carbohydratesDaily"
-                name="carbohydratesDaily"
-                value={formData.carbohydratesDaily}
-                readOnly
-                aria-readonly="true"
-                tabIndex={-1}
-                placeholder="Otomatis"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
+              <AKGValue label="AKG Karbohidrat" value={formData.carbohydratesDaily} />
             </div>
           </div>
 
@@ -326,29 +279,16 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
             </div>
 
             <div>
-              <label htmlFor="proteinDaily" className="block text-sm font-semibold text-gray-700">
-                % AKG (Protein)
-              </label>
-              <input
-                type="text"
-                id="proteinDaily"
-                name="proteinDaily"
-                value={formData.proteinDaily}
-                readOnly
-                aria-readonly="true"
-                tabIndex={-1}
-                placeholder="Otomatis"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
+              <AKGValue label="AKG Protein" value={formData.proteinDaily} />
             </div>
           </div>
 
           {/* Sugar */}
-          <div>
-            <label htmlFor="sugar" className="block text-sm font-semibold text-gray-700">
-              Gula
-            </label>
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="sugar" className="block text-sm font-semibold text-gray-700">
+                Gula
+              </label>
               <input
                 type="text"
                 id="sugar"
@@ -358,23 +298,10 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 placeholder="Contoh: 0 g"
                 className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
+            </div>
 
-              <div>
-                <label htmlFor="sugarDaily" className="className text-sm font-semibold text-gray-700">
-                  % AKG (Gula)
-                </label>
-                <input
-                  type="text"
-                  id="sugarDaily"
-                  name="sugarDaily"
-                  value={formData.sugarDaily}
-                  readOnly
-                  aria-readonly="true"
-                  tabIndex={-1}
-                  placeholder="Otomatis"
-                  className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
+            <div>
+              <AKGValue label="AKG Gula" value={formData.sugarDaily} />
             </div>
           </div>
 
@@ -401,20 +328,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
             </div>
 
             <div>
-              <label htmlFor="sodiumDaily" className="block text-sm font-semibold text-gray-700">
-                % AKG (Natrium)
-              </label>
-              <input
-                type="text"
-                id="sodiumDaily"
-                name="sodiumDaily"
-                value={formData.sodiumDaily}
-                readOnly
-                aria-readonly="true"
-                tabIndex={-1}
-                placeholder="Otomatis"
-                className="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
+              <AKGValue label="AKG Natrium" value={formData.sodiumDaily} />
             </div>
           </div>
 

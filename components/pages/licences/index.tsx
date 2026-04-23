@@ -197,6 +197,7 @@ export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
       {nutrition_info && (
         <section id="section-nutrition" className="pb-16 border-t border-slate-200 pt-16">
           <NutritionFacts
+            servings={nutrition_info?.servings ?? undefined}
             calories={nutrition_info?.energy ?? undefined}
             fat={nutrition_info?.fat ?? undefined}
             saturatedFat={nutrition_info?.saturated_fat ?? undefined}

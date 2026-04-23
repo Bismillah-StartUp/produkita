@@ -1,44 +1,44 @@
 'use client'
 
+import { AKG, calculateAKG } from '@/lib/nutrition'
+
 interface NutritionFactsProps {
+  servings?: number
   calories?: number
   fat?: number
-  fatDaily?: number
   saturatedFat?: number
-  saturatedFatDaily?: number
   carbs?: number
-  carbsDaily?: number
   protein?: number
-  proteinDaily?: number
   sodium?: number
-  sodiumDaily?: number
   sugar?: number
-  sugarDaily?: number
 }
 
 export default function NutritionFacts({
+  servings,
   calories,
   fat,
-  fatDaily,
   saturatedFat,
-  saturatedFatDaily,
   carbs,
-  carbsDaily,
   protein,
-  proteinDaily,
   sodium,
-  sodiumDaily,
   sugar,
-  sugarDaily,
 }: NutritionFactsProps) {
+  const fatDaily = calculateAKG(fat, AKG.fat)
+  const saturatedFatDaily = calculateAKG(saturatedFat, AKG.saturatedFat)
+  const proteinDaily = calculateAKG(protein, AKG.protein)
+  const carbsDaily = calculateAKG(carbs, AKG.carbs)
+  const sugarDaily = calculateAKG(sugar, AKG.sugar)
+  const sodiumDaily = calculateAKG(sodium, AKG.sodium)
+
   const hasNutritionData =
-    calories ||
-    fat ||
-    saturatedFat ||
-    carbs ||
-    protein ||
-    sodium ||
-    sugar
+    servings !== undefined ||
+    calories !== undefined ||
+    fat !== undefined ||
+    saturatedFat !== undefined ||
+    carbs !== undefined ||
+    protein !== undefined ||
+    sodium !== undefined ||
+    sugar !== undefined
 
   if (!hasNutritionData) {
     return null
@@ -62,7 +62,14 @@ export default function NutritionFacts({
               Jumlah per sajian / Amount per serving
             </p>
 
-            {calories && (
+            {servings !== undefined && (
+              <div className="flex justify-between items-baseline mb-2 sm:mb-3 gap-2">
+                <span className="font-semibold text-xs sm:text-sm text-slate-900">Takaran saji / Serving size</span>
+                <span className="font-semibold text-xs sm:text-sm text-slate-900 shrink-0">{servings}</span>
+              </div>
+            )}
+
+            {calories !== undefined && (
               <div className="flex justify-between items-baseline mb-3 sm:mb-4 pb-3 sm:pb-4 border-b-2 border-black gap-2">
                 <span className="font-bold text-xs sm:text-sm text-slate-900">Energi total / Total energy</span>
                 <span className="font-bold text-sm sm:text-lg text-slate-900 shrink-0">{calories} kcal</span>
@@ -89,7 +96,7 @@ export default function NutritionFacts({
                           <span className="font-semibold">Lemak Total / Total Fat</span>
                         </td>
                         <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{fat} g</td>
-                        <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{fatDaily || '-'}%</td>
+                        <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{fatDaily}%</td>
                       </tr>
 
                       {saturatedFat !== undefined && (
@@ -98,7 +105,7 @@ export default function NutritionFacts({
                             Lemak Jenuh / Saturated Fat
                           </td>
                           <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{saturatedFat} g</td>
-                          <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{saturatedFatDaily || '-'}%</td>
+                          <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{saturatedFatDaily}%</td>
                         </tr>
                       )}
                     </>
@@ -110,7 +117,7 @@ export default function NutritionFacts({
                         <span className="font-semibold">Protein / Protein</span>
                       </td>
                       <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{protein} g</td>
-                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{proteinDaily || '-'}%</td>
+                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{proteinDaily}%</td>
                     </tr>
                   )}
 
@@ -120,7 +127,7 @@ export default function NutritionFacts({
                         <span className="font-semibold">Karbohidrat Total / Total Carbohydrate</span>
                       </td>
                       <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{carbs} g</td>
-                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{carbsDaily || '-'}%</td>
+                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{carbsDaily}%</td>
                     </tr>
                   )}
 
@@ -130,7 +137,7 @@ export default function NutritionFacts({
                         <span className="font-semibold">Gula / Sugar</span>
                       </td>
                       <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{sugar} g</td>
-                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{sugarDaily || '-'}%</td>
+                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{sugarDaily}%</td>
                     </tr>
                   )}
 
@@ -140,7 +147,7 @@ export default function NutritionFacts({
                         <span className="font-semibold">Garam (natrium) / Salt (sodium)</span>
                       </td>
                       <td className="text-right py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm text-slate-900">{sodium} mg</td>
-                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{sodiumDaily || '-'}%</td>
+                      <td className="text-right py-2 sm:py-3 pl-1 sm:pl-2 text-xs sm:text-sm text-slate-900">{sodiumDaily}%</td>
                     </tr>
                   )}
                 </tbody>
