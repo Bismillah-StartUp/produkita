@@ -48,6 +48,8 @@ model Enterprise {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique() @db.Uuid
   name          String
+  district      String?
+  province      String?
   description   String?
   address       String?
   email         String?

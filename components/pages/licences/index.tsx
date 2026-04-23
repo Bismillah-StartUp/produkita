@@ -40,6 +40,8 @@ interface EnterpriseData {
   id: number
   uuid: string
   name: string
+  district: string | null
+  province: string | null
   phone: string | null
   email: string | null
   address: string | null
@@ -109,6 +111,8 @@ export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
     id: 1,
     uuid: 'ent-uuid-123',
     name: 'PT Rasa Nusantara Sejahtera',
+    district: 'Bandung',
+    province: 'Jawa Barat',
     phone: '+62 22 1234 5678',
     email: 'info@rasanusantara.co.id',
     address: 'Jl. Industri No. 45, Bandung, Jawa Barat 40123',
@@ -184,6 +188,8 @@ export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
           price={product?.price}
           volume={`${product?.description || '250 ml'}`}
           enterpriseName={enterprise?.name || 'Enterprise'}
+          enterpriseDistrict={enterprise?.district}
+          enterpriseProvince={enterprise?.province}
           certifications={{
             hasBPOM: !!certificate?.bpom_number,
             hasPIRT: !!certificate?.pirt_number,

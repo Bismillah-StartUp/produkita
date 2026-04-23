@@ -234,6 +234,8 @@ export function Rekap({
           onEdit={onEdit}
         >
           <SectionItem label="Nama Perusahaan" value={enterpriseData.companyName} />
+          <SectionItem label="Daerah" value={enterpriseData.district} />
+          <SectionItem label="Provinsi" value={enterpriseData.province} />
           <SectionItem label="Alamat Lengkap" value={enterpriseData.address} />
           <SectionItem label="Nomor Telepon" value={enterpriseData.phone} />
           <SectionItem label="Email" value={enterpriseData.email} />

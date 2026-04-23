@@ -21,6 +21,8 @@ export interface LegalityFormData {
   halalValidUntil: string
 }
 
+const DEFAULT_PRODUCT_CATEGORY = 'Food & Beverage'
+
 interface LegalityFormProps {
   onSubmit?: (data: LegalityFormData) => void
   onPrevious?: () => void
@@ -41,7 +43,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
     hasPirt: initialHasPirt,
     hasHalal: initialHasHalal,
     bpomNumber: initialData?.bpomNumber ?? '',
-    productCategory: initialData?.productCategory ?? '',
+    productCategory: DEFAULT_PRODUCT_CATEGORY,
     bpomRegistrationDate: initialData?.bpomRegistrationDate ?? '',
     bpomValidUntil: initialData?.bpomValidUntil ?? '',
     pirtNumber: initialData?.pirtNumber ?? '',
@@ -130,7 +132,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
     const nextErrors: Record<string, string> = {}
 
     if (!formData.productCategory.trim()) {
-      nextErrors.productCategory = 'Kategori produk wajib dipilih'
+      nextErrors.productCategory = 'Kategori produk wajib diisi'
     }
 
     if (hasBpom) {
@@ -229,24 +231,11 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
           </div>
 
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <label htmlFor="productCategory" className="block text-sm font-semibold text-gray-700">
-              Kategori Produk <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="productCategory"
-              name="productCategory"
-              value={formData.productCategory}
-              onChange={handleChange}
-              className={`mt-2 block w-full rounded-lg border ${errors.productCategory ? 'border-red-500' : 'border-gray-300'} bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}
-            >
-              <option value="">Pilih Kategori</option>
-              <option value="Food & Beverage">Food & Beverage</option>
-              <option value="Kosmetik">Kosmetik</option>
-              <option value="Farmasi">Farmasi</option>
-              <option value="Alat Kesehatan">Alat Kesehatan</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
-            {errors.productCategory && <p className="mt-1 text-xs font-semibold text-red-600">{errors.productCategory}</p>}
+            <label className="block text-sm font-semibold text-gray-700">Kategori Produk</label>
+            <input type="hidden" name="productCategory" value={formData.productCategory} />
+            <div className="mt-2 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+              {DEFAULT_PRODUCT_CATEGORY}
+            </div>
           </div>
 
           {hasBpom && (

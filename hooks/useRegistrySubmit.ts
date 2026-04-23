@@ -82,6 +82,8 @@ export function useRegistrySubmit() {
         },
         enterpriseData: {
           companyName: data.enterpriseData.companyName,
+          district: data.enterpriseData.district,
+          province: data.enterpriseData.province,
           address: data.enterpriseData.address,
           phone: data.enterpriseData.phone,
           email: data.enterpriseData.email,

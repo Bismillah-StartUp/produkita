@@ -36,6 +36,16 @@ const FEATURES = [
     title: "Support Dedicated",
     description: "Tim support berpengalaman siap membantu Anda kapan saja.",
   },
+  {
+    icon: CheckCircle,
+    title: "Support Dedicated",
+    description: "Tim support berpengalaman siap membantu Anda kapan saja.",
+  },
+  {
+    icon: CheckCircle,
+    title: "Support Dedicated",
+    description: "Tim support berpengalaman siap membantu Anda kapan saja.",
+  },
 ]
 
 export const Features = () => {

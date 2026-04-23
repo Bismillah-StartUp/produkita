@@ -42,6 +42,8 @@ interface RegistrySubmitData {
   }
   enterpriseData: {
     companyName: string
+    district: string
+    province: string
     address: string
     phone: string
     email: string
@@ -97,6 +99,8 @@ export async function POST(request: NextRequest) {
         data: {
           uuid: uuidv4(),
           name: data.enterpriseData.companyName,
+          district: data.enterpriseData.district,
+          province: data.enterpriseData.province,
           description: "",
           address: data.enterpriseData.address,
           email: data.enterpriseData.email,

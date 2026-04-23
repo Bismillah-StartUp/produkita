@@ -28,6 +28,8 @@ export async function getCertificateDetailsByCode(licenseCode: string) {
       id: number
       uuid: string
       name: string
+      district: string | null
+      province: string | null
       phone: string | null
       email: string | null
       address: string | null
@@ -61,6 +63,8 @@ export async function getCertificateDetailsByCode(licenseCode: string) {
             id: enterprise.id,
             uuid: enterprise.uuid,
             name: enterprise.name,
+            district: enterprise.district,
+            province: enterprise.province,
             phone: enterprise.phone,
             email: enterprise.email,
             address: enterprise.address,

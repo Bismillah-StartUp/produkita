@@ -9,6 +9,8 @@ interface ProductOverviewProps {
   price?: number | null
   volume?: string | null
   enterpriseName: string
+  enterpriseDistrict?: string | null
+  enterpriseProvince?: string | null
   certifications: {
     hasBPOM: boolean
     hasPIRT: boolean
@@ -23,8 +25,14 @@ export default function ProductOverview({
   price,
   volume,
   enterpriseName,
+  enterpriseDistrict,
+  enterpriseProvince,
   certifications,
 }: ProductOverviewProps) {
+  const enterpriseLabel = enterpriseDistrict && enterpriseProvince
+    ? `${enterpriseName}, ${enterpriseDistrict}, ${enterpriseProvince}.`
+    : enterpriseName
+
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Product Image */}
@@ -48,7 +56,7 @@ export default function ProductOverview({
 
       {/* Product Info */}
       <div>
-        <p className="text-xs sm:text-sm text-slate-600">{enterpriseName}</p>
+        <p className="text-xs sm:text-sm text-slate-600">{enterpriseLabel}</p>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-1">{productName}</h1>
         {price && (
           <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mt-2 sm:mt-3">

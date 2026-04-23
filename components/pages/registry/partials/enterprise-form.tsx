@@ -6,6 +6,8 @@ import { Building2 } from 'lucide-react'
 
 export interface EnterpriseFormData {
   companyName: string
+  district: string
+  province: string
   address: string
   phone: string
   email: string
@@ -21,6 +23,8 @@ interface EnterpriseFormProps {
 export function EnterpriseForm({ onSubmit, onPrevious, initialData, isLoading = false }: EnterpriseFormProps) {
   const [formData, setFormData] = useState<EnterpriseFormData>({
     companyName: initialData?.companyName ?? '',
+    district: initialData?.district ?? '',
+    province: initialData?.province ?? '',
     address: initialData?.address ?? '',
     phone: initialData?.phone ?? '',
     email: initialData?.email ?? '',
@@ -48,6 +52,12 @@ export function EnterpriseForm({ onSubmit, onPrevious, initialData, isLoading = 
 
     if (!formData.companyName.trim()) {
       newErrors.companyName = 'Nama perusahaan wajib diisi'
+    }
+    if (!formData.district.trim()) {
+      newErrors.district = 'Daerah wajib diisi'
+    }
+    if (!formData.province.trim()) {
+      newErrors.province = 'Provinsi wajib diisi'
     }
     if (!formData.address.trim()) {
       newErrors.address = 'Alamat lengkap wajib diisi'
@@ -105,6 +115,49 @@ export function EnterpriseForm({ onSubmit, onPrevious, initialData, isLoading = 
             {errors.companyName && (
               <p className="mt-1 text-xs font-semibold text-red-600">{errors.companyName}</p>
             )}
+          </div>
+
+          {/* District and Province Row */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="district" className="block text-sm font-semibold text-gray-700">
+                Daerah <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="district"
+                name="district"
+                value={formData.district}
+                onChange={handleChange}
+                placeholder="Contoh: Kediri"
+                className={`mt-2 block w-full rounded-lg border ${
+                  errors.district ? 'border-red-500' : 'border-gray-300'
+                } bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
+              />
+              {errors.district && (
+                <p className="mt-1 text-xs font-semibold text-red-600">{errors.district}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="province" className="block text-sm font-semibold text-gray-700">
+                Provinsi <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="province"
+                name="province"
+                value={formData.province}
+                onChange={handleChange}
+                placeholder="Contoh: Jawa Timur"
+                className={`mt-2 block w-full rounded-lg border ${
+                  errors.province ? 'border-red-500' : 'border-gray-300'
+                } bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
+              />
+              {errors.province && (
+                <p className="mt-1 text-xs font-semibold text-red-600">{errors.province}</p>
+              )}
+            </div>
           </div>
 
           {/* Address */}
