@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { v4 as uuidv4 } from "uuid"
 import { uploadImage } from "@/configs/cloudinary/utils"
 import { prisma } from "@/lib/prisma"
-import { generateBarcode, generateLicensesCode, generateQRCode, sendBarcodeEmail } from "@/lib/utils"
+import { generateBarcode, generateLicensesCode, generateQRCode } from "@/lib/utils"
+import { sendBarcodeEmail } from "@/lib/send-barcode-email"
 
 interface RegistrySubmitData {
   productData: {
