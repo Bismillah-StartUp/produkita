@@ -1,4 +1,13 @@
-import { Shield, TrendingUp, Zap, Lock, Award, CheckCircle } from "lucide-react"
+import { 
+  Shield, 
+  TrendingUp, 
+  Zap, 
+  Lock, 
+  Award, 
+  CheckCircle,
+  FlaskConical,
+  Apple
+} from "lucide-react"
 
 const FEATURES = [
   {
@@ -34,7 +43,22 @@ const FEATURES = [
   {
     icon: CheckCircle,
     title: "Support Dedicated",
-    description: "Tim support berpengalaman siap membantu Anda kapan saja.",
+    description:
+      "Tim support berpengalaman siap membantu Anda kapan saja.",
+  },
+
+  // NEW FEATURES
+  {
+    icon: FlaskConical,
+    title: "Proximate Test",
+    description:
+      "Analisis komposisi dasar produk seperti kadar air, protein, lemak, abu, dan karbohidrat untuk memastikan kualitas dan kesesuaian standar industri.",
+  },
+  {
+    icon: Apple,
+    title: "Nutrition Test",
+    description:
+      "Pengujian nilai gizi lengkap termasuk energi, vitamin, dan mineral untuk mendukung pelabelan nutrisi yang akurat dan sesuai regulasi.",
   },
 ]
 
