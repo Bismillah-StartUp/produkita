@@ -78,7 +78,7 @@ export function Footer() {
 
         <div className="border-t border-gray-200 pt-8">
           <p className="text-center text-sm text-gray-600">
-            © 2026 EntreCertivy. Semua hak dilindungi.
+            © 2026 EntreCertivy. Semua hak dilindungi oleh PTPU UTM.
           </p>
         </div>
       </div>

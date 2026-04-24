@@ -2,7 +2,7 @@ export const AKG = {
   energy: 2150,
   fat: 67,
   saturatedFat: 20,
-  protein: 60,
+  protein: 50,
   carbs: 325,
   sugar: 50,
   sodium: 1500,
