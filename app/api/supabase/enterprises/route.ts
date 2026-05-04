@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server"
 import { getEnterprisesServer } from "@/lib/supabase"
 
-/**
- * GET /api/supabase/enterprises
- * Fetch all enterprises from Supabase
- */
 export async function GET() {
   try {
     const enterprises = await getEnterprisesServer()

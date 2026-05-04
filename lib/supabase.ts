@@ -1,194 +1,157 @@
-/**
- * Supabase Utility Functions
- * Common operations for Supabase database
- */
-
-import { createBrowserClient } from "@/configs/supabase"
-import { createServerClient } from "@/configs/supabase"
-import { type Database } from "@/configs/supabase"
+import { createBrowserClient, createServerClient } from "@/configs/supabase"
 import { cookies } from "next/headers"
 
-// ============================================================================
-// Client-side utilities
-// ============================================================================
 
-/**
- * Fetch enterprises from Supabase
- */
+const executeQuery = async <T>(
+  queryFn: (supabase: any) => Promise<{ data: T | null; error: any }>,
+  fallback: T,
+  errorMessage: string
+): Promise<T> => {
+  try {
+    const { data, error } = await queryFn(createBrowserClient())
+
+    if (error) {
+      console.error(errorMessage, error)
+      return fallback
+    }
+
+    return data ?? fallback
+  } catch (err) {
+    console.error(errorMessage, err)
+    return fallback
+  }
+}
+
+
+const executeServerQuery = async <T>(
+  queryFn: (supabase: any) => Promise<{ data: T | null; error: any }>,
+  fallback: T,
+  errorMessage: string
+): Promise<T> => {
+  try {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(cookieStore)
+
+    const { data, error } = await queryFn(supabase)
+
+    if (error) {
+      console.error(errorMessage, error)
+      return fallback
+    }
+
+    return data ?? fallback
+  } catch (err) {
+    console.error(errorMessage, err)
+    return fallback
+  }
+}
+
+
 export async function getEnterprises() {
-  const supabase = createBrowserClient()
-  const { data, error } = await supabase
-    .from("enterprises")
-    .select("*")
-    .order("createdAt", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching enterprises:", error)
-    return []
-  }
-
-  return data
+  return executeQuery(
+    (supabase) =>
+      supabase
+        .from("enterprises")
+        .select("*")
+        .order("createdAt", { ascending: false }),
+    [],
+    "Error fetching enterprises:"
+  )
 }
 
-/**
- * Fetch single enterprise by ID
- */
 export async function getEnterpriseById(id: number) {
-  const supabase = createBrowserClient()
-  const { data, error } = await supabase
-    .from("enterprises")
-    .select("*")
-    .eq("id", id)
-    .single()
-
-  if (error) {
-    console.error("Error fetching enterprise:", error)
-    return null
-  }
-
-  return data
+  return executeQuery(
+    (supabase) =>
+      supabase
+        .from("enterprises")
+        .select("*")
+        .eq("id", id)
+        .single(),
+    null,
+    "Error fetching enterprise:"
+  )
 }
 
-/**
- * Fetch products for an enterprise
- */
 export async function getEnterpriseProducts(enterpriseId: number) {
-  const supabase = createBrowserClient()
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("enterprise_id", enterpriseId)
-    .order("createdAt", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching products:", error)
-    return []
-  }
-
-  return data
+  return executeQuery(
+    (supabase) =>
+      supabase
+        .from("products")
+        .select("*")
+        .eq("enterprise_id", enterpriseId)
+        .order("createdAt", { ascending: false }),
+    [],
+    "Error fetching products:"
+  )
 }
 
-/**
- * Fetch product by barcode
- */
 export async function getProductByBarcode(barcode: string) {
-  const supabase = createBrowserClient()
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("barcode", barcode)
-    .single()
-
-  if (error) {
-    console.error("Error fetching product:", error)
-    return null
-  }
-
-  return data
+  return executeQuery(
+    (supabase) =>
+      supabase
+        .from("products")
+        .select("*")
+        .eq("barcode", barcode)
+        .single(),
+    null,
+    "Error fetching product:"
+  )
 }
 
-/**
- * Fetch certificates for a product
- */
 export async function getProductCertificates(productId: number) {
-  const supabase = createBrowserClient()
-  const { data, error } = await supabase
-    .from("certificates")
-    .select("*")
-    .eq("product_id", productId)
-    .order("createdAt", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching certificates:", error)
-    return []
-  }
-
-  return data
+  return executeQuery(
+    (supabase) =>
+      supabase
+        .from("certificates")
+        .select("*")
+        .eq("product_id", productId)
+        .order("createdAt", { ascending: false }),
+    [],
+    "Error fetching certificates:"
+  )
 }
 
-// ============================================================================
-// Server-side utilities
-// ============================================================================
 
-/**
- * Get server-side Supabase client
- */
 export async function getServerSupabase() {
   const cookieStore = await cookies()
   return createServerClient(cookieStore)
 }
 
-/**
- * Fetch enterprises (server-side)
- */
 export async function getEnterprisesServer() {
-  const supabase = await getServerSupabase()
-  const { data, error } = await supabase
-    .from("enterprises")
-    .select("*")
-    .order("createdAt", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching enterprises:", error)
-    return []
-  }
-
-  return data
+  return executeServerQuery(
+    (supabase) =>
+      supabase
+        .from("enterprises")
+        .select("*")
+        .order("createdAt", { ascending: false }),
+    [],
+    "Error fetching enterprises:"
+  )
 }
 
-/**
- * Fetch single enterprise by UUID (server-side)
- */
+
+export async function getByUuidServer<T>(table: string, uuid: string): Promise<T | null> {
+  return executeServerQuery(
+    (supabase) =>
+      supabase
+        .from(table)
+        .select("*")
+        .eq("uuid", uuid)
+        .single(),
+    null,
+    `Error fetching ${table} by UUID:`
+  )
+}
+
+
 export async function getEnterpriseByUuidServer(uuid: string) {
-  const supabase = await getServerSupabase()
-  const { data, error } = await supabase
-    .from("enterprises")
-    .select("*")
-    .eq("uuid", uuid)
-    .single()
-
-  if (error) {
-    console.error("Error fetching enterprise:", error)
-    return null
-  }
-
-  return data
+  return getByUuidServer("enterprises", uuid)
 }
 
-/**
- * Fetch product by UUID with certificates and nutrition info (server-side)
- */
 export async function getProductByUuidServer(uuid: string) {
-  const supabase = await getServerSupabase()
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("uuid", uuid)
-    .single()
-
-  if (error) {
-    console.error("Error fetching product:", error)
-    return null
-  }
-
-  return data
+  return getByUuidServer("products", uuid)
 }
 
-/**
- * Fetch certificate with related data by UUID (server-side)
- */
 export async function getCertificateByUuidServer(uuid: string) {
-  const supabase = await getServerSupabase()
-  const { data, error } = await supabase
-    .from("certificates")
-    .select("*")
-    .eq("uuid", uuid)
-    .single()
-
-  if (error) {
-    console.error("Error fetching certificate:", error)
-    return null
-  }
-
-  return data
+  return getByUuidServer("certificates", uuid)
 }

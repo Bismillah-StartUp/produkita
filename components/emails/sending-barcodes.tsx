@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 interface SendingBarcodesEmailProps {
 	productName: string
 	companyName: string
@@ -48,14 +50,14 @@ export default function SendingBarcodesEmail({
 							<div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
 								Barcode
 							</div>
-							<img src="cid:barcode-image" alt={`Barcode ${licenseCode}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+							<Image src="cid:barcode-image" alt={`Barcode ${licenseCode}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
 						</div>
 
 						<div style={{ padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
 							<div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
 								QR Code
 							</div>
-							<img src="cid:qr-code-image" alt={`QR Code ${licenseCode}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+							<Image src="cid:qr-code-image" alt={`QR Code ${licenseCode}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
 						</div>
 					</div>
 

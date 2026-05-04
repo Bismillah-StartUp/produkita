@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { getCookieConfig, getSupabaseUrl, getSupabaseKey } from "@/configs/supabase/server"
 
-/**
- * GET /api/supabase/health
- * Test Supabase connection and return database status
- */
+
 export async function GET() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+    const supabaseUrl = getSupabaseUrl()
+    const supabaseKey = getSupabaseKey()
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
@@ -24,16 +22,7 @@ export async function GET() {
 
     const cookieStore = await cookies()
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
-        },
-      },
+      cookies: getCookieConfig(cookieStore),
     })
 
     // Test connection by fetching tables info
