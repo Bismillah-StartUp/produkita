@@ -1,6 +1,6 @@
 {
-  "name": "entre-certivy",
-  "version": "0.0.1",
+  "name": "locasentry",
+  "version": "0.5.0",
   "type": "module",
   "private": true,
   "scripts": {

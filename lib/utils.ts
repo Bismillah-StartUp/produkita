@@ -3,20 +3,6 @@ import { twMerge } from "tailwind-merge"
 import { createHash, randomBytes } from "crypto"
 import QRCode from "qrcode"
 
-interface EmailProps {
-  email: string
-  productName: string
-  companyName: string
-  licenseCode: string
-  licensePageUrl: string
-  barcodeDataUrl: string
-  qrCodeDataUrl: string
-}
-
-const dataUrlToBuffer = (dataUrl: string) => {
-  const base64Content = dataUrl.split(",")[1]
-  return Buffer.from(base64Content || "", "base64")
-}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
