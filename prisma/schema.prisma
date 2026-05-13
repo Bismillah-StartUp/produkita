@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_DIRECT")
+  // directUrl = env("DATABASE_URL_DIRECT")
 }
 
 model Certificate {
@@ -13,7 +13,7 @@ model Certificate {
   uuid                String    @unique() @db.Uuid
   enterprise_id       Int
   product_id          Int
-  description         String?    
+  description         String?
   bpom_number         String?
   pirt_number         String?
   lisence_number      String?
@@ -55,7 +55,7 @@ model Enterprise {
   email         String?
   phone         String?
   status        String
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -76,7 +76,7 @@ model Product {
   enterprise_id   Int
   type            ProductCategory
   license_code    String?   @unique()
-  
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -103,7 +103,7 @@ model NutritionInfo{
   updatedAt       DateTime  @updatedAt
 
   product         Product   @relation(fields: [product_id], references: [id])
-  
+
   @@map("nutrition_infos")
 }
 
@@ -111,4 +111,26 @@ enum ProductCategory {
   fnb
   cosmetic
   pharmaceutical
+}
+
+
+model FinancialRecord {
+  id              String                @id @default(cuid())
+  namaProduk      String
+  tipe            TransactionType
+  jumlah          Float
+  status          TransactionStatus     @default(COMPLETED)
+  tanggal         DateTime              @default(now())
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+}
+
+enum TransactionType {
+  MASUK
+  KELUAR
+}
+
+enum TransactionStatus {
+  COMPLETED
+  PENDING
 }
