@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingDown, TrendingUp, PieChart } from 'lucide-react'
 
+
+
 const formatIDR = (val: number) =>
   new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -10,23 +12,28 @@ const formatIDR = (val: number) =>
     maximumFractionDigits: 0
   }).format(val)
 
+const formatCompactIDR = (val: number) => {
+  const formatted = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    notation: 'compact',
+    maximumFractionDigits: 2
+  }).format(val)
+
+  return formatted.replace('jt', 'JT').replace('m', 'M').replace('rb', 'RB')
+}
+
+
 export default async function FinancialsPage() {
   const now = new Date()
-  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const currentMonthRecords = await prisma.financialRecord.findMany({
-    where: { tanggal: { gte: startOfCurrentMonth } }
-  })
-
-  const lastMonthRecords = await prisma.financialRecord.findMany({
+  const recentRecords = await prisma.financialRecord.findMany({
     where: {
-      tanggal: {
-        gte: startOfLastMonth,
-        lte: endOfLastMonth
-      }
-    }
+      tanggal: { gte: sixMonthsAgo },
+      status: 'COMPLETED'
+    },
+    orderBy: { tanggal: 'asc' }
   })
 
   const allRecords = await prisma.financialRecord.findMany({
@@ -34,13 +41,26 @@ export default async function FinancialsPage() {
     take: 10
   })
 
-  const calculateTotal = (data: any[], type: 'MASUK' | 'KELUAR') =>
-    data.filter(r => r.tipe === type && r.status === 'COMPLETED').reduce((sum, r) => sum + r.jumlah, 0)
+  const last6Months = Array.from({ length: 6 }).map((_, i) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+    const monthName = date.toLocaleDateString('id-ID', { month: 'short' })
 
-  const curMasuk = calculateTotal(currentMonthRecords, 'MASUK')
-  const curKeluar = calculateTotal(currentMonthRecords, 'KELUAR')
-  const lastMasuk = calculateTotal(lastMonthRecords, 'MASUK')
-  const lastKeluar = calculateTotal(lastMonthRecords, 'KELUAR')
+    const match = recentRecords.filter(r =>
+      new Date(r.tanggal).getMonth() === date.getMonth() &&
+      new Date(r.tanggal).getFullYear() === date.getFullYear()
+    )
+
+    return {
+      monthName,
+      masuk: match.filter(r => r.tipe === 'MASUK').reduce((sum, r) => sum + r.jumlah, 0),
+      keluar: match.filter(r => r.tipe === 'KELUAR').reduce((sum, r) => sum + r.jumlah, 0),
+    }
+  })
+
+  const curMasuk = last6Months[5].masuk
+  const curKeluar = last6Months[5].keluar
+  const lastMasuk = last6Months[4].masuk
+  const lastKeluar = last6Months[4].keluar
 
   const curUntung = curMasuk - curKeluar
   const lastUntung = lastMasuk - lastKeluar
@@ -121,21 +141,42 @@ export default async function FinancialsPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Pendapatan vs Pengeluaran</CardTitle>
-            <CardDescription>Perbandingan kinerja keuangan bulan ini</CardDescription>
+            <CardDescription>Perbandingan kinerja keuangan 6 bulan terakhir</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-600 w-24">Bulan Ini</span>
-                <div className="flex-1 flex gap-2 ml-4">
-                  <div className="bg-green-100 h-8 rounded flex items-center px-4" style={{ flex: curMasuk || 1 }}>
-                    <span className="text-xs font-semibold text-green-700">{formatIDR(curMasuk)}</span>
+              {last6Months.map((data, index) => {
+                const totalBulanIni = data.masuk + data.keluar;
+                let flexMasuk = totalBulanIni > 0 ? (data.masuk / totalBulanIni) * 100 : 0;
+                let flexKeluar = totalBulanIni > 0 ? (data.keluar / totalBulanIni) * 100 : 0;
+                if (data.masuk > 0 && flexMasuk < 15) {
+                  flexMasuk = 15;
+                  flexKeluar = 85;
+                }
+                if (data.keluar > 0 && flexKeluar < 15) {
+                  flexKeluar = 15;
+                  flexMasuk = 85;
+                }
+                return (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-600 w-24">{data.monthName}</span>
+                    <div className="flex-1 flex gap-2 ml-4">
+                      {data.masuk > 0 ? (
+                        <div className="bg-green-100 h-8 rounded flex items-center px-2 justify-start overflow-hidden" style={{ flex: `${flexMasuk}%` }} >
+                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                            {formatCompactIDR(data.masuk)}
+                          </span>
+                        </div>) : (<div style={{ flex: '0 0 0%' }} /> )}
+                      {data.keluar > 0 ? (
+                        <div className="bg-red-100 h-8 rounded flex items-center px-2 justify-end overflow-hidden" style={{ flex: `${flexKeluar}%` }} >
+                          <span className="text-xs font-semibold text-red-700 whitespace-nowrap">
+                            {formatCompactIDR(data.keluar)}
+                          </span>
+                        </div> ) : (<div style={{ flex: '0 0 0%' }} /> )}
+                    </div>
                   </div>
-                  <div className="bg-red-100 h-8 rounded flex items-center px-4" style={{ flex: curKeluar || 1 }}>
-                    <span className="text-xs font-semibold text-red-700">{formatIDR(curKeluar)}</span>
-                  </div>
-                </div>
-              </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>
@@ -149,15 +190,15 @@ export default async function FinancialsPage() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Total Pendapatan</span>
-                <span className="font-semibold text-green-600">{formatIDR(curMasuk)}</span>
+                <span className="font-semibold text-green-600">{formatCompactIDR(curMasuk)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Total Pengeluaran</span>
-                <span className="font-semibold text-red-600">{formatIDR(curKeluar)}</span>
+                <span className="font-semibold text-red-600">{formatCompactIDR(curKeluar)}</span>
               </div>
               <div className="border-t pt-2 flex justify-between text-sm font-semibold">
                 <span>Keuntungan Bersih</span>
-                <span className="text-blue-600">{formatIDR(curUntung)}</span>
+                <span className="text-blue-600">{formatCompactIDR(curUntung)}</span>
               </div>
             </div>
             <Button className="w-full">Lihat Laporan Detail</Button>
