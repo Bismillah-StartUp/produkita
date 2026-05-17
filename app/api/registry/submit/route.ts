@@ -95,17 +95,16 @@ export async function POST(request: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create or find enterprise
       console.log("✓ Creating enterprise...")
-      const enterprise = await tx.enterprise.create({
+      const enterprise = await tx.tenant.create({
         data: {
-          uuid: uuidv4(),
           name: data.enterpriseData.companyName,
           district: data.enterpriseData.district,
           province: data.enterpriseData.province,
-          description: "",
           address: data.enterpriseData.address,
+          phonenumber: data.enterpriseData.phone,
           email: data.enterpriseData.email,
-          phone: data.enterpriseData.phone,
           status: "active",
+          user_id: 0,
         },
       })
 
@@ -122,7 +121,7 @@ export async function POST(request: NextRequest) {
           image_url: productImageUrl || null,
           description: `${data.productData.weight}${data.productData.unit}`,
           type: productType,
-          enterprise_id: enterprise.id,
+          tenant_id: enterprise.id,
           license_code: licenseCode,
         },
       })
@@ -162,7 +161,7 @@ export async function POST(request: NextRequest) {
       const certificate = await tx.certificate.create({
         data: {
           uuid: uuidv4(),
-          enterprise_id: enterprise.id,
+          tenant_id: enterprise.id,
           product_id: product.id,
           description: [
             data.legalityData.hasBpom && data.legalityData.bpomNumber ? `BPOM: ${data.legalityData.bpomNumber}` : null,
@@ -170,7 +169,7 @@ export async function POST(request: NextRequest) {
           ].filter(Boolean).join(" | ") || null,
           bpom_number: data.legalityData.hasBpom ? data.legalityData.bpomNumber || null : null,
           pirt_number: data.legalityData.hasPirt ? data.legalityData.pirtNumber || null : null,
-          lisence_number: licenseCode,
+          license_number: licenseCode,
           halal_id: data.legalityData.hasHalal ? halal?.id : null,
         },
       })
