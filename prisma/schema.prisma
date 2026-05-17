@@ -19,10 +19,10 @@ model User {
   role        UserRole
 
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  enterprises Enterprise[]
+  tenants     Tenant?
 
   @@map("users")
 }
@@ -67,7 +67,7 @@ model Halal {
   @@map("halals")
 }
 
-model Enterprise {
+model Tenant {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique() @db.Uuid
   name          String
@@ -78,7 +78,7 @@ model Enterprise {
   email         String?
   phonenumber   String?
   status        String
-  user_id       Int
+  user_id       Int       @unique()
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -86,29 +86,44 @@ model Enterprise {
   products      Product[]
   user          User      @relation(fields: [user_id], references: [id])
 
-  @@map("enterprises")
+  @@map("tenants")
 }
 
 model Product {
   id              Int       @id @default(autoincrement())
   uuid            String    @unique() @db.Uuid
   name            String
-  image_url       String?
   price           Float?
   brand           String?
   description     String?
-  enterprise_id   Int
+  tenant_id       Int
   type            ProductCategory
   license_code    String?   @unique()
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  enterprise      Enterprise @relation(fields: [enterprise_id], references: [id])
+  tenant          Tenant @relation(fields: [tenant_id], references: [id])
   certificates    Certificate[]
   nutrition_info  NutritionInfo?
 
+  images          ProductImage[]
+
   @@map("products")
+}
+
+model ProductImage {
+  id          Int       @id @default(autoincrement())
+  uuid        String    @unique() @db.Uuid
+  product_id  Int
+  url         String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  product     Product   @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
 }
 
 model NutritionInfo {
