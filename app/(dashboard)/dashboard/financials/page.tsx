@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingDown, TrendingUp, PieChart } from 'lucide-react'
+import { TransactionDialog } from './_components/transaction-dialog'
 
 
 
@@ -245,7 +246,7 @@ export default async function FinancialsPage() {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button variant="outline">Export Laporan</Button>
-        <Button>Tambah Transaksi</Button>
+        <TransactionDialog mode='add' />
       </div>
     </main>
   )
