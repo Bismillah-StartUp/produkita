@@ -2,9 +2,10 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingDown, TrendingUp, PieChart } from 'lucide-react'
-import { TransactionDialog } from './_components/transaction-dialog'
-
-
+import { TransactionDialog } from '@/components/pages/financials/partials/transaction-dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 
 const formatIDR = (val: number) =>
   new Intl.NumberFormat('id-ID', {
@@ -211,35 +212,94 @@ export default async function FinancialsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Transaksi Terbaru</CardTitle>
-          <CardDescription>Riwayat transaksi pendapatan dan pengeluaran</CardDescription>
+          <CardDescription>
+            Riwayat transaksi pendapatan dan pengeluaran
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="space-y-4">
-            {allRecords.map((record) => (
-              <div key={record.id} className="flex items-center justify-between py-4 border-b last:border-0">
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">{record.namaProduk}</p>
-                  <p className="text-sm text-slate-500">
-                    {new Date(record.tanggal).toLocaleDateString('id-ID', { dateStyle: 'long' })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className={`font-semibold ${record.tipe === 'MASUK' ? 'text-green-600' : 'text-red-600'}`}>
-                    {record.tipe === 'MASUK' ? '+' : '-'}{formatIDR(record.jumlah)}
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      record.status === 'COMPLETED'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-yellow-100 text-yellow-700'
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produk</TableHead>
+                <TableHead>Tanggal</TableHead>
+                <TableHead>Tipe</TableHead>
+                <TableHead>Jumlah</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-12.5"></TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {allRecords.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell className="font-medium">
+                    {record.namaProduk}
+                  </TableCell>
+
+                  <TableCell>
+                    {new Date(record.tanggal).toLocaleDateString(
+                      "id-ID",
+                      { dateStyle: "long" }
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        record.tipe === "MASUK"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {record.tipe}
+                    </span>
+                  </TableCell>
+
+                  <TableCell
+                    className={`font-semibold ${
+                      record.tipe === "MASUK"
+                        ? "text-green-600"
+                        : "text-red-600"
                     }`}
                   >
-                    {record.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                    {record.tipe === "MASUK" ? "+" : "-"}
+                    {formatIDR(record.jumlah)}
+                  </TableCell>
+
+                  <TableCell>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        record.status === "COMPLETED"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {record.status}
+                    </span>
+                  </TableCell>
+
+                  <TableCell>
+                    {/* Action Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-2 rounded-md hover:bg-slate-100">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-500">
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 

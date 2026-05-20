@@ -8,30 +8,53 @@ datasource db {
   directUrl = env("DATABASE_URL_DIRECT")
 }
 
+
+model User {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique() @default(uuid()) @db.Uuid
+  name        String?
+  email       String   @unique()
+  password    String
+  phonenumber String?
+  role        UserRole
+
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenants     Tenant?
+
+  @@map("users")
+}
+
+enum UserRole {
+  superadmin
+  admin
+  user
+}
+
 model Certificate {
-  id                  Int       @id @default(autoincrement())
-  uuid                String    @unique() @db.Uuid
-  enterprise_id       Int
-  product_id          Int
-  description         String?
-  bpom_number         String?
-  pirt_number         String?
-  lisence_number      String?
-  halal_id            Int?
+  id                        Int       @id @default(autoincrement())
+  uuid                      String    @unique() @default(uuid()) @db.Uuid
+  product_id                Int
+  description               String?
+  bpom_number               String?
+  pirt_number               String?
+  license_number            String?
+  halal_id                  Int?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  enterprise    Enterprise @relation(fields: [enterprise_id], references: [id])
-  product       Product    @relation(fields: [product_id], references: [id])
-  halal         Halal?     @relation(fields: [halal_id], references: [id])
+  product       Product     @relation(fields: [product_id], references: [id])
+  halal         Halal?      @relation(fields: [halal_id], references: [id])
 
   @@map("certificates")
 }
 
 model Halal {
   id              Int       @id @default(autoincrement())
-  uuid            String    @unique() @db.Uuid
+  uuid            String    @unique() @default(uuid()) @db.Uuid
   number          String
   authority       String?
   valid_until     DateTime?
@@ -44,50 +67,66 @@ model Halal {
   @@map("halals")
 }
 
-model Enterprise {
+model Tenant {
   id            Int       @id @default(autoincrement())
-  uuid          String    @unique() @db.Uuid
+  uuid          String    @unique() @default(uuid()) @db.Uuid
   name          String
   district      String?
   province      String?
   description   String?
   address       String?
   email         String?
-  phone         String?
+  phonenumber   String?
   status        String
+  user_id       Int       @unique()
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  certificates  Certificate[]
   products      Product[]
+  user          User      @relation(fields: [user_id], references: [id])
 
-  @@map("enterprises")
+  @@map("tenants")
 }
 
 model Product {
   id              Int       @id @default(autoincrement())
-  uuid            String    @unique() @db.Uuid
+  uuid            String    @unique() @default(uuid()) @db.Uuid
   name            String
-  image_url       String?
   price           Float?
   brand           String?
   description     String?
-  enterprise_id   Int
+  tenant_id       Int
   type            ProductCategory
   license_code    String?   @unique()
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  enterprise      Enterprise @relation(fields: [enterprise_id], references: [id])
+  tenant          Tenant @relation(fields: [tenant_id], references: [id])
   certificates    Certificate[]
   nutrition_info  NutritionInfo?
+
+  images          ProductImage[]
 
   @@map("products")
 }
 
-model NutritionInfo{
+model ProductImage {
+  id          Int       @id @default(autoincrement())
+  uuid        String    @unique() @default(uuid()) @db.Uuid
+  product_id  Int
+  url         String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  product     Product   @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
+}
+
+model NutritionInfo {
   id              Int       @id @default(autoincrement())
   product_id      Int       @unique()
   servings        Float?
