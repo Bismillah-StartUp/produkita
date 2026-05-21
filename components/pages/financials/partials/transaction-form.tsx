@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface TransactionFormProps {
-  initialData?: any // Data dari row tabel jika mode 'edit'
+  initialData?: any
   onSuccess: () => void
   className?: string
 }
@@ -17,13 +17,13 @@ export function TransactionForm({ initialData, onSuccess, className }: Transacti
   const [loading, setLoading] = React.useState(false)
 
   const [formData, setFormData] = React.useState({
-    namaProduk: initialData?.namaProduk || "",
-    tipe: initialData?.tipe || "MASUK",
-    jumlah: initialData?.jumlah || "",
-    status: initialData?.status || "COMPLETED",
-    tanggal: initialData?.tanggal
-      ? new Date(initialData.tanggal).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
+    product_name: initialData?.product_name || "",
+    transaction_type: initialData?.transaction_type || "income",
+    amount: initialData?.amount || "",
+    transaction_status: initialData?.transaction_status || "completed",
+    transaction_date: initialData?.transaction_date
+      ? new Date(initialData.transaction_date).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
   })
 
   const todaydate = new Date().toISOString().split('T')[0]
@@ -41,7 +41,7 @@ export function TransactionForm({ initialData, onSuccess, className }: Transacti
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          jumlah: parseFloat(formData.jumlah.toString())
+          amount: Number(formData.amount),
         }),
       })
 
@@ -58,12 +58,12 @@ export function TransactionForm({ initialData, onSuccess, className }: Transacti
   return (
     <form onSubmit={handleSubmit} className={cn("grid items-start gap-4", className)}>
       <div className="grid gap-2">
-        <Label htmlFor="namaProduk">Nama Produk</Label>
+        <Label htmlFor="product_name">Nama Produk</Label>
         <Input
-          id="namaProduk"
+          id="product_name"
           required
-          value={formData.namaProduk}
-          onChange={(e) => setFormData({ ...formData, namaProduk: e.target.value })}
+          value={formData.product_name}
+          onChange={(e) => setFormData({ ...formData,product_name: e.target.value, })}
           placeholder="Masukkan nama produk..."
         />
       </div>
@@ -71,21 +71,21 @@ export function TransactionForm({ initialData, onSuccess, className }: Transacti
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label>Tipe Transaksi</Label>
-          <Select value={formData.tipe} onValueChange={(v) => setFormData({ ...formData, tipe: v })}>
+          <Select value={formData.transaction_type} onValueChange={(value) => setFormData({ ...formData, transaction_type: value, })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="MASUK">Masuk (Pemasukan)</SelectItem>
-              <SelectItem value="KELUAR">Keluar (Pengeluaran)</SelectItem>
+              <SelectItem value="income">Masuk (Pemasukan)</SelectItem>
+              <SelectItem value="expense">Keluar (Pengeluaran)</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="grid gap-2">
           <Label>Status</Label>
-          <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+          <Select value={formData.transaction_status}onValueChange={(value) => setFormData({ ...formData, transaction_status: value, })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="COMPLETED">Selesai</SelectItem>
-              <SelectItem value="PENDING">Tertunda</SelectItem>
+              <SelectItem value="completed">Selesai</SelectItem>
+              <SelectItem value="pending">Tertunda</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -93,25 +93,25 @@ export function TransactionForm({ initialData, onSuccess, className }: Transacti
 
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="jumlah">Jumlah (Rp)</Label>
+          <Label htmlFor="amount">Jumlah (Rp)</Label>
           <Input
-            id="jumlah"
+            id="amount"
             type="number"
-            step="0.01"
+            step="1"
             required
-            value={formData.jumlah}
-            onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
+            value={formData.amount}
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value, })}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="tanggal">Tanggal</Label>
+          <Label htmlFor="transaction_date">Tanggal</Label>
           <Input
-            id="tanggal"
+            id="transaction_date"
             type="date"
             required
             max={todaydate}
-            value={formData.tanggal}
-            onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
+            value={formData.transaction_date}
+            onChange={(e) =>setFormData({ ...formData, transaction_date: e.target.value, })}
           />
         </div>
       </div>

@@ -154,22 +154,27 @@ enum ProductCategory {
 
 
 model FinancialRecord {
-  id              String                @id @default(cuid())
-  namaProduk      String
-  tipe            TransactionType
-  jumlah          Float
-  status          TransactionStatus     @default(COMPLETED)
-  tanggal         DateTime              @default(now())
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  id                  String              @id @default(cuid())
+
+  product_name        String
+  transaction_type    TransactionType
+  amount              Int
+
+  transaction_status  TransactionStatus   @default(completed)
+  transaction_date    DateTime            @default(now())
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@map("financial_records")
 }
 
 enum TransactionType {
-  MASUK
-  KELUAR
+  income
+  expense
 }
 
 enum TransactionStatus {
-  COMPLETED
-  PENDING
+  completed
+  pending
 }

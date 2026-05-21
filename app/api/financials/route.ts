@@ -4,16 +4,16 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     const records = await prisma.financialRecord.findMany({
-      orderBy: { tanggal: 'desc' },
+      orderBy: { transaction_date: 'desc' },
     })
 
     const totalMasuk = records
-      .filter((r) => r.tipe === 'MASUK' && r.status === 'COMPLETED')
-      .reduce((sum, r) => sum + r.jumlah, 0)
+      .filter((r) => r.transaction_type  === 'income' && r.transaction_status === 'completed')
+      .reduce((sum, r) => sum + r.amount, 0)
 
     const totalKeluar = records
-      .filter((r) => r.tipe === 'KELUAR' && r.status === 'COMPLETED')
-      .reduce((sum, r) => sum + r.jumlah, 0)
+      .filter((r) => r.transaction_type  === 'expense' && r.transaction_status === 'completed')
+      .reduce((sum, r) => sum + r.amount, 0)
     return NextResponse.json({
       stats: [
         { title: 'Total Pendapatan', value: totalMasuk },
@@ -30,15 +30,15 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { namaProduk, tipe, jumlah, status, tanggal } = body
+    const { product_name, transaction_type, amount, transaction_status, transaction_date } = body
 
     const newRecord = await prisma.financialRecord.create({
       data: {
-        namaProduk,
-        tipe,
-        jumlah: parseFloat(jumlah), // Sesuai tipe Float di gambar
-        status,
-        tanggal: tanggal ? new Date(tanggal) : new Date(),
+        product_name: product_name,
+        transaction_type: transaction_type,
+        amount: parseInt(amount),
+        transaction_status: transaction_status,
+        transaction_date: transaction_date ? new Date(transaction_date) : new Date(),
       },
     })
 
