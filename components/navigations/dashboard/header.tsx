@@ -44,7 +44,7 @@ export const Header = () => {
   const breadcrumbs = generateBreadcrumbs()
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between h-[60px]">
       <Breadcrumb>
         <BreadcrumbList>
           {breadcrumbs.map((crumb, index) => (
