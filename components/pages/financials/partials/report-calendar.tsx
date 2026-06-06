@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
 export default function ReportCalendar({ records, activeDateStr }: { records: any[]; activeDateStr: string }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const safeDateStr = activeDateStr.includes('T') ? activeDateStr : `${activeDateStr}T00:00:00`
+  const safeDateStr = activeDateStr.includes("T") ? activeDateStr : `${activeDateStr}T00:00:00`
   const activeDate = new Date(safeDateStr)
   const today = new Date()
 
@@ -47,7 +47,7 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1)
   const emptyCells = Array.from({ length: firstDayOfMonth }, (_, i) => i)
 
-  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString("id-ID", { month: "long", year: "numeric" })
 
   const getDayStatus = (day: number) => {
     const currentDate = new Date(viewYear, viewMonth, day)
@@ -58,20 +58,20 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
       return rDate.getDate() === day && rDate.getMonth() === viewMonth && rDate.getFullYear() === viewYear
     })
 
-    if (isToday) return 'today'
-    if (currentDate > today) return 'upcoming'
-    if (hasRecord) return 'completed'
-    return 'missing'
+    if (isToday) return "today"
+    if (currentDate > today) return "upcoming"
+    if (hasRecord) return "completed"
+    return "missing"
   }
 
   const handleDateClick = (day: number) => {
     const yearStr = viewYear
-    const monthStr = String(viewMonth + 1).padStart(2, '0')
-    const dayStr = String(day).padStart(2, '0')
+    const monthStr = String(viewMonth + 1).padStart(2, "0")
+    const dayStr = String(day).padStart(2, "0")
     const dateString = `${yearStr}-${monthStr}-${dayStr}`
 
-    const params = new URLSearchParams(searchParams?.toString() || '')
-    params.set('date', dateString)
+    const params = new URLSearchParams(searchParams?.toString() || "")
+    params.set("date", dateString)
 
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
     router.refresh()
@@ -134,12 +134,12 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
                 key={day}
                 type="button"
                 onClick={() => handleDateClick(day)}
-                className={`relative flex h-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-lg px-1 transition-all ${isSelected ? 'ring-2 ring-blue-600 ring-offset-2' : ''} ${status === 'today' ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700' : ''} ${status === 'completed' ? 'bg-green-50 text-green-700 hover:bg-green-100' : ''} ${status === 'missing' ? 'bg-red-50 text-red-700 hover:bg-red-100' : ''} ${status === 'upcoming' ? 'text-slate-400 hover:bg-slate-50' : ''} `}
+                className={`relative flex h-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-lg px-1 transition-all ${isSelected ? "ring-2 ring-blue-600 ring-offset-2" : ""} ${status === "today" ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700" : ""} ${status === "completed" ? "bg-green-50 text-green-700 hover:bg-green-100" : ""} ${status === "missing" ? "bg-red-50 text-red-700 hover:bg-red-100" : ""} ${status === "upcoming" ? "text-slate-400 hover:bg-slate-50" : ""} `}
               >
                 <span className="text-xs font-bold">{day}</span>
 
-                {status === 'completed' && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-green-500"></span>}
-                {status === 'missing' && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-red-500"></span>}
+                {status === "completed" && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-green-500"></span>}
+                {status === "missing" && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-red-500"></span>}
               </button>
             )
           })}

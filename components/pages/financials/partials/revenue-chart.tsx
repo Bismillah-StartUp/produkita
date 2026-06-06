@@ -1,62 +1,177 @@
-'use client'
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { ChartContainer } from "@/components/ui/chart"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { formatIDR } from "@/lib/format-currency"
 
 const chartConfig = {
-  pemasukan: { label: 'Pemasukan', color: '#3b82f6' },
-  pengeluaran: { label: 'Pengeluaran', color: '#ef4444' },
+  pemasukan: { label: "Pemasukan", color: "#3b82f6" },
+  pengeluaran: { label: "Pengeluaran", color: "#ef4444" },
 }
 
-export default function RevenueChart({ data }: { data: any[] }) {
+type DailyData = {
+  date: number | string
+  pemasukan: number
+  pengeluaran: number
+}
+
+interface RevenueChartProps {
+  data: DailyData[]
+  summary?: {
+    totalPemasukan: string
+    trendPemasukan: string
+    totalPengeluaran: string
+    trendPengeluaran: string
+  }
+}
+
+export default function RevenueChart({ data, summary }: RevenueChartProps) {
+  const dateSubtitle = useMemo(() => {
+    const now = new Date()
+    const monthYear = now.toLocaleDateString("id-ID", {
+      month: "long",
+      year: "numeric",
+    })
+    const today = now.getDate()
+    return `Tgl 1 – ${today} ${monthYear}`
+  }, [])
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const pemasukan = payload.find((p: any) => p.dataKey === "pemasukan")?.value || 0
+      const pengeluaran = payload.find((p: any) => p.dataKey === "pengeluaran")?.value || 0
+      const selisih = pemasukan - pengeluaran
+
+      return (
+        <div className="rounded-xl border border-slate-100 bg-white p-3 shadow-lg">
+          <p className="mb-2 text-xs font-bold text-slate-500">Tgl {label}</p>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-6 text-xs">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-600">
+                <span className="h-2 w-2 rounded-full bg-[#3b82f6]"></span>
+                Pemasukan
+              </div>
+              <span className="font-bold text-slate-900">{formatIDR(pemasukan)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-6 text-xs">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-600">
+                <span className="h-2 w-2 rounded-full bg-[#ef4444]"></span>
+                Pengeluaran
+              </div>
+              <span className="font-bold text-slate-900">{formatIDR(pengeluaran)}</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-6 border-t border-slate-100 pt-1.5 text-xs">
+              <span className="font-semibold text-slate-400">Selisih</span>
+              <span className="font-bold text-blue-600">{formatIDR(selisih)}</span>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
     <Card className="flex w-full flex-col justify-between rounded-xl border-slate-100 shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+      <CardHeader className="pt-5 pb-0">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <CardTitle className="text-sm font-semibold text-slate-900">Pendapatan vs Pengeluaran</CardTitle>
-            <CardDescription className="mt-0.5 text-xs text-slate-400">
-              Perbandingan kinerja keuangan 6 bulan terakhir
-            </CardDescription>
+            <CardTitle className="text-base font-bold text-slate-900">Grafik Keuangan</CardTitle>
+            <CardDescription className="mt-1 text-sm font-medium text-slate-400">{dateSubtitle}</CardDescription>
           </div>
 
-          <div className="mt-1 flex items-center gap-4 text-xs font-bold text-slate-600">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-[#3b82f6]"></span>
-              Pemasukan
+          {/* Legenda Dinamis Persis Gambar */}
+          <div className="flex items-center gap-6 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#3b82f6]"></span>
+              <span className="font-semibold text-slate-500">Pemasukan</span>
+              <span className="font-bold text-blue-600">{summary?.totalPemasukan || "0Jt"}</span>
+              <span className="font-semibold text-green-500">{summary?.trendPemasukan || "↑0%"}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-[#ef4444]"></span>
-              Pengeluaran
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+              <span className="font-semibold text-slate-500">Pengeluaran</span>
+              <span className="font-bold text-blue-600">{summary?.totalPengeluaran || "0Jt"}</span>
+              <span className="font-semibold text-blue-500">{summary?.trendPengeluaran || "↑0%"}</span>
             </div>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-1 flex-col justify-end pt-2">
+      <CardContent className="flex flex-1 flex-col justify-end pt-6 pb-4">
         <ChartContainer config={chartConfig} className="h-70 w-full">
-          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              className="text-xs font-semibold text-slate-400"
-              dy={10}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              className="text-xs font-semibold text-slate-400"
-              ticks={[0, 10000000, 20000000, 30000000, 40000000, 50000000, 60000000]}
-              tickFormatter={(value) => `${value / 1000000}M`}
-            />
-            <ChartTooltip cursor={{ fill: '#f8fafc' }} content={<ChartTooltipContent />} />
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+              <defs>
+                <linearGradient id="fillPemasukan" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="fillPengeluaran" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
 
-            <Bar dataKey="pemasukan" stackId="a" fill="var(--color-pemasukan)" radius={[7, 7, 7, 7]} barSize={32} />
-            <Bar dataKey="pengeluaran" stackId="a" fill="var(--color-pengeluaran)" radius={[7, 7, 0, 0]} barSize={32} />
-          </BarChart>
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                className="text-xs font-semibold text-slate-400"
+                dy={10}
+                minTickGap={20}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                className="text-xs font-semibold text-slate-400"
+                ticks={[0, 8000000, 15000000, 23000000, 30000000]}
+                tickFormatter={(value) => `${value / 1000000}Jt`}
+              />
+
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{
+                  stroke: "#cbd5e1",
+                  strokeWidth: 1,
+                  strokeDasharray: "4 4",
+                }}
+              />
+
+              <Area
+                type="monotone"
+                dataKey="pengeluaran"
+                stroke="#ef4444"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#fillPengeluaran)"
+                activeDot={{
+                  r: 4,
+                  fill: "#ef4444",
+                  stroke: "#fff",
+                  strokeWidth: 2,
+                }}
+              />
+
+              <Area
+                type="monotone"
+                dataKey="pemasukan"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#fillPemasukan)"
+                activeDot={{
+                  r: 4,
+                  fill: "#3b82f6",
+                  stroke: "#fff",
+                  strokeWidth: 2,
+                }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>

@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import * as React from 'react'
-import { useRouter } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Save, X } from 'lucide-react'
+import * as React from "react"
+import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Save, X } from "lucide-react"
 
 interface TransactionFormProps {
   initialData?: any
@@ -20,20 +20,20 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
   const getLocalDateString = () => {
     const date = new Date()
     const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
     return `${year}-${month}-${day}`
   }
 
   const [formData, setFormData] = React.useState({
-    product_name: initialData?.product_name || '',
-    transaction_type: initialData?.transaction_type || 'income',
-    amount: initialData?.amount || '',
-    transaction_status: initialData?.transaction_status || 'completed',
+    product_name: initialData?.product_name || "",
+    transaction_type: initialData?.transaction_type || "income",
+    amount: initialData?.amount || "",
+    transaction_status: initialData?.transaction_status || "completed",
     transaction_date: initialData?.transaction_date
-      ? new Date(initialData.transaction_date).toISOString().split('T')[0]
+      ? new Date(initialData.transaction_date).toISOString().split("T")[0]
       : getLocalDateString(),
-    notes: initialData?.notes || '',
+    notes: initialData?.notes || "",
   })
 
   const todaydate = getLocalDateString()
@@ -43,12 +43,12 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
     setLoading(true)
 
     try {
-      const url = initialData?.id ? `/api/financials/${initialData.id}` : '/api/financials'
-      const method = initialData?.id ? 'PATCH' : 'POST'
+      const url = initialData?.id ? `/api/financials/${initialData.id}` : "/api/financials"
+      const method = initialData?.id ? "PATCH" : "POST"
 
       const response = await fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           amount: Number(formData.amount),
@@ -56,18 +56,18 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
       })
 
       if (response.ok) {
-        router.push('/dashboard/financials')
+        router.push("/dashboard/financials")
         router.refresh()
       }
     } catch (error) {
-      console.error('Gagal menyimpan:', error)
+      console.error("Gagal menyimpan:", error)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className={cn('w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8', className)}>
+    <div className={cn("w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8", className)}>
       {/* Header Form */}
       <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-blue-600">Tambah Laporan</h2>
@@ -119,24 +119,24 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
             <div className="flex h-11 gap-3">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, transaction_type: 'income' })}
+                onClick={() => setFormData({ ...formData, transaction_type: "income" })}
                 className={cn(
-                  'flex flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-all',
-                  formData.transaction_type === 'income'
-                    ? 'border-blue-500 bg-blue-50 text-blue-600'
-                    : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                  "flex flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-all",
+                  formData.transaction_type === "income"
+                    ? "border-blue-500 bg-blue-50 text-blue-600"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                 )}
               >
                 Masuk
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, transaction_type: 'expense' })}
+                onClick={() => setFormData({ ...formData, transaction_type: "expense" })}
                 className={cn(
-                  'flex flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-all',
-                  formData.transaction_type === 'expense'
-                    ? 'border-blue-500 bg-blue-50 text-blue-600'
-                    : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                  "flex flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-all",
+                  formData.transaction_type === "expense"
+                    ? "border-blue-500 bg-blue-50 text-blue-600"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                 )}
               >
                 Keluar
@@ -180,7 +180,7 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
           className="mt-2 h-12 w-full gap-2 rounded-lg bg-blue-600 text-base font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98]"
         >
           <Save className="h-4.5 w-4.5" />
-          {loading ? 'Menyimpan...' : initialData?.id ? 'Simpan Perubahan' : 'Tambahkan Laporan'}
+          {loading ? "Menyimpan..." : initialData?.id ? "Simpan Perubahan" : "Tambahkan Laporan"}
         </Button>
       </form>
     </div>
