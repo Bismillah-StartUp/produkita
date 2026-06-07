@@ -1,15 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Download, Pencil, Trash2 } from 'lucide-react'
-import { formatIDR } from '@/lib/format-currency'
-import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Download, Pencil, Trash2 } from "lucide-react"
+import { formatIDR } from "@/lib/format-currency"
+import Link from "next/link"
+import { Plus } from "lucide-react"
 export default function RecentTransactions({ records, activeDate }: { records: any[]; activeDate: Date }) {
-  const formattedActiveDate = activeDate.toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const formattedActiveDate = activeDate.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   })
 
   return (
@@ -18,7 +18,7 @@ export default function RecentTransactions({ records, activeDate }: { records: a
         <div>
           <CardTitle className="text-sm font-semibold text-slate-900">Transaksi Terbaru</CardTitle>
           <CardDescription className="mt-0.5 text-xs text-slate-400">
-            Menampilkan {records.length} transaksi untuk tanggal{' '}
+            Menampilkan {records.length} transaksi untuk tanggal{" "}
             <strong className="text-slate-600">{formattedActiveDate}</strong>
           </CardDescription>
         </div>
@@ -59,29 +59,29 @@ export default function RecentTransactions({ records, activeDate }: { records: a
                   <TableCell className="text-sm font-semibold text-slate-800">{record.product_name}</TableCell>
 
                   <TableCell className="text-sm font-medium text-slate-500">
-                    {new Date(record.transaction_date).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
+                    {new Date(record.transaction_date).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
                     })}
                   </TableCell>
 
                   <TableCell>
                     <span
                       className={`rounded-md px-2 py-1 text-xs font-bold ${
-                        record.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
+                        record.transaction_type === "income" ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {record.transaction_type === 'income' ? 'Masuk' : 'Keluar'}
+                      {record.transaction_type === "income" ? "Masuk" : "Keluar"}
                     </span>
                   </TableCell>
 
                   <TableCell
                     className={`text-sm font-bold ${
-                      record.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
+                      record.transaction_type === "income" ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    {record.transaction_type === 'income' ? '+ ' : '- '}
+                    {record.transaction_type === "income" ? "+ " : "- "}
                     {formatIDR(record.amount)}
                   </TableCell>
 

@@ -1,10 +1,10 @@
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from "lucide-react"
 
 export default function AlertBanner({ activeDate, isToday }: { activeDate: Date; isToday: boolean }) {
-  const formattedDate = activeDate.toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const formattedDate = activeDate.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   })
 
   return (
@@ -14,11 +14,11 @@ export default function AlertBanner({ activeDate, isToday }: { activeDate: Date;
       </div>
       <div>
         <h4 className="text-sm font-semibold">
-          {isToday ? 'Belum Mengisi Laporan Hari Ini!' : `Belum Mengisi Laporan: ${formattedDate}`}
+          {isToday ? "Belum Mengisi Laporan Hari Ini!" : `Belum Mengisi Laporan: ${formattedDate}`}
         </h4>
         <p className="mt-0.5 text-xs text-blue-100">
           {isToday
-            ? 'Segera isi laporan keuangan hari ini sebelum hari berakhir.'
+            ? "Segera isi laporan keuangan hari ini sebelum hari berakhir."
             : `Data untuk tanggal ${formattedDate} belum tersedia. Silakan tambahkan laporan.`}
         </p>
       </div>

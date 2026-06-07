@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ChartContainer } from "@/components/ui/chart"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { formatIDR } from "@/lib/format-currency"
+import { formatCompactIDR, formatIDR } from "@/lib/format-currency"
 
 const chartConfig = {
   pemasukan: { label: "Pemasukan", color: "#3b82f6" },
@@ -20,11 +20,46 @@ type DailyData = {
 interface RevenueChartProps {
   data: DailyData[]
   summary?: {
-    totalPemasukan: string
-    trendPemasukan: string
-    totalPengeluaran: string
-    trendPengeluaran: string
+    total_pemasukan: string
+    trend_pemasukan: string
+    total_pengeluaran: string
+    trend_pengeluaran: string
   }
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const pemasukan = payload.find((p: any) => p.dataKey === "pemasukan")?.value || 0
+    const pengeluaran = payload.find((p: any) => p.dataKey === "pengeluaran")?.value || 0
+    const selisih = pemasukan - pengeluaran
+
+    return (
+      <div className="rounded-xl border border-slate-100 bg-white p-3 shadow-lg">
+        <p className="mb-2 text-xs font-bold text-slate-500">Tgl {label}</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-6 text-xs">
+            <div className="flex items-center gap-1.5 font-semibold text-slate-600">
+              <span className="h-2 w-2 rounded-full bg-[#3b82f6]"></span>
+              Pemasukan
+            </div>
+            <span className="font-bold text-slate-900">{formatIDR(pemasukan)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-6 text-xs">
+            <div className="flex items-center gap-1.5 font-semibold text-slate-600">
+              <span className="h-2 w-2 rounded-full bg-[#ef4444]"></span>
+              Pengeluaran
+            </div>
+            <span className="font-bold text-slate-900">{formatIDR(pengeluaran)}</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-6 border-t border-slate-100 pt-1.5 text-xs">
+            <span className="font-semibold text-slate-400">Selisih</span>
+            <span className="font-bold text-blue-600">{formatIDR(selisih)}</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  return null
 }
 
 export default function RevenueChart({ data, summary }: RevenueChartProps) {
@@ -38,40 +73,46 @@ export default function RevenueChart({ data, summary }: RevenueChartProps) {
     return `Tgl 1 – ${today} ${monthYear}`
   }, [])
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const pemasukan = payload.find((p: any) => p.dataKey === "pemasukan")?.value || 0
-      const pengeluaran = payload.find((p: any) => p.dataKey === "pengeluaran")?.value || 0
-      const selisih = pemasukan - pengeluaran
-
-      return (
-        <div className="rounded-xl border border-slate-100 bg-white p-3 shadow-lg">
-          <p className="mb-2 text-xs font-bold text-slate-500">Tgl {label}</p>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-6 text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-600">
-                <span className="h-2 w-2 rounded-full bg-[#3b82f6]"></span>
-                Pemasukan
-              </div>
-              <span className="font-bold text-slate-900">{formatIDR(pemasukan)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-6 text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-600">
-                <span className="h-2 w-2 rounded-full bg-[#ef4444]"></span>
-                Pengeluaran
-              </div>
-              <span className="font-bold text-slate-900">{formatIDR(pengeluaran)}</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-6 border-t border-slate-100 pt-1.5 text-xs">
-              <span className="font-semibold text-slate-400">Selisih</span>
-              <span className="font-bold text-blue-600">{formatIDR(selisih)}</span>
-            </div>
-          </div>
-        </div>
-      )
+  const TotalPemasukan = useMemo(() => {
+    if (summary?.total_pemasukan !== undefined && summary.total_pemasukan !== "") {
+      return Number(summary.total_pemasukan)
     }
-    return null
-  }
+    return data.reduce((sum, item) => sum + (item.pemasukan || 0), 0)
+  }, [summary, data])
+
+  const TotalPengeluaran = useMemo(() => {
+    if (summary?.total_pengeluaran !== undefined && summary.total_pengeluaran !== "") {
+      return Number(summary.total_pengeluaran)
+    }
+    return data.reduce((sum, item) => sum + (item.pengeluaran || 0), 0)
+  }, [summary, data])
+
+  const Trends = useMemo(() => {
+    if (!data || data.length < 2) {
+      return {
+        pemasukan: summary?.trend_pemasukan || "↑0%",
+        pengeluaran: summary?.trend_pengeluaran || "↑0%",
+      }
+    }
+
+    const current = data[data.length - 1]
+    const previous = data[data.length - 2]
+
+    const calculatePercent = (currVal: number, prevVal: number) => {
+      if (prevVal === 0) {
+        if (currVal === 0) return "↑0%"
+        return "↑100%"
+      }
+      const difference = currVal - prevVal
+      const percent = Math.round((difference / prevVal) * 100)
+      return `${percent >= 0 ? "↑" : "↓"}${Math.abs(percent)}%`
+    }
+
+    return {
+      pemasukan: calculatePercent(current.pemasukan || 0, previous.pemasukan || 0),
+      pengeluaran: calculatePercent(current.pengeluaran || 0, previous.pengeluaran || 0),
+    }
+  }, [data, summary])
 
   return (
     <Card className="flex w-full flex-col justify-between rounded-xl border-slate-100 shadow-sm">
@@ -81,20 +122,18 @@ export default function RevenueChart({ data, summary }: RevenueChartProps) {
             <CardTitle className="text-base font-bold text-slate-900">Grafik Keuangan</CardTitle>
             <CardDescription className="mt-1 text-sm font-medium text-slate-400">{dateSubtitle}</CardDescription>
           </div>
-
-          {/* Legenda Dinamis Persis Gambar */}
           <div className="flex items-center gap-6 text-xs">
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-[#3b82f6]"></span>
               <span className="font-semibold text-slate-500">Pemasukan</span>
-              <span className="font-bold text-blue-600">{summary?.totalPemasukan || "0Jt"}</span>
-              <span className="font-semibold text-green-500">{summary?.trendPemasukan || "↑0%"}</span>
+              <span className="font-bold text-blue-600">{formatCompactIDR(TotalPemasukan)}</span>
+              <span className="font-semibold text-green-500">{Trends.pemasukan}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
               <span className="font-semibold text-slate-500">Pengeluaran</span>
-              <span className="font-bold text-blue-600">{summary?.totalPengeluaran || "0Jt"}</span>
-              <span className="font-semibold text-blue-500">{summary?.trendPengeluaran || "↑0%"}</span>
+              <span className="font-bold text-blue-600">{formatCompactIDR(TotalPengeluaran)}</span>
+              <span className="font-semibold text-blue-500">{Trends.pengeluaran}</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
@@ -17,12 +17,6 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
   const [viewMonth, setViewMonth] = useState(activeDate.getMonth())
   const [viewYear, setViewYear] = useState(activeDate.getFullYear())
 
-  useEffect(() => {
-    if (!isNaN(activeDate.getTime())) {
-      setViewMonth(activeDate.getMonth())
-      setViewYear(activeDate.getFullYear())
-    }
-  }, [activeDateStr])
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
       setViewMonth(11)

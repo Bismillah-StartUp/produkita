@@ -143,10 +143,10 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
           <RevenueChart
             data={daily_data_this_month}
             summary={{
-              totalPemasukan: formatIDR(current_data.pemasukan),
-              trendPemasukan: get_change(current_data.pemasukan, previous_data.pemasukan),
-              totalPengeluaran: formatIDR(current_data.pengeluaran),
-              trendPengeluaran: get_change(current_data.pengeluaran, previous_data.pengeluaran),
+              total_pemasukan: current_data.pemasukan.toString(),
+              trend_pemasukan: get_change(current_data.pemasukan, previous_data.pemasukan),
+              total_pengeluaran: current_data.pengeluaran.toString(),
+              trend_pengeluaran: get_change(current_data.pengeluaran, previous_data.pengeluaran),
             }}
           />
         </div>
