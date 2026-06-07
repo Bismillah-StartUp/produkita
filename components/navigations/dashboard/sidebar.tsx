@@ -53,13 +53,13 @@ export const Sidebar = () => {
     <aside className={`bg-white border-r border-slate-200 min-h-screen flex flex-col transition-all duration-300 ${
       isOpen ? 'w-64' : 'w-20'
     }`}>
-      <div className="border-b border-slate-200 px-6 py-4 flex items-center h-[60px]">
+      <div className="border-b border-slate-200 px-6 py-4 flex items-center h-15">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 hover:opacity-75 transition-opacity"
           title={isOpen ? 'Tutup sidebar' : 'Buka sidebar'}
         >
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
             <span className="text-white font-bold">P</span>
           </div>
           {isOpen && (
@@ -87,7 +87,7 @@ export const Sidebar = () => {
                   }`}
                   title={!isOpen ? item.title : ''}
                 >
-                  <Icon size={20} className="flex-shrink-0" />
+                  <Icon size={20} className="shrink-0" />
                   {isOpen && (
                     <>
                       <span>{item.title}</span>
@@ -110,7 +110,7 @@ export const Sidebar = () => {
                     }`}
                     title={!isOpen ? item.title : ''}
                   >
-                    <Icon size={20} className="flex-shrink-0" />
+                    <Icon size={20} className="shrink-0" />
                     {isOpen && <span>{item.title}</span>}
                   </button>
                 </Link>
