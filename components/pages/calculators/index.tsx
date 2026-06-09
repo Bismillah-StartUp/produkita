@@ -1,6 +1,6 @@
 "use client";
 
-import { CostItem } from "@/hooks/useHppCalculator";
+import { useHppCalculator } from "@/hooks/useHppCalculator";
 import MethodSelector from "./partials/method-selector";
 import ProductInfo from "./partials/product-info";
 import CostSection from "./partials/cost-section";
