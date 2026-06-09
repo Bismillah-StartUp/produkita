@@ -1,5 +1,5 @@
 import CostTable from "./cost-table";
-import { CostItem } from "../hooks/use-hpp-calculator";
+import { CostItem } from "@/hooks/useHppCalculator";
 
 interface CostSectionProps {
   state: {

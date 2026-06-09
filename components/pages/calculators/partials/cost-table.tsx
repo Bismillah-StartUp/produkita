@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2, Pencil, Check, X as XIcon } from "lucide-react";
-import { CostItem } from "../hooks/use-hpp-calculator";
+import { CostItem } from "@/hooks/useHppCalculator";
 import { formatIDR } from "@/lib/format-currency";
 
 interface CostTableProps {
