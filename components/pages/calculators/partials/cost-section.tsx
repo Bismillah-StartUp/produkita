@@ -1,42 +1,36 @@
-import CostTable from "./cost-table";
-import { CostItem } from "@/hooks/useHppCalculator";
+import CostTable from "./cost-table"
+import { CostItem } from "@/hooks/useHppCalculator"
+import { SATUAN } from "@/lib/utils"
 
 interface CostSectionProps {
   state: {
-    calculation_method: "full" | "variable";
-    bbb_items: CostItem[];
-    btkl_items: CostItem[];
-    packaging_items: CostItem[];
-    bop_var_items: CostItem[];
-    bop_fix_items: CostItem[];
-  };
+    calculation_method: "full" | "variable"
+    bbb_items: CostItem[]
+    btkl_items: CostItem[]
+    packaging_items: CostItem[]
+    bop_var_items: CostItem[]
+    bop_fix_items: CostItem[]
+  }
   actions: {
-    add_item: (set_state: any) => void;
-    remove_item: (id: string, set_state: any) => void;
-    update_item: (
-      id: string,
-      field: keyof CostItem,
-      value: string | number,
-      set_state: any,
-    ) => void;
-    set_bbb_items: any;
-    set_btkl_items: any;
-    set_packaging_items: any;
-    set_bop_var_items: any;
-    set_bop_fix_items: any;
-  };
+    add_item: (set_state: any) => void
+    remove_item: (id: string, set_state: any) => void
+    update_item: (id: string, field: keyof CostItem, value: string | number, set_state: any) => void
+    set_bbb_items: any
+    set_btkl_items: any
+    set_packaging_items: any
+    set_bop_var_items: any
+    set_bop_fix_items: any
+  }
 }
 
 export default function CostSection({ state, actions }: CostSectionProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="w-full">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
           3
         </div>
-        <h2 className="text-lg font-bold text-slate-800">
-          Rincian Biaya Produksi
-        </h2>
+        <h2 className="text-lg font-bold text-slate-800">Input Komponen Biaya</h2>
       </div>
 
       <div className="space-y-6">
@@ -46,9 +40,8 @@ export default function CostSection({ state, actions }: CostSectionProps) {
           items={state.bbb_items}
           on_add={() => actions.add_item(actions.set_bbb_items)}
           on_remove={(id) => actions.remove_item(id, actions.set_bbb_items)}
-          on_update={(id, field, val) =>
-            actions.update_item(id, field, val, actions.set_bbb_items)
-          }
+          on_update={(id, field, val) => actions.update_item(id, field, val, actions.set_bbb_items)}
+          unitOptions={SATUAN.bbb}
         />
 
         <CostTable
@@ -57,9 +50,8 @@ export default function CostSection({ state, actions }: CostSectionProps) {
           items={state.btkl_items}
           on_add={() => actions.add_item(actions.set_btkl_items)}
           on_remove={(id) => actions.remove_item(id, actions.set_btkl_items)}
-          on_update={(id, field, val) =>
-            actions.update_item(id, field, val, actions.set_btkl_items)
-          }
+          on_update={(id, field, val) => actions.update_item(id, field, val, actions.set_btkl_items)}
+          unitOptions={SATUAN.btkl}
         />
 
         <CostTable
@@ -67,12 +59,9 @@ export default function CostSection({ state, actions }: CostSectionProps) {
           description="Biaya untuk membungkus atau mengemas produk."
           items={state.packaging_items}
           on_add={() => actions.add_item(actions.set_packaging_items)}
-          on_remove={(id) =>
-            actions.remove_item(id, actions.set_packaging_items)
-          }
-          on_update={(id, field, val) =>
-            actions.update_item(id, field, val, actions.set_packaging_items)
-          }
+          on_remove={(id) => actions.remove_item(id, actions.set_packaging_items)}
+          on_update={(id, field, val) => actions.update_item(id, field, val, actions.set_packaging_items)}
+          unitOptions={SATUAN.packaging}
         />
 
         <CostTable
@@ -81,9 +70,8 @@ export default function CostSection({ state, actions }: CostSectionProps) {
           items={state.bop_var_items}
           on_add={() => actions.add_item(actions.set_bop_var_items)}
           on_remove={(id) => actions.remove_item(id, actions.set_bop_var_items)}
-          on_update={(id, field, val) =>
-            actions.update_item(id, field, val, actions.set_bop_var_items)
-          }
+          on_update={(id, field, val) => actions.update_item(id, field, val, actions.set_bop_var_items)}
+          unitOptions={SATUAN.bop_var}
         />
 
         <CostTable
@@ -92,11 +80,18 @@ export default function CostSection({ state, actions }: CostSectionProps) {
           items={state.bop_fix_items}
           on_add={() => actions.add_item(actions.set_bop_fix_items)}
           on_remove={(id) => actions.remove_item(id, actions.set_bop_fix_items)}
-          on_update={(id, field, val) =>
-            actions.update_item(id, field, val, actions.set_bop_fix_items)
+          on_update={(id, field, val) => actions.update_item(id, field, val, actions.set_bop_fix_items)}
+          unitOptions={SATUAN.bop_fix}
+          disabled={state.calculation_method === "variable"}
+          badge={
+            state.calculation_method === "variable" && (
+              <span className="rounded-md bg-orange-100 px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide text-orange-300">
+                Period Cost — tidak masuk HPP
+              </span>
+            )
           }
         />
       </div>
     </div>
-  );
+  )
 }

@@ -35,7 +35,14 @@ export default function MethodSelector({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="rounded-full border border-slate-200 px-3 py-1 text-[12px] font-bold text-slate-700 shadow-sm">
+          <span
+            className={cn(
+              "rounded-full border px-3 py-1 text-[12px] font-bold shadow-sm transition-colors",
+              selected_method === "full"
+                ? "border-blue-200 bg-blue-50 text-blue-700"
+                : "border-purple-200 bg-purple-50 text-purple-700",
+            )}
+          >
             {selected_method === "full" ? "Full Costing" : "Variable Costing"}
           </span>
           <ChevronDown
@@ -106,8 +113,8 @@ export default function MethodSelector({
             className={cn(
               "relative flex cursor-pointer flex-col justify-between rounded-xl border p-5 transition-all",
               selected_method === "variable"
-                ? "border-blue-500 bg-blue-50/30"
-                : "border-slate-200 bg-white hover:border-blue-300",
+                ? "border-purple-500 bg-purple-50/30"
+                : "border-slate-200 bg-white hover:border-purple-300",
             )}
           >
             <div>
@@ -140,7 +147,7 @@ export default function MethodSelector({
               </p>
               <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
                 <code className="text-[11px] font-medium tracking-wide text-slate-500">
-                  HPP = BBB + BTKL + BOP Variabel (BOP Tetap → Laba Rugi)
+                  HPP = BBB + BTKL + BK + BOP Var (BOP Tetap → Laba Rugi)
                 </code>
               </div>
             </div>

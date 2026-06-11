@@ -202,24 +202,24 @@ export default function MarginSelector({
           }}
           className={`relative flex cursor-pointer flex-col justify-between rounded-2xl border-2 p-5 transition-all ${
             is_custom
-              ? "border-blue-600 border-solid bg-blue-600 shadow-lg shadow-blue-600/20"
+              ? "border-blue-400 border-solid bg-blue-50/50 shadow-md"
               : "border-dashed border-slate-200 bg-white hover:border-blue-300"
           }`}
         >
           <div>
             <div className="flex w-full items-start justify-between">
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                   is_custom
-                    ? "bg-white/20 text-white"
+                    ? "bg-blue-100 text-blue-700"
                     : "bg-slate-100 text-slate-500"
                 }`}
               >
                 Custom
               </span>
               {is_custom ? (
-                <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full border-2 border-white">
-                  <div className="h-2.5 w-2.5 rounded-full bg-white"></div>
+                <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full border-2 border-blue-600">
+                  <div className="h-2.5 w-2.5 rounded-full bg-blue-600"></div>
                 </div>
               ) : (
                 <div className="h-5.5 w-5.5 shrink-0 rounded-full border-2 border-slate-200"></div>
@@ -234,47 +234,39 @@ export default function MarginSelector({
                   margin_percentage === 0 && is_custom ? "" : margin_percentage
                 }
                 onChange={(e) => on_change(Number(e.target.value) || 0)}
-                className={`w-full rounded-xl border py-2 text-center text-[40px] font-black leading-none focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border py-2 text-center text-[40px] font-black leading-none focus:outline-none focus:ring-2 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                   is_custom
-                    ? "border-white/30 bg-white/10 text-white placeholder-white/50 focus:ring-white/50"
-                    : "border-blue-200 bg-white text-blue-600 placeholder-blue-300 focus:ring-blue-400"
+                    ? "border-blue-200 bg-white text-blue-600 shadow-sm focus:border-blue-400 focus:ring-blue-400"
+                    : "border-slate-200 bg-transparent text-blue-600 placeholder-blue-200 hover:border-blue-300"
                 }`}
                 placeholder="0"
               />
-              <span
-                className={`text-3xl font-black ${is_custom ? "text-white" : "text-blue-600"}`}
-              >
-                %
-              </span>
+              <span className="text-3xl font-black text-blue-600">%</span>
             </div>
 
             <p
-              className={`mt-2 text-center text-[11px] leading-relaxed ${is_custom ? "text-blue-100" : "text-slate-400"}`}
+              className={`mt-2 text-center text-[11px] leading-relaxed transition-colors ${is_custom ? "text-blue-600/70" : "text-slate-400"}`}
             >
               Ketik angka untuk mengubah
             </p>
           </div>
 
           <div
-            className={`mt-6 w-full rounded-xl border p-4 ${
+            className={`mt-6 w-full rounded-xl border p-4 transition-all ${
               is_custom
-                ? "border-white/10 bg-white/10"
+                ? "border-blue-100 bg-white shadow-sm"
                 : "border-slate-100 bg-slate-50"
             }`}
           >
             <p
-              className={`text-[11px] font-medium ${is_custom ? "text-blue-100" : "text-slate-400"}`}
+              className={`text-[11px] font-medium ${is_custom ? "text-slate-500" : "text-slate-400"}`}
             >
               Harga Jual / {unit}
             </p>
-            <p
-              className={`mt-1 text-xl font-bold ${is_custom ? "text-white" : "text-slate-900"}`}
-            >
+            <p className="mt-1 text-xl font-bold text-slate-900">
               {formatIDR(price_custom)}
             </p>
-            <p
-              className={`mt-1 text-[11px] font-medium ${is_custom ? "text-blue-100" : "text-green-600"}`}
-            >
+            <p className="mt-1 text-[11px] font-medium text-green-600">
               Untung {formatIDR(profit_custom)} / {unit}
             </p>
           </div>
