@@ -6,6 +6,10 @@ import {
   verifyOtpController,
   logoutController,
   getSessionController,
+  updateProfileController,
+  requestUpdateEmailController,
+  verifyUpdateEmailController,
+  updatePasswordController,
 } from "./auth.controller"
 
 export const login = async (email: string, password: string) => {
@@ -26,4 +30,20 @@ export const logout = async () => {
 
 export const getSession = async () => {
   return await getSessionController()
+}
+
+export const updateProfileAction = async (uuid: string, data: { name?: string; phonenumber?: string }) => {
+  return await updateProfileController(uuid, data)
+}
+
+export const requestUpdateEmail = async (uuid: string, newEmail: string) => {
+  return await requestUpdateEmailController(uuid, newEmail)
+}
+
+export const verifyUpdateEmail = async (uuid: string, newEmail: string, otp: string) => {
+  return await verifyUpdateEmailController(uuid, newEmail, otp)
+}
+
+export const updatePasswordAction = async (uuid: string, oldPassword: string, newPassword: string) => {
+  return await updatePasswordController(uuid, oldPassword, newPassword)
 }

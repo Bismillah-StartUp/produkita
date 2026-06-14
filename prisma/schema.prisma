@@ -35,6 +35,7 @@ model OTP {
   otp        String
   is_used    Boolean  @default(false)
   expired_at DateTime
+  type       OTPType  @default(register)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -48,6 +49,11 @@ enum UserRole {
   superadmin
   admin
   user
+}
+
+enum OTPType {
+  register
+  update_email
 }
 
 model Certificate {
