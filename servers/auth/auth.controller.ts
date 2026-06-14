@@ -1,7 +1,6 @@
 import { sendOtpMail, sendUpdateEmail } from "@/lib/emails/sendingOtp"
 import {
   findUserByEmail,
-  createUser,
   updateUserUnverified,
   verifyPassword,
   verifyUser,
@@ -16,6 +15,7 @@ import {
   findValidOtpWithType,
   updateEmail,
   updatePassword,
+  createUserWithTenant,
 } from "./auth.service"
 
 import {
@@ -43,21 +43,27 @@ export const loginController = async (email: string, password: string) => {
   return { uuid: user.uuid, email: user.email, role: user.role }
 }
 
-export const registerController = async (email: string, password: string) => {
+export const registerController = async (
+  email: string,
+  password: string,
+  name: string,
+  tenantName: string
+) => {
   if (!email || !password) throw new Error("Email dan password wajib diisi")
   if (!email.includes("@")) throw new Error("Format email tidak valid")
   if (password.length < 6) throw new Error("Password minimal 6 karakter")
+  if (!tenantName) throw new Error("Nama UMKM wajib diisi")
 
   const existing = await findUserByEmail(email)
 
   let user
   if (existing && !existing.is_verified) {
-    // user sudah ada tapi belum verified → update password, kirim OTP baru
-    user = await updateUserUnverified(existing.id, password)
+    // update user + tenant dengan data terbaru
+    user = await updateUserUnverified(existing.id, password, name, tenantName)
   } else if (existing && existing.is_verified) {
     throw new Error("Email sudah terdaftar")
   } else {
-    user = await createUser(email, password)
+    user = await createUserWithTenant(email, password, name, tenantName)
   }
 
   const otp = generateOtp()

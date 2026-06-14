@@ -16,8 +16,13 @@ export const login = async (email: string, password: string) => {
   return await loginController(email, password)
 }
 
-export const register = async (email: string, password: string) => {
-  return await registerController(email, password)
+export const register = async (
+  email: string,
+  password: string,
+  name: string,
+  tenantName: string
+) => {
+  return await registerController(email, password, name, tenantName)
 }
 
 export const verifyOtp = async (email: string, otp: string) => {

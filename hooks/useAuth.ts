@@ -20,11 +20,16 @@ export const useAuth = () => {
     }
   }
 
-  const handleRegister = async (email: string, password: string) => {
+  const handleRegister = async (
+    email: string,
+    password: string,
+    name: string,
+    tenantName: string
+  ) => {
     setLoading(true)
     setError(null)
     try {
-      return await register(email, password)
+      return await register(email, password, name, tenantName)
     } catch (err: any) {
       setError(err.message)
       return null

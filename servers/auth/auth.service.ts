@@ -58,27 +58,61 @@ export const findUserByEmail = async (email: string) => {
   return await prisma.user.findUnique({ where: { email } })
 }
 
-
-export const createUser = async (email: string, password: string) => {
+export const createUserWithTenant = async (
+  email: string,
+  password: string,
+  name: string,
+  tenantName: string
+) => {
   const hashedPassword = await bcrypt.hash(password, 10)
-  return await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      role: "user",
-      is_verified: false,
-    },
+
+  return await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+        role: "user",
+        is_verified: false,
+      },
+    })
+
+    await tx.tenant.create({
+      data: {
+        name: tenantName,
+        status: "pending",
+        user_id: user.id,
+      },
+    })
+
+    return user
   })
 }
 
-export const updateUserUnverified = async (id: number, password: string) => {
+export const updateUserUnverified = async (
+  id: number,
+  password: string,
+  name: string,
+  tenantName: string
+) => {
   const hashedPassword = await bcrypt.hash(password, 10)
-  return await prisma.user.update({
-    where: { id },
-    data: {
-      password: hashedPassword,
-      is_verified: false,
-    },
+
+  return await prisma.$transaction(async (tx) => {
+    const user = await tx.user.update({
+      where: { id },
+      data: {
+        password: hashedPassword,
+        name,
+        is_verified: false,
+      },
+    })
+
+    await tx.tenant.update({
+      where: { user_id: id },
+      data: { name: tenantName },
+    })
+
+    return user
   })
 }
 
