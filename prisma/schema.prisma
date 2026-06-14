@@ -114,6 +114,7 @@ model Certificate {
 
   product               Product         @relation(fields: [product_id], references: [id])
 
+  @@unique([product_id, type])
   @@map("certificates")
 }
 
