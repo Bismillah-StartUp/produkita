@@ -91,25 +91,43 @@ model Halal {
 }
 
 model Tenant {
-  id            Int       @id @default(autoincrement())
-  uuid          String    @unique() @default(uuid()) @db.Uuid
-  name          String
-  district      String?
-  province      String?
-  description   String?
-  address       String?
-  email         String?
-  phonenumber   String?
-  status        String
-  user_id       Int       @unique()
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique() @default(uuid()) @db.Uuid
+  user_id         Int           @unique()
 
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
+  name            String?
+  trade_name      String?
+  business_field  String?
+  npwp            String?
+  description     String?
+  address         String?
+  city            String?
+  postal_code     String?
+  province        String?
+  latitude        Float?
+  longitude       Float?
+  email           String?
+  phonenumber     String?
+  website         String?
+  logo_url        String?
+  logo_public_id  String?
+  place_url       String?
+  place_public_id String?
+  status          TenantStatus  @default(pending)
 
-  products      Product[]
-  user          User      @relation(fields: [user_id], references: [id])
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  user            User          @relation(fields: [user_id], references: [id])
+  products        Product[]
 
   @@map("tenants")
+}
+
+enum TenantStatus {
+  active
+  inactive
+  pending
 }
 
 model Product {

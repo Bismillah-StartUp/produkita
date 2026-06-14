@@ -22,7 +22,7 @@ export const sendOtpMail = async (email: string, otp: string) => {
   })
 }
 
-export const sendUpdateEmailOtpMail = async (email: string, otp: string) => {
+export const sendUpdateEmail = async (email: string, otp: string) => {
   const expiredMinutes = process.env.OTP_EXPIRED_MINUTES ?? 3
 
   await sendMail({

@@ -1,4 +1,4 @@
-import { sendOtpMail, sendUpdateEmailOtpMail } from "@/lib/emails/sendingOtp"
+import { sendOtpMail, sendUpdateEmail } from "@/lib/emails/sendingOtp"
 import {
   findUserByEmail,
   createUser,
@@ -115,7 +115,7 @@ export const requestUpdateEmailController = async (uuid: string, newEmail: strin
 
   const otp = generateOtp()
   await saveOtpWithType(user.id, otp, "update_email")
-  await sendUpdateEmailOtpMail(newEmail, otp)
+  await sendUpdateEmail(newEmail, otp)
 
   return { email: newEmail }
 }
