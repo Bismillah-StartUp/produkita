@@ -37,7 +37,7 @@ model Certificate {
   id                        Int       @id @default(autoincrement())
   uuid                      String    @unique() @default(uuid()) @db.Uuid
   product_id                Int
-  description               String?    
+  description               String?
   bpom_number               String?
   pirt_number               String?
   license_number            String?
@@ -79,7 +79,7 @@ model Tenant {
   phonenumber   String?
   status        String
   user_id       Int       @unique()
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -99,7 +99,7 @@ model Product {
   tenant_id       Int
   type            ProductCategory
   license_code    String?   @unique()
-  
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -142,7 +142,7 @@ model NutritionInfo {
   updatedAt       DateTime  @updatedAt
 
   product         Product   @relation(fields: [product_id], references: [id])
-  
+
   @@map("nutrition_infos")
 }
 
@@ -150,4 +150,33 @@ enum ProductCategory {
   fnb
   cosmetic
   pharmaceutical
+}
+
+
+model FinancialRecord {
+  id                  String              @id @default(cuid())
+
+  product_name        String
+  transaction_type    TransactionType
+  amount              Int
+
+  transaction_status  TransactionStatus   @default(completed)
+  transaction_date    DateTime            @default(now())
+
+  notes               String?
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@map("financial_records")
+}
+
+enum TransactionType {
+  income
+  expense
+}
+
+enum TransactionStatus {
+  completed
+  pending
 }
