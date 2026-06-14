@@ -5,7 +5,7 @@ import { CloudinaryUploadResponse, CloudinaryTransformations } from "./types"
 // Upload image to Cloudinary
 export const uploadImage = async (
   file: Buffer | string,
-  uploadType: "avatars" | "certifications" | "documents" = "documents"
+  uploadType: "avatars" | "certifications" | "documents" | "tenants" = "documents"
 ): Promise<CloudinaryUploadResponse> => {
   const uploadOptions =
     CLOUDINARY_UPLOAD_OPTIONS[
