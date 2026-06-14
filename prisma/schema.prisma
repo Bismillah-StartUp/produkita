@@ -113,6 +113,7 @@ model Tenant {
   logo_public_id  String?
   place_url       String?
   place_public_id String?
+  year            Int?
   status          TenantStatus  @default(pending)
 
   created_at      DateTime      @default(now())

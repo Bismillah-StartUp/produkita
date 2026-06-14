@@ -28,6 +28,7 @@ export const updateTenantProfile = async (
     email?: string
     phonenumber?: string
     website?: string
+    year?: number
   }
 ) => {
   return await prisma.tenant.update({

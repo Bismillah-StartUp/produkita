@@ -30,6 +30,7 @@ export const updateTenant = async (
     email?: string
     phonenumber?: string
     website?: string
+    year?: number
   }
 ) => {
   return await updateTenantController(userUuid, data)
