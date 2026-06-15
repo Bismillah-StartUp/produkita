@@ -1,54 +1,55 @@
-'use client'
+"use client"
 
-import { Button } from '@/components/ui/button'
-import { Package, Leaf, Shield, Building2, CheckCircle2 } from 'lucide-react'
-import { ProductFormData } from './product-form'
-import { NutritionFormData } from './nutritions-form'
-import { LegalityFormData } from './legality-form'
-import { EnterpriseFormData } from './enterprise-form'
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
+import { Package, Leaf, Shield, Info, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ProductFormData } from "./product-form"
+import { NutritionFormData } from "./nutritions-form"
+import { LegalityFormData } from "./legality-form"
+import { ServingFormData } from "./serving-form"
 
 interface RekapProps {
   productData?: ProductFormData
   nutritionData?: NutritionFormData
   legalityData?: LegalityFormData
-  enterpriseData?: EnterpriseFormData
+  servingData?: ServingFormData
   onSubmit?: () => void
   onEdit?: (step: number) => void
   isLoading?: boolean
 }
 
-interface SectionItemProps {
-  label: string
-  value: string | undefined
-  showValue?: boolean
+interface SectionRowProps {
+  leftLabel: string
+  leftValue: string | undefined
+  rightLabel: string
+  rightValue: string | undefined
 }
 
-interface NutritionItemProps {
-  label: string
-  value: string | undefined
-  percent: string | undefined
-}
-
-function SectionItem({ label, value, showValue = true }: SectionItemProps) {
+function SectionRow({ leftLabel, leftValue, rightLabel, rightValue }: SectionRowProps) {
   return (
-    <div className="flex justify-between border-b border-gray-100 px-4 py-2 last:border-0">
-      <span className="text-xs font-medium text-gray-600">{label}</span>
-      <span className="text-xs font-semibold text-gray-900">
-        {showValue ? value || '-' : '•••'}
-      </span>
+    <div className="grid grid-cols-2 border-b border-gray-100 last:border-0">
+      <div className="flex justify-between px-4 py-2.5 sm:border-r sm:border-gray-100">
+        <span className="text-xs font-medium text-gray-500">{leftLabel}</span>
+        <span className="text-xs font-semibold text-gray-900">{leftValue || "-"}</span>
+      </div>
+      <div className="flex justify-between px-4 py-2.5">
+        <span className="text-xs font-medium text-gray-500">{rightLabel}</span>
+        <span className="text-xs font-semibold text-gray-900">{rightValue || "-"}</span>
+      </div>
     </div>
   )
 }
 
-function NutritionItem({ label, value, percent }: NutritionItemProps) {
-  const displayValue = value || '-'
-  const displayPercent = percent?.trim() ? `${percent}%` : '-'
+interface FullRowProps {
+  label: string
+  value: string | undefined
+}
 
+function FullRow({ label, value }: FullRowProps) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-gray-100 px-4 py-2 last:border-0">
-      <span className="text-xs font-medium text-gray-600">{label}</span>
-      <span className="text-right text-xs font-semibold text-gray-900">{displayValue}</span>
-      <span className="text-right text-xs font-semibold text-gray-900">{displayPercent}</span>
+    <div className="flex flex-col gap-1 border-b border-gray-100 px-4 py-3 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <span className="text-xs font-medium text-gray-500 shrink-0">{label}</span>
+      <span className="text-xs font-semibold text-gray-900 whitespace-pre-line sm:text-right">{value || "-"}</span>
     </div>
   )
 }
@@ -57,32 +58,68 @@ interface SectionProps {
   title: string
   icon: React.ReactNode
   borderColor: string
+  headerBg: string
   children: React.ReactNode
   stepNumber: number
   onEdit?: (step: number) => void
+  showEditButton?: boolean
 }
 
-function RecapSection({ title, icon, borderColor, children, stepNumber, onEdit }: SectionProps) {
+function RecapSection({
+  title,
+  icon,
+  borderColor,
+  headerBg,
+  children,
+  stepNumber,
+  onEdit,
+  showEditButton = true,
+}: SectionProps) {
   return (
-    <div className={`rounded-lg border ${borderColor} bg-white overflow-hidden`}>
-      <div className={`border-b ${borderColor} px-6 py-3 flex items-center justify-between`}>
+    <div className={`rounded-xl border ${borderColor} bg-white overflow-hidden`}>
+      <div className={`border-b ${borderColor} ${headerBg} px-5 py-3 flex items-center justify-between`}>
         <div className="flex items-center gap-2">
-          <div className="h-5 w-5">{icon}</div>
+          <div className="h-5 w-5 shrink-0">{icon}</div>
           <h3 className="text-base font-bold text-gray-900">{title}</h3>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="text-xs font-semibold px-3 py-1"
-          onClick={() => onEdit?.(stepNumber)}
+        {showEditButton && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-xs font-semibold px-3 py-1 bg-white"
+            onClick={() => onEdit?.(stepNumber)}
+          >
+            Edit
+          </Button>
+        )}
+      </div>
+      <div className="divide-y divide-gray-100">{children}</div>
+    </div>
+  )
+}
+
+interface CertBadgeProps {
+  label: string
+  number: string | undefined
+  colorClass: string
+}
+
+function CertBadge({ label, number, colorClass }: CertBadgeProps) {
+  return (
+    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 last:border-0">
+      <div className="flex items-center gap-3">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white ${colorClass}`}
         >
-          Edit
-        </Button>
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          {label}
+        </span>
+        <span className="text-xs text-gray-500">No. {number || "-"}</span>
       </div>
-      <div className="divide-y divide-gray-100">
-        {children}
-      </div>
+      <Button type="button" variant="outline" size="sm" className="text-xs font-semibold px-4 py-1 bg-white">
+        Lihat
+      </Button>
     </div>
   )
 }
@@ -91,21 +128,29 @@ export function Rekap({
   productData,
   nutritionData,
   legalityData,
-  enterpriseData,
+  servingData,
   onSubmit,
   onEdit,
   isLoading = false,
 }: RekapProps) {
-  const hasAllData = productData && nutritionData && legalityData && enterpriseData
+  const hasAllData = productData && nutritionData && legalityData && servingData
 
   return (
     <div className="space-y-4">
-      {/* Status Info */}
-      {!hasAllData && (
+      {hasAllData ? (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 shrink-0 text-blue-600" />
+            <p className="text-sm font-medium text-blue-900">
+              Semua data telah terisi. Periksa kembali sebelum mendaftarkan produk.
+            </p>
+          </div>
+        </div>
+      ) : (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
           <div className="flex gap-2">
             <div className="shrink-0 pt-0.5">
-              <CheckCircle2 className="h-4 w-4 text-yellow-600" />
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
             </div>
             <div>
               <p className="text-sm font-semibold text-yellow-900">Data Belum Lengkap</p>
@@ -117,165 +162,170 @@ export function Rekap({
         </div>
       )}
 
-      {/* Informasi Produk */}
       {productData && (
         <RecapSection
           title="Informasi Produk"
           icon={<Package className="h-6 w-6 text-blue-600" />}
           borderColor="border-blue-200"
+          headerBg="bg-blue-50"
           stepNumber={1}
           onEdit={onEdit}
         >
-          <SectionItem label="Nama Produk" value={productData.productName} />
-          <SectionItem label="Brand" value={productData.brandName} />
-          <SectionItem
-            label="Harga"
-            value={`Rp ${productData.price ? parseInt(productData.price).toLocaleString('id-ID') : '-'}`}
+          <SectionRow
+            leftLabel="Nama Produk"
+            leftValue={productData.productName}
+            rightLabel="Nama Brand"
+            rightValue={productData.brandName}
           />
-          <SectionItem
-            label="Ukuran/Berat"
-            value={`${productData.weight} ${productData.unit}`}
+          <SectionRow
+            leftLabel="Harga"
+            leftValue={productData.price ? `Rp ${parseInt(productData.price).toLocaleString("id-ID")}` : "-"}
+            rightLabel="Berat/Volume"
+            rightValue={productData.weight ? `${productData.weight} ${productData.unit}` : "-"}
           />
-          <SectionItem label="Foto Produk" value="✓ Terupload" showValue={!!productData.productPhotoPreview} />
+          <SectionRow
+            leftLabel="Jenis"
+            leftValue={productData.jenis?.length ? productData.jenis.join(", ") : "-"}
+            rightLabel="Deskripsi Produk"
+            rightValue={productData.deskripsi}
+          />
+          <div className="flex items-center justify-between px-4 py-2.5">
+            <span className="text-xs font-medium text-gray-500">Foto Produk</span>
+            {productData.productPhotoPreview?.length ? (
+              <div className="flex gap-1.5">
+                {productData.productPhotoPreview.map((src, idx) => (
+                  <Image
+                    key={idx}
+                    src={src}
+                    alt={`Foto produk ${idx + 1}`}
+                    className="h-9 w-9 rounded-md object-cover border border-gray-200"
+                    width={80}
+                    height={80}
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs font-semibold text-gray-900">-</span>
+            )}
+          </div>
         </RecapSection>
       )}
 
-      {/* Informasi Nutrisi */}
       {nutritionData && (
         <RecapSection
-          title="Informasi Nutrisi"
+          title="Informasi Nutrisi & Gizi"
           icon={<Leaf className="h-6 w-6 text-green-600" />}
           borderColor="border-green-200"
+          headerBg="bg-green-50"
           stepNumber={2}
           onEdit={onEdit}
         >
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b border-gray-100 px-4 py-2 text-xs font-semibold text-gray-500">
-            <span>Nama Nutrisi</span>
-            <span className="text-right">Nilai</span>
-            <span className="text-right">% AKG</span>
-          </div>
-          <SectionItem label="Takaran Saji" value={nutritionData.servingSize} />
-          <SectionItem label="Energi Total" value={`${nutritionData.calories} kkal`} />
-          <NutritionItem label="Total Lemak" value={`${nutritionData.totalFat} g`} percent={nutritionData.fatDaily} />
-          <NutritionItem
-            label="Lemak Jenuh"
-            value={`${nutritionData.saturatedFat} g`}
-            percent={nutritionData.saturatedFatDaily}
+          <SectionRow
+            leftLabel="Takaran Saji"
+            leftValue={nutritionData.servingSize}
+            rightLabel="Sajian Perkemasan"
+            rightValue={nutritionData.servingsPerPackage}
           />
-          <NutritionItem
-            label="Karbohidrat"
-            value={`${nutritionData.carbohydrates} g`}
-            percent={nutritionData.carbohydratesDaily}
+          <SectionRow
+            leftLabel="Energi Total"
+            leftValue={nutritionData.calories ? `${nutritionData.calories} kkal` : undefined}
+            rightLabel="Lemak Jenuh"
+            rightValue={nutritionData.saturatedFat ? `${nutritionData.saturatedFat} g` : undefined}
           />
-          <NutritionItem label="Protein" value={`${nutritionData.protein} g`} percent={nutritionData.proteinDaily} />
-          <NutritionItem label="Gula" value={`${nutritionData.sugar || '-'} g`} percent={nutritionData.sugarDaily} />
-          <NutritionItem label="Natrium" value={`${nutritionData.sodium} mg`} percent={nutritionData.sodiumDaily} />
+          <SectionRow
+            leftLabel="Karbohidrat Total"
+            leftValue={nutritionData.carbohydrates ? `${nutritionData.carbohydrates} g` : undefined}
+            rightLabel="Protein"
+            rightValue={nutritionData.protein ? `${nutritionData.protein} g` : undefined}
+          />
+          <SectionRow
+            leftLabel="Gula"
+            leftValue={nutritionData.sugar ? `${nutritionData.sugar} g` : undefined}
+            rightLabel="Natrium (Garam)"
+            rightValue={nutritionData.sodium ? `${nutritionData.sodium} mg` : undefined}
+          />
+          <SectionRow
+            leftLabel="Komposisi"
+            leftValue={nutritionData.composition}
+            rightLabel="Informasi Alergen"
+            rightValue={nutritionData.allergens?.length ? nutritionData.allergens.join(", ") : "-"}
+          />
         </RecapSection>
       )}
 
-      {/* Sertifikasi & Legalitas */}
       {legalityData && (
         <RecapSection
-          title="Sertifikasi & Legalitas"
+          title="Informasi Sertifikat"
           icon={<Shield className="h-6 w-6 text-purple-600" />}
           borderColor="border-purple-200"
+          headerBg="bg-purple-50"
           stepNumber={3}
           onEdit={onEdit}
         >
-          <SectionItem label="Kategori Produk" value={legalityData.productCategory} />
-
-          {legalityData.hasBpom && (
-            <>
-              <div className="px-4 py-2 bg-blue-50">
-                <p className="mb-2 text-xs font-semibold text-blue-900">BPOM Distribution Permit</p>
-              </div>
-              <SectionItem label="Nomor BPOM" value={legalityData.bpomNumber} />
-              <SectionItem label="Tanggal Registrasi" value={legalityData.bpomRegistrationDate} />
-              <SectionItem label="Berlaku Hingga" value={legalityData.bpomValidUntil} />
-            </>
-          )}
-
-          {legalityData.hasPirt && (
-            <>
-              <div className="border-t border-gray-100 px-4 py-2 bg-purple-50">
-                <p className="mb-2 text-xs font-semibold text-purple-900">PIRT Permit</p>
-              </div>
-              <SectionItem label="Nomor PIRT" value={legalityData.pirtNumber} />
-              <SectionItem label="Tanggal Registrasi" value={legalityData.pirtRegistrationDate} />
-              <SectionItem label="Berlaku Hingga" value={legalityData.pirtValidUntil} />
-            </>
-          )}
-
+          {legalityData.hasBpom && <CertBadge label="BPOM" number={legalityData.bpomNumber} colorClass="bg-blue-600" />}
+          {legalityData.hasPirt && <CertBadge label="PIRT" number={legalityData.pirtNumber} colorClass="bg-purple-400" />}
           {legalityData.hasHalal && (
-            <>
-              <div className="border-t border-gray-100 px-4 py-2 bg-green-50">
-                <p className="mb-2 text-xs font-semibold text-green-900">Halal Certification</p>
-              </div>
-              <SectionItem label="Nomor Sertifikat Halal" value={legalityData.halalCertificateNumber} />
-              <SectionItem label="Disertifikasi oleh" value={legalityData.halalCertifiedBy} />
-              <SectionItem label="Tanggal Terbit" value={legalityData.halalIssuanceDate} />
-              <SectionItem label="Berlaku Hingga" value={legalityData.halalValidUntil} />
-            </>
+            <CertBadge label="Halal MUI" number={legalityData.halalCertificateNumber} colorClass="bg-green-600" />
           )}
+          {legalityData.hasCoa && <CertBadge label="COA" number={legalityData.coaNumber} colorClass="bg-amber-600" />}
 
-          {!legalityData.hasBpom && !legalityData.hasPirt && !legalityData.hasHalal && (
+          {!legalityData.hasBpom && !legalityData.hasPirt && !legalityData.hasHalal && !legalityData.hasCoa && (
             <div className="px-4 py-3 text-sm text-gray-600">Tidak ada sertifikat tambahan yang diinput.</div>
           )}
         </RecapSection>
       )}
 
-      {/* Informasi Perusahaan */}
-      {enterpriseData && (
+      {servingData && (
         <RecapSection
-          title="Informasi Perusahaan"
-          icon={<Building2 className="h-6 w-6 text-orange-600" />}
-          borderColor="border-orange-200"
+          title="Saran Penyajian"
+          icon={<Package className="h-6 w-6 text-blue-600" />}
+          borderColor="border-blue-200"
+          headerBg="bg-blue-50"
           stepNumber={4}
           onEdit={onEdit}
+          showEditButton={false}
         >
-          <SectionItem label="Nama Perusahaan" value={enterpriseData.companyName} />
-          <SectionItem label="Daerah" value={enterpriseData.district} />
-          <SectionItem label="Provinsi" value={enterpriseData.province} />
-          <SectionItem label="Alamat Lengkap" value={enterpriseData.address} />
-          <SectionItem label="Nomor Telepon" value={enterpriseData.phone} />
-          <SectionItem label="Email" value={enterpriseData.email} />
+          <FullRow label="Informasi Penyajian" value={servingData.servingInfo} />
+          <FullRow label="Informasi Penyimpanan" value={servingData.storageInfo} />
+          <FullRow label="Informasi Porsi" value={servingData.portionInfo} />
+          <FullRow label="Link Video Penyajian" value={servingData.videoLink} />
+
+          <FullRow label="Video Penyajian" value={undefined} />
+
+          <div className="flex flex-col gap-1 border-b border-gray-100 px-4 py-3 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <span className="text-xs font-medium text-gray-500 shrink-0">Foto Penyajian</span>
+            {servingData.servingPhotoPreviews?.length ? (
+              <div className="flex flex-wrap justify-end gap-1.5">
+                {servingData.servingPhotoPreviews.map((src, idx) => (
+                  <Image
+                    key={idx}
+                    src={src}
+                    alt={`Foto penyajian ${idx + 1}`}
+                    className="h-9 w-9 rounded-md object-cover border border-gray-200"
+                    width={80}
+                    height={80}
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs font-semibold text-gray-900">-</span>
+            )}
+          </div>
         </RecapSection>
       )}
 
-      {/* Submit Section */}
-      <div className="border-t border-gray-200 pt-6">
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-4">
-          <div className="flex gap-2">
-            <div className="shrink-0 pt-0.5">
-              <CheckCircle2 className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-blue-900">Data Siap Dikirim</p>
-              <p className="mt-0.5 text-xs text-blue-800">
-                Pastikan semua informasi sudah benar. Anda dapat mengedit data sebelum mengirimkan.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 py-6 text-sm font-semibold"
-            onClick={() => onEdit?.(4)}
-          >
-            Sebelumnya
-          </Button>
-          <Button
-            type="button"
-            disabled={!hasAllData || isLoading}
-            className="flex-1 bg-green-600 py-6 text-base font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onSubmit}
-          >
-            {isLoading ? 'Memproses...' : 'Daftar Sekarang'}
-          </Button>
-        </div>
+      <div className="flex gap-3 pt-2">
+        <Button type="button" variant="outline" className="flex-1 py-6 text-sm font-semibold" onClick={() => onEdit?.(4)}>
+          ← Sebelumnya
+        </Button>
+        <Button
+          type="button"
+          disabled={!hasAllData || isLoading}
+          className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={onSubmit}
+        >
+          {isLoading ? "Memproses..." : "Daftarkan Produk →"}
+        </Button>
       </div>
     </div>
   )

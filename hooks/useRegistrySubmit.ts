@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import type { ProductFormData } from '@/components/pages/registry/partials/product-form'
-import type { NutritionFormData } from '@/components/pages/registry/partials/nutritions-form'
-import type { EnterpriseFormData } from '@/components/pages/registry/partials/enterprise-form'
-import type { LegalityFormData } from '@/components/pages/registry/partials/legality-form'
+import { useState } from "react"
+import type { ProductFormData } from "@/components/pages/registry/partials/product-form"
+import type { NutritionFormData } from "@/components/pages/registry/partials/nutritions-form"
+import type { ServingFormData } from "@/components/pages/registry/partials/serving-form"
+import type { LegalityFormData } from "@/components/pages/registry/partials/legality-form"
 
 interface RegistrySubmitPayload {
   productData: ProductFormData & { productPhotoBase64?: string }
   nutritionData: NutritionFormData
   legalityData: LegalityFormData
-  enterpriseData: EnterpriseFormData
+  servingData: ServingFormData
 }
 
 export function useRegistrySubmit() {
@@ -26,22 +26,25 @@ export function useRegistrySubmit() {
     try {
       // Convert File to base64 if present
       let productPhotoBase64: string | undefined
-
-      if (data.productData.productPhoto instanceof File) {
+      const photos = data.productData.productPhoto
+      const previews = data.productData.productPhotoPreview
+      if (Array.isArray(photos) && photos.length > 0 && photos[0] instanceof File) {
         productPhotoBase64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
           reader.onloadend = () => {
-            if (typeof reader.result === 'string') {
+            if (typeof reader.result === "string") {
               resolve(reader.result)
             } else {
-              reject(new Error('Failed to read file'))
+              reject(new Error("Failed to read file"))
             }
           }
           reader.onerror = () => reject(reader.error)
-          reader.readAsDataURL(data.productData.productPhoto as File)
+          reader.readAsDataURL(photos[0])
         })
-      } else if (data.productData.productPhotoPreview) {
-        productPhotoBase64 = data.productData.productPhotoPreview
+      } else if (Array.isArray(previews) && previews.length > 0) {
+        productPhotoBase64 = previews[0]
+      } else if (typeof previews === "string") {
+        productPhotoBase64 = previews
       }
 
       // Prepare payload for API
@@ -69,7 +72,6 @@ export function useRegistrySubmit() {
           hasPirt: data.legalityData.hasPirt,
           hasHalal: data.legalityData.hasHalal,
           bpomNumber: data.legalityData.bpomNumber,
-          productCategory: data.legalityData.productCategory,
           bpomRegistrationDate: data.legalityData.bpomRegistrationDate,
           bpomValidUntil: data.legalityData.bpomValidUntil,
           pirtNumber: data.legalityData.pirtNumber,
@@ -80,22 +82,21 @@ export function useRegistrySubmit() {
           halalIssuanceDate: data.legalityData.halalIssuanceDate,
           halalValidUntil: data.legalityData.halalValidUntil,
         },
-        enterpriseData: {
-          companyName: data.enterpriseData.companyName,
-          district: data.enterpriseData.district,
-          province: data.enterpriseData.province,
-          address: data.enterpriseData.address,
-          phone: data.enterpriseData.phone,
-          email: data.enterpriseData.email,
+        servingData: {
+          servingInfo: data.servingData.servingInfo,
+          storageInfo: data.servingData.storageInfo,
+          portionInfo: data.servingData.portionInfo,
+          videoLink: data.servingData.videoLink,
+          servingPhotoPreviews: data.servingData.servingPhotoPreviews,
         },
       }
 
-      console.log('📤 Submitting registry data...')
+      console.log("📤 Submitting registry data...")
 
-      const response = await fetch('/api/registry/submit', {
-        method: 'POST',
+      const response = await fetch("/api/registry/submit", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       })
@@ -103,17 +104,17 @@ export function useRegistrySubmit() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit registry')
+        throw new Error(result.error || "Failed to submit registry")
       }
 
       setSuccess(true)
-      console.log('✅ Registry submitted successfully:', result)
+      console.log("✅ Registry submitted successfully:", result)
 
       return result
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      const errorMessage = err instanceof Error ? err.message : "Unknown error"
       setError(errorMessage)
-      console.error('❌ Registry submission failed:', err)
+      console.error("❌ Registry submission failed:", err)
       throw err
     } finally {
       setLoading(false)
