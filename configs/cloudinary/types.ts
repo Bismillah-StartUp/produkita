@@ -7,12 +7,6 @@ export interface CloudinaryUploadResponse extends Partial<UploadApiResponse> {
   folder?: string
 }
 
-export interface CloudinaryError {
-  error?: {
-    message: string
-  }
-}
-
 export interface CloudinaryTransformations {
   width?: number
   height?: number

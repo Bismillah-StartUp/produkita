@@ -78,7 +78,7 @@ export const Sidebar = () => {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-2 px-4 py-6">
+      <nav className={`flex-1 space-y-2 ${isOpen ? "px-4 py-6" : "px-2 py-6"}`}>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const hasSubmenu = !!item.submenu;
@@ -89,20 +89,26 @@ export const Sidebar = () => {
             <div key={item.title}>
               {hasSubmenu ? (
                 <button
-                  onClick={() => toggleSubmenu(item.title)}
-                  className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
+                  onClick={() => isOpen && toggleSubmenu(item.title)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     submenuActive
-                      ? "bg-blue-50 font-medium text-blue-600"
+                      ? "bg-blue-50 text-blue-600 font-medium"
                       : "text-slate-600 hover:bg-slate-50"
                   }`}
                   title={!isOpen ? item.title : ""}
                 >
-                  <Icon size={20} />
-                  <span>{item.title}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`ml-auto transition-transform ${isOpen ? "rotate-180" : ""}`}
-                  />
+                  <Icon size={20} className="shrink-0" />
+                  {isOpen && (
+                    <>
+                      <span>{item.title}</span>
+                      <ChevronDown
+                        size={16}
+                        className={`ml-auto transition-transform ${
+                          isOpenItem ? "rotate-180" : ""
+                        }`}
+                      />
+                    </>
+                  )}
                 </button>
               ) : (
                 <Link href={item.href!}>
@@ -120,8 +126,8 @@ export const Sidebar = () => {
                 </Link>
               )}
 
-              {hasSubmenu && isOpen && (
-                <div className="mt-2 ml-4 space-y-1">
+              {hasSubmenu && isOpenItem && isOpen && (
+                <div className="ml-4 mt-2 space-y-1">
                   {item.submenu!.map((subitem) => (
                     <Link key={subitem.href} href={subitem.href}>
                       <button
@@ -143,8 +149,11 @@ export const Sidebar = () => {
       </nav>
 
       <div className="border-t border-slate-200 p-4">
-        <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-slate-600 transition-colors hover:bg-slate-50">
-          <span className="text-sm">Logout</span>
+        <button
+          className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+          title={!isOpen ? "Logout" : ""}
+        >
+          {isOpen && <span className="text-sm">Logout</span>}
         </button>
       </div>
     </aside>
