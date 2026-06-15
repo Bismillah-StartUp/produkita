@@ -111,6 +111,7 @@ model Certificate {
 
   created_at            DateTime        @default(now())
   updated_at            DateTime        @updatedAt
+  deleted_at            DateTime?
 
   product               Product         @relation(fields: [product_id], references: [id])
 
@@ -142,6 +143,7 @@ model Product {
 
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
+  deleted_at       DateTime?
 
   tenant          Tenant @relation(fields: [tenant_id], references: [id])
   certificates    Certificate[]
@@ -173,10 +175,11 @@ model ProductImage {
   uuid        String    @unique() @default(uuid()) @db.Uuid
   product_id  Int
   url         String
-  public_id   String    // tambah ini
+  public_id   String
 
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
 
   product     Product   @relation(fields: [product_id], references: [id])
 
@@ -233,6 +236,7 @@ model ProductServingImage {
 
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
 
   serving     ProductServing @relation(fields: [serving_id], references: [id])
 

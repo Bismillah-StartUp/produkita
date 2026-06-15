@@ -4,9 +4,18 @@ import { useState } from "react"
 import {
   getProduct,
   getProductsByTenant,
-  deleteProductImage,
-  deleteServingImage,
   submitProduct,
+  softDeleteProduct,
+  updateProductBasic,
+  addProductImages,
+  softDeleteProductImage,
+  updateNutrition,
+  addCertificate,
+  updateCertificate,
+  softDeleteCertificate,
+  updateServing,
+  addServingImages,
+  softDeleteServingImage,
 } from "@/servers/products/product.actions"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
 
@@ -32,12 +41,6 @@ export const useProduct = () => {
 
   const handleGetProductsByTenant = async (tenantUuid: string) =>
     handle(() => getProductsByTenant(tenantUuid))
-
-  const handleDeleteProductImage = async (imageUuid: string) =>
-    handle(() => deleteProductImage(imageUuid))
-
-  const handleDeleteServingImage = async (imageUuid: string) =>
-    handle(() => deleteServingImage(imageUuid))
 
   const handleSubmitProduct = async (
     tenantUuid: string,
@@ -115,13 +118,100 @@ export const useProduct = () => {
       })
     })
 
+    const handleSoftDeleteProduct = async (uuid: string) =>
+      handle(() => softDeleteProduct(uuid))
+
+    const handleUpdateProductBasic = async (
+      uuid: string,
+      data: {
+        name?: string
+        brand?: string
+        price?: number
+        description?: string
+        type?: ProductCategory
+        weight?: number
+        weight_unit?: WeightUnits
+      }
+    ) => handle(() => updateProductBasic(uuid, data))
+
+    const handleAddProductImages = async (uuid: string, files: File[]) =>
+      handle(async () => {
+        const buffers = await Promise.all(files.map(async (f) => Buffer.from(await f.arrayBuffer())))
+        return await addProductImages(uuid, buffers)
+      })
+
+    const handleSoftDeleteProductImage = async (imageUuid: string) =>
+      handle(() => softDeleteProductImage(imageUuid))
+
+    const handleUpdateNutrition = async (
+      productUuid: string,
+      data: Parameters<typeof updateNutrition>[1]
+    ) => handle(() => updateNutrition(productUuid, data))
+
+    const handleAddCertificate = async (
+      productUuid: string,
+      data: {
+        type: CertificateType
+        number?: string
+        registered_at?: Date
+        valid_until?: Date
+        lab_name?: string
+        file?: File
+      }
+    ) =>
+      handle(async () => {
+        const buffer = data.file ? Buffer.from(await data.file.arrayBuffer()) : undefined
+        return await addCertificate(productUuid, { ...data, file: buffer })
+      })
+
+    const handleUpdateCertificate = async (
+      certificateUuid: string,
+      data: {
+        number?: string
+        registered_at?: Date
+        valid_until?: Date
+        lab_name?: string
+        file?: File
+      }
+    ) =>
+      handle(async () => {
+        const buffer = data.file ? Buffer.from(await data.file.arrayBuffer()) : undefined
+        return await updateCertificate(certificateUuid, { ...data, file: buffer })
+      })
+
+    const handleSoftDeleteCertificate = async (certificateUuid: string) =>
+      handle(() => softDeleteCertificate(certificateUuid))
+
+    const handleUpdateServing = async (
+      productUuid: string,
+      data: Parameters<typeof updateServing>[1]
+    ) => handle(() => updateServing(productUuid, data))
+
+    const handleAddServingImages = async (productUuid: string, files: File[]) =>
+      handle(async () => {
+        const buffers = await Promise.all(files.map(async (f) => Buffer.from(await f.arrayBuffer())))
+        return await addServingImages(productUuid, buffers)
+      })
+
+    const handleSoftDeleteServingImage = async (imageUuid: string) =>
+      handle(() => softDeleteServingImage(imageUuid))
+
   return {
     loading,
     error,
     getProduct: handleGetProduct,
     getProductsByTenant: handleGetProductsByTenant,
-    deleteProductImage: handleDeleteProductImage,
-    deleteServingImage: handleDeleteServingImage,
     submitProduct: handleSubmitProduct,
+    softDeleteProduct: handleSoftDeleteProduct,
+    updateProductBasic: handleUpdateProductBasic,
+    addProductImages: handleAddProductImages,
+    softDeleteProductImage: handleSoftDeleteProductImage,
+    updateNutrition: handleUpdateNutrition,
+    addCertificate: handleAddCertificate,
+    updateCertificate: handleUpdateCertificate,
+    softDeleteCertificate: handleSoftDeleteCertificate,
+    updateServing: handleUpdateServing,
+    addServingImages: handleAddServingImages,
+    softDeleteServingImage: handleSoftDeleteServingImage,
   }
 }

@@ -3,9 +3,18 @@
 import {
   getProductController,
   getProductsByTenantController,
-  deleteProductImageController,
-  deleteServingImageController,
   submitProductController,
+  softDeleteProductController,
+  updateProductBasicController,
+  addProductImagesController,
+  softDeleteProductImageController,
+  updateNutritionController,
+  addCertificateController,
+  updateCertificateController,
+  softDeleteCertificateController,
+  updateServingController,
+  addServingImagesController,
+  softDeleteServingImageController,
 } from "./product.controller"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
 
@@ -17,12 +26,8 @@ export const getProductsByTenant = async (tenantUuid: string) => {
   return await getProductsByTenantController(tenantUuid)
 }
 
-export const deleteProductImage = async (imageUuid: string) => {
-  return await deleteProductImageController(imageUuid)
-}
-
-export const deleteServingImage = async (imageUuid: string) => {
-  return await deleteServingImageController(imageUuid)
+export const softDeleteProduct = async (uuid: string) => {
+  return await softDeleteProductController(uuid)
 }
 
 export const submitProduct = async (
@@ -70,4 +75,80 @@ export const submitProduct = async (
   }
 ) => {
   return await submitProductController(tenantUuid, tenantEmail, data)
+}
+
+export const updateProductBasic = async (
+  uuid: string,
+  data: {
+    name?: string
+    brand?: string
+    price?: number
+    description?: string
+    type?: ProductCategory
+    weight?: number
+    weight_unit?: WeightUnits
+  }
+) => {
+  return await updateProductBasicController(uuid, data)
+}
+
+export const addProductImages = async (uuid: string, files: Buffer[]) => {
+  return await addProductImagesController(uuid, files)
+}
+
+export const softDeleteProductImage = async (imageUuid: string) => {
+  return await softDeleteProductImageController(imageUuid)
+}
+
+export const updateNutrition = async (
+  productUuid: string,
+  data: Parameters<typeof updateNutritionController>[1]
+) => {
+  return await updateNutritionController(productUuid, data)
+}
+
+export const addCertificate = async (
+  productUuid: string,
+  data: {
+    type: CertificateType
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  return await addCertificateController(productUuid, data)
+}
+
+export const updateCertificate = async (
+  certificateUuid: string,
+  data: {
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  return await updateCertificateController(certificateUuid, data)
+}
+
+export const softDeleteCertificate = async (certificateUuid: string) => {
+  return await softDeleteCertificateController(certificateUuid)
+}
+
+export const updateServing = async (
+  productUuid: string,
+  data: Parameters<typeof updateServingController>[1]
+) => {
+  return await updateServingController(productUuid, data)
+}
+
+export const addServingImages = async (productUuid: string, files: Buffer[]) => {
+  return await addServingImagesController(productUuid, files)
+}
+
+export const softDeleteServingImage = async (imageUuid: string) => {
+  return await softDeleteServingImageController(imageUuid)
 }

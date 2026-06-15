@@ -1,9 +1,18 @@
 import {
   findProductByUuid,
   findProductsByTenantUuid,
-  deleteProductImage,
-  deleteServingImage,
   submitProduct,
+  softDeleteProduct,
+  updateProductBasic,
+  addProductImages,
+  softDeleteProductImage,
+  updateNutrition,
+  addCertificate,
+  updateCertificate,
+  softDeleteCertificate,
+  updateServing,
+  addServingImages,
+  softDeleteServingImage,
 } from "./product.service"
 import { sendBarcodeEmail } from "@/lib/emails/sendingBarcode"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
@@ -18,12 +27,8 @@ export const getProductsByTenantController = async (tenantUuid: string) => {
   return await findProductsByTenantUuid(tenantUuid)
 }
 
-export const deleteProductImageController = async (imageUuid: string) => {
-  return await deleteProductImage(imageUuid)
-}
-
-export const deleteServingImageController = async (imageUuid: string) => {
-  return await deleteServingImage(imageUuid)
+export const softDeleteProductController = async (uuid: string) => {
+  return await softDeleteProduct(uuid)
 }
 
 export const submitProductController = async (
@@ -92,4 +97,84 @@ export const submitProductController = async (
     qrCodeDataUrl: result.qrCodeDataUrl,
     barcodeDataUrl: result.barcodeDataUrl,
   }
+}
+
+export const updateProductBasicController = async (
+  uuid: string,
+  data: {
+    name?: string
+    brand?: string
+    price?: number
+    description?: string
+    type?: ProductCategory
+    weight?: number
+    weight_unit?: WeightUnits
+  }
+) => {
+  if (data.name === "") throw new Error("Nama produk tidak boleh kosong")
+  return await updateProductBasic(uuid, data)
+}
+
+export const addProductImagesController = async (uuid: string, files: Buffer[]) => {
+  if (!files.length) throw new Error("Minimal 1 foto")
+  return await addProductImages(uuid, files)
+}
+
+export const softDeleteProductImageController = async (imageUuid: string) => {
+  return await softDeleteProductImage(imageUuid)
+}
+
+export const updateNutritionController = async (
+  productUuid: string,
+  data: Parameters<typeof updateNutrition>[1]
+) => {
+  return await updateNutrition(productUuid, data)
+}
+
+export const addCertificateController = async (
+  productUuid: string,
+  data: {
+    type: CertificateType
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  if (!data.type) throw new Error("Tipe sertifikat wajib diisi")
+  return await addCertificate(productUuid, data)
+}
+
+export const updateCertificateController = async (
+  certificateUuid: string,
+  data: {
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  return await updateCertificate(certificateUuid, data)
+}
+
+export const softDeleteCertificateController = async (certificateUuid: string) => {
+  return await softDeleteCertificate(certificateUuid)
+}
+
+export const updateServingController = async (
+  productUuid: string,
+  data: Parameters<typeof updateServing>[1]
+) => {
+  return await updateServing(productUuid, data)
+}
+
+export const addServingImagesController = async (productUuid: string, files: Buffer[]) => {
+  if (!files.length) throw new Error("Minimal 1 foto")
+  return await addServingImages(productUuid, files)
+}
+
+export const softDeleteServingImageController = async (imageUuid: string) => {
+  return await softDeleteServingImage(imageUuid)
 }
