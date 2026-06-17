@@ -1,24 +1,28 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
+  const router = useRouter()
+  const { login, loading, error } = useAuth()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    // TODO: Implement login logic
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+
+    const result = await login(email, password)
+    if (result) {
+      router.push('/dashboard')
+    }
   }
 
   return (
@@ -36,9 +40,15 @@ export default function LoginForm() {
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Selamat Datang Kembali</h1>
         <p className="text-slate-600 mb-8">Masuk untuk mengelola produk & keuangan Anda.</p>
 
+        {/* Error */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-900 mb-2">
               Email
@@ -46,7 +56,7 @@ export default function LoginForm() {
             <input
               id="email"
               type="email"
-              placeholder="hamsarons@gmail.com"
+              placeholder="contoh@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -54,7 +64,6 @@ export default function LoginForm() {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-slate-900 mb-2">
               Kata Sandi
@@ -79,7 +88,6 @@ export default function LoginForm() {
             </div>
           </div>
 
-          {/* Remember Me Checkbox */}
           <div className="flex items-center">
             <input
               id="remember"
@@ -93,20 +101,18 @@ export default function LoginForm() {
             </label>
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors"
           >
-            {isLoading ? 'Loading...' : 'Login'}
+            {loading ? 'Loading...' : 'Login'}
           </Button>
         </form>
 
-        {/* Sign Up Link */}
         <p className="text-center text-sm text-slate-600 mt-8">
           Tidak punya akun?{' '}
-          <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
             Daftarkan UMKM Anda Sekarang
           </Link>
         </p>
