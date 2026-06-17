@@ -87,6 +87,7 @@ model Tenant {
 
   user            User          @relation(fields: [user_id], references: [id])
   products        Product[]
+  financial_records FinancialRecord[]
 
   @@map("tenants")
 }
@@ -151,6 +152,7 @@ model Product {
   serving         ProductServing?
 
   images          ProductImage[]
+  financial_records FinancialRecord[]
 
   @@map("products")
 }
@@ -245,19 +247,20 @@ model ProductServingImage {
 
 
 model FinancialRecord {
-  id                  String              @id @default(cuid())
+  id                String          @id @default(cuid())
+  tenant_id         Int
+  product_id        Int?
+  product_name      String
+  transaction_type  TransactionType
+  amount            Int
+  transaction_date  DateTime
+  notes             String?
 
-  product_name        String
-  transaction_type    TransactionType
-  amount              Int
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
 
-  transaction_status  TransactionStatus   @default(completed)
-  transaction_date    DateTime            @default(now())
-
-  notes               String?
-
-  created_at           DateTime            @default(now())
-  updated_at           DateTime            @updatedAt
+  tenant            Tenant          @relation(fields: [tenant_id], references: [id])
+  product           Product?        @relation(fields: [product_id], references: [id])
 
   @@map("financial_records")
 }
