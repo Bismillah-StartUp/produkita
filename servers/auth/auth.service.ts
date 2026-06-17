@@ -2,6 +2,7 @@ import { sendOtpMail } from "@/lib/emails/sendingOtp"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
+import { setAuthCookie, signToken } from "./auth.token"
 
 export const generateOtp = () => {
   return crypto.randomInt(100000, 999999).toString()
@@ -173,4 +174,25 @@ export const resendOtpService = async (email: string) => {
   await sendOtpMail(email, otp)
 
   return { email }
+}
+
+export const loginService = async (
+  email: string,
+  password: string,
+  rememberMe: boolean = false
+) => {
+  const user = await findUserByEmail(email)
+  if (!user) throw new Error("Email tidak ditemukan")
+  if (!user.is_verified) throw new Error("Akun belum diverifikasi")
+
+  const isValid = await verifyPassword(password, user.password)
+  if (!isValid) throw new Error("Password salah")
+
+  const token = await signToken(
+    { uuid: user.uuid, email: user.email, role: user.role },
+    rememberMe
+  )
+  await setAuthCookie(token, rememberMe)
+
+  return { uuid: user.uuid, email: user.email, role: user.role }
 }

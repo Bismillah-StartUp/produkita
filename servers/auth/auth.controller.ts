@@ -17,31 +17,24 @@ import {
   updatePassword,
   createUserWithTenant,
   resendOtpService,
+  loginService,
 } from "./auth.service"
 
 import {
-  signToken,
-  setAuthCookie,
   getAuthCookie,
   removeAuthCookie,
   verifyToken,
 } from "./auth.token"
 
-export const loginController = async (email: string, password: string) => {
+export const loginController = async (
+  email: string,
+  password: string,
+  rememberMe: boolean = false
+) => {
   if (!email || !password) throw new Error("Email dan password wajib diisi")
   if (!email.includes("@")) throw new Error("Format email tidak valid")
 
-  const user = await findUserByEmail(email)
-  if (!user) throw new Error("Email tidak ditemukan")
-  if (!user.is_verified) throw new Error("Akun belum diverifikasi")
-
-  const isValid = await verifyPassword(password, user.password)
-  if (!isValid) throw new Error("Password salah")
-
-  const token = await signToken({ uuid: user.uuid, email: user.email, role: user.role })
-  await setAuthCookie(token)
-
-  return { uuid: user.uuid, email: user.email, role: user.role }
+  return await loginService(email, password, rememberMe)
 }
 
 export const registerController = async (

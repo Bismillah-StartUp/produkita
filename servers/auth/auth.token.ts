@@ -4,29 +4,33 @@ import { cookies } from "next/headers"
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!)
 const COOKIE_NAME = process.env.COOKIE_NAME! || "bebekpalupi"
 const EXPIRES_IN = process.env.JWT_EXPIRES_IN! || "1h"
+const REMEMBER_EXPIRES_IN = process.env.JWT_EXTENDED_EXPIRES! || "7d"
 
-export async function signToken(payload: { uuid: string; email: string; role: string }) {
+export const signToken = async (
+  payload: { uuid: string; email: string; role: string },
+  rememberMe: boolean = false
+) => {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(EXPIRES_IN)
+    .setExpirationTime(rememberMe ? REMEMBER_EXPIRES_IN : EXPIRES_IN)
     .setIssuedAt()
     .sign(SECRET)
 }
 
-export async function verifyToken(token: string) {
-  const { payload } = await jwtVerify(token, SECRET)
-  return payload as { uuid: string; email: string; role: string }
-}
-
-export async function setAuthCookie(token: string) {
+export const setAuthCookie = async (token: string, rememberMe: boolean = false) => {
   const cookieStore = await cookies()
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7,
     path: "/",
   })
+}
+
+export async function verifyToken(token: string) {
+  const { payload } = await jwtVerify(token, SECRET)
+  return payload as { uuid: string; email: string; role: string }
 }
 
 export async function getAuthCookie() {

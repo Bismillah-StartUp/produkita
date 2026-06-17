@@ -14,8 +14,12 @@ import {
 } from "./auth.controller"
 import { signOtpNavigationToken, verifyOtpNavigationToken } from "./auth.token"
 
-export const login = async (email: string, password: string) => {
-  return await loginController(email, password)
+export const login = async (
+  email: string,
+  password: string,
+  rememberMe: boolean = false
+) => {
+  return await loginController(email, password, rememberMe)
 }
 
 export const register = async (
