@@ -11,6 +11,7 @@ import {
   verifyUpdateEmailController,
   updatePasswordController,
 } from "./auth.controller"
+import { signOtpNavigationToken, verifyOtpNavigationToken } from "./auth.token"
 
 export const login = async (email: string, password: string) => {
   return await loginController(email, password)
@@ -51,4 +52,12 @@ export const verifyUpdateEmail = async (uuid: string, newEmail: string, otp: str
 
 export const updatePasswordAction = async (uuid: string, oldPassword: string, newPassword: string) => {
   return await updatePasswordController(uuid, oldPassword, newPassword)
+}
+
+export const generateOtpToken = async (email: string) => {
+  return await signOtpNavigationToken(email)
+}
+
+export const verifyOtpToken = async (token: string) => {
+  return await verifyOtpNavigationToken(token)
 }

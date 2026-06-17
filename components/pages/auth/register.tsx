@@ -1,11 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import { generateOtpToken } from '@/servers/auth/auth.actions'
 
 export default function RegisterForm() {
+  const router = useRouter()
+  const { register, loading, error } = useAuth()
+
   const [nama, setNama] = useState('')
   const [email, setEmail] = useState('')
   const [umkm, setUmkm] = useState('')
@@ -13,7 +19,6 @@ export default function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,11 +26,12 @@ export default function RegisterForm() {
       alert('Password tidak cocok!')
       return
     }
-    setIsLoading(true)
-    // TODO: Implement register logic
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+
+    const result = await register(email, password, nama, umkm)
+    if (result) {
+      const token = await generateOtpToken(email)
+      router.push(`/otp/${token}`)
+    }
   }
 
   return (
@@ -43,11 +49,16 @@ export default function RegisterForm() {
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Daftarkan UMKM Anda</h1>
         <p className="text-slate-600 mb-8">Bergabunglah dengan platform untuk mengelola produk & keuangan Anda.</p>
 
+        {/* Error */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* UMKM and Nama - Two Columns */}
           <div className="grid grid-cols-2 gap-4">
-            {/* UMKM Field */}
             <div>
               <label htmlFor="umkm" className="block text-sm font-medium text-slate-900 mb-2">
                 Nama UMKM
@@ -62,8 +73,7 @@ export default function RegisterForm() {
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
               />
             </div>
-            
-            {/* Nama Field */}
+
             <div>
               <label htmlFor="nama" className="block text-sm font-medium text-slate-900 mb-2">
                 Nama Pemilik
@@ -80,7 +90,6 @@ export default function RegisterForm() {
             </div>
           </div>
 
-          {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-900 mb-2">
               Email
@@ -96,7 +105,6 @@ export default function RegisterForm() {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-slate-900 mb-2">
               Kata Sandi
@@ -121,7 +129,6 @@ export default function RegisterForm() {
             </div>
           </div>
 
-          {/* Confirm Password Field */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-900 mb-2">
               Konfirmasi Kata Sandi
@@ -146,17 +153,15 @@ export default function RegisterForm() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors"
           >
-            {isLoading ? 'Loading...' : 'Daftar Sekarang'}
+            {loading ? 'Loading...' : 'Daftar Sekarang'}
           </Button>
         </form>
 
-        {/* Sign In Link */}
         <p className="text-center text-sm text-slate-600 mt-8">
           Sudah punya akun?{' '}
           <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">

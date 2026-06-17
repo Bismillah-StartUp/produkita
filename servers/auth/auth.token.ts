@@ -38,3 +38,16 @@ export async function removeAuthCookie() {
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE_NAME)
 }
+
+export const signOtpNavigationToken = async (email: string) => {
+  return await new SignJWT({ email })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("10m")
+    .setIssuedAt()
+    .sign(SECRET)
+}
+
+export const verifyOtpNavigationToken = async (token: string) => {
+  const { payload } = await jwtVerify(token, SECRET)
+  return payload as { email: string }
+}
