@@ -16,6 +16,7 @@ import {
   updateEmail,
   updatePassword,
   createUserWithTenant,
+  resendOtpService,
 } from "./auth.service"
 
 import {
@@ -154,4 +155,9 @@ export const updatePasswordController = async (uuid: string, oldPassword: string
   if (!isValid) throw new Error("Password lama salah")
 
   return await updatePassword(uuid, newPassword)
+}
+
+export const resendOtpController = async (email: string) => {
+  if (!email) throw new Error("Email wajib diisi")
+  return await resendOtpService(email)
 }

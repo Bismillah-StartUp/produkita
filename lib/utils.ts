@@ -51,3 +51,9 @@ export const generateBarcode = async (value: string) => {
 
   return `data:image/png;base64,${pngBuffer.toString("base64")}`
 }
+
+export const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}

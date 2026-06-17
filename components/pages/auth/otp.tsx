@@ -1,18 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AlertCircle, Info } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { formatTime } from '@/lib/utils'
 
 interface OTPFormProps {
-  email?: string
-  onSubmit?: (otp: string) => void
+  email: string
+  token: string
 }
 
-export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPFormProps) {
+export default function OTPForm({ email, token }: OTPFormProps) {
+  const router = useRouter()
+  const { verifyOtp, loading, error } = useAuth()
+
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [timeLeft, setTimeLeft] = useState(115) // 1:55
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [timeLeft, setTimeLeft] = useState(180)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendError, setResendError] = useState('')
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -28,30 +34,14 @@ export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPF
     newOtp[index] = value.slice(-1)
     setOtp(newOtp)
 
-    // Auto-focus next field
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`)
       nextInput?.focus()
     }
 
-    // Auto-submit when all 6 digits are filled
     if (newOtp.join('').length === 6) {
       handleSubmitOtp(newOtp.join(''))
     }
-  }
-
-  const handleSubmitOtp = async (fullOtp: string) => {
-    setError('')
-    setIsLoading(true)
-    
-    // TODO: Implement OTP verification logic
-    if (onSubmit) {
-      onSubmit(fullOtp)
-    }
-    
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
   }
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -61,16 +51,26 @@ export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPF
     }
   }
 
-  const handleResend = async () => {
-    // TODO: Implement resend OTP logic
-    setTimeLeft(115)
-    setOtp(['', '', '', '', '', ''])
+  const handleSubmitOtp = async (fullOtp: string) => {
+    const result = await verifyOtp(email, fullOtp)
+    if (result) {
+      router.push('/login')
+    }
   }
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+  const handleResend = async () => {
+    setResendLoading(true)
+    setResendError('')
+    try {
+      const { resendOtp } = await import('@/servers/auth/auth.actions')
+      await resendOtp(email)
+      setTimeLeft(180)
+      setOtp(['', '', '', '', '', ''])
+    } catch (err: any) {
+      setResendError(err.message)
+    } finally {
+      setResendLoading(false)
+    }
   }
 
   return (
@@ -89,9 +89,8 @@ export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPF
         <p className="text-slate-600 mb-2">Kami telah mengirimkan kode OTP 6 digit ke email</p>
         <p className="text-slate-900 font-semibold mb-8">{email}</p>
 
-        {/* OTP Form */}
         <div className="space-y-6">
-          {/* OTP Input Fields */}
+          {/* OTP Input */}
           <div className="flex gap-3 justify-center">
             {otp.map((digit, index) => (
               <input
@@ -111,19 +110,20 @@ export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPF
           {/* Timer */}
           <div className="text-center">
             <p className="text-sm text-slate-600">
-              Kode akan kadaluarsa dalam <span className="font-bold text-blue-600">{formatTime(timeLeft)}</span>
+              Kode akan kadaluarsa dalam{' '}
+              <span className="font-bold text-blue-600">{formatTime(timeLeft)}</span>
             </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
+          {/* Error */}
+          {(error || resendError) && (
             <div className="flex gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-600">{error || resendError}</p>
             </div>
           )}
 
-          {/* Info Message */}
+          {/* Info */}
           <div className="flex gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />
             <p className="text-sm text-blue-600">
@@ -131,27 +131,30 @@ export default function OTPForm({ email = 'namaanda@gmail.com', onSubmit }: OTPF
             </p>
           </div>
 
-          {/* Loading State */}
-          {isLoading && (
+          {/* Loading */}
+          {loading && (
             <div className="text-center">
               <p className="text-sm text-blue-600 font-medium">Memverifikasi kode OTP...</p>
             </div>
           )}
         </div>
 
-        {/* Resend Code Section */}
-        <div className="mt-8 text-center space-y-3">
+        {/* Resend */}
+        <div className="mt-8 text-center">
           <p className="text-sm text-slate-600">
             Tidak menerima kode?{' '}
             {timeLeft === 0 ? (
               <button
                 onClick={handleResend}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                disabled={resendLoading}
+                className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
               >
-                Kirim ulang kode
+                {resendLoading ? 'Mengirim...' : 'Kirim ulang kode'}
               </button>
             ) : (
-              <span className="text-slate-500">Tunggu {formatTime(timeLeft)} untuk mengirim ulang</span>
+              <span className="text-slate-500">
+                Tunggu {formatTime(timeLeft)} untuk mengirim ulang
+              </span>
             )}
           </p>
         </div>

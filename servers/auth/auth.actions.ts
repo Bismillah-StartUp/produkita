@@ -10,6 +10,7 @@ import {
   requestUpdateEmailController,
   verifyUpdateEmailController,
   updatePasswordController,
+  resendOtpController,
 } from "./auth.controller"
 import { signOtpNavigationToken, verifyOtpNavigationToken } from "./auth.token"
 
@@ -60,4 +61,8 @@ export const generateOtpToken = async (email: string) => {
 
 export const verifyOtpToken = async (token: string) => {
   return await verifyOtpNavigationToken(token)
+}
+
+export const resendOtp = async (email: string) => {
+  return await resendOtpController(email)
 }

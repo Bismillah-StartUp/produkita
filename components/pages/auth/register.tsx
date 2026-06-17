@@ -30,7 +30,8 @@ export default function RegisterForm() {
     const result = await register(email, password, nama, umkm)
     if (result) {
       const token = await generateOtpToken(email)
-      router.push(`/otp/${token}`)
+      // encode token agar aman di URL
+      router.push(`/otp/${encodeURIComponent(token)}`)
     }
   }
 
@@ -164,7 +165,7 @@ export default function RegisterForm() {
 
         <p className="text-center text-sm text-slate-600 mt-8">
           Sudah punya akun?{' '}
-          <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
             Masuk di sini
           </Link>
         </p>

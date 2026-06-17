@@ -1,3 +1,4 @@
+import { sendOtpMail } from "@/lib/emails/sendingOtp"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
@@ -160,4 +161,16 @@ export const findUserByEmailExcludeUuid = async (email: string, uuid: string) =>
       NOT: { uuid },
     },
   })
+}
+
+export const resendOtpService = async (email: string) => {
+  const user = await findUserByEmail(email)
+  if (!user) throw new Error("Email tidak ditemukan")
+  if (user.is_verified) throw new Error("Akun sudah terverifikasi")
+
+  const otp = generateOtp()
+  await saveOtp(user.id, otp)
+  await sendOtpMail(email, otp)
+
+  return { email }
 }
