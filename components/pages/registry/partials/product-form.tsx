@@ -1,18 +1,26 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Package, Image as ImageIcon } from 'lucide-react'
-import Image from 'next/image'
+import { useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
+
+type Satuan = "ml" | "g" | "kg" | "L" | "pcs"
+
+interface JenisOption {
+  id: string
+  label: string
+}
 
 export interface ProductFormData {
-  productPhoto: File | null
-  productPhotoPreview: string
   productName: string
   brandName: string
   price: string
   weight: string
-  unit: string
+  unit: Satuan
+  jenis: string[]
+  deskripsi: string
+  productPhoto: File[]
+  productPhotoPreview: string[]
 }
 
 interface ProductInfoFormProps {
@@ -21,320 +29,394 @@ interface ProductInfoFormProps {
   isLoading?: boolean
 }
 
+const SATUAN_OPTIONS: Satuan[] = ["ml", "g", "kg", "L", "pcs"]
+
+const JENIS_OPTIONS: JenisOption[] = [
+  { id: "fnb", label: "Food & Beverage" },
+  { id: "fnb-short", label: "FnB" },
+]
+
+const TIPS_FOTO: string[] = [
+  "Gunakan latar belakang putih/terang",
+  "Tampilkan label/kemasan produk jelas",
+  "Resolusi minimal 800×800 px",
+]
+
+const MAX_PHOTOS = 5
+
+const INITIAL_FORM: ProductFormData = {
+  productName: "",
+  brandName: "",
+  price: "",
+  weight: "",
+  unit: "ml",
+  jenis: ["Food & Beverage"],
+  deskripsi: "",
+  productPhoto: [],
+  productPhotoPreview: [],
+}
+
 export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: ProductInfoFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
-    productPhoto: initialData?.productPhoto ?? null,
-    productPhotoPreview: initialData?.productPhotoPreview ?? '',
-    productName: initialData?.productName ?? '',
-    brandName: initialData?.brandName ?? '',
-    price: initialData?.price ?? '',
-    weight: initialData?.weight ?? '',
-    unit: initialData?.unit ?? 'ml',
+    ...INITIAL_FORM,
+    ...initialData,
   })
-
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isDragging, setIsDragging] = useState(false)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({
-          ...prev,
-          productPhoto: 'Ukuran file maksimal 5MB',
-        }))
-        return
-      }
+  const mainUploadRef = useRef<HTMLInputElement>(null)
 
-      // Validate file type
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        setErrors(prev => ({
-          ...prev,
-          productPhoto: 'Format file harus JPG atau PNG',
-        }))
-        return
-      }
-
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          productPhoto: file,
-          productPhotoPreview: reader.result as string,
-        }))
-        setErrors(prev => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { productPhoto, ...rest } = prev
-          return rest
-        })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev }
-        delete newErrors[name]
-        return newErrors
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next[name]
+        return next
       })
     }
   }
 
+  const handleToggleJenis = (label: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      jenis: prev.jenis.includes(label) ? prev.jenis.filter((j) => j !== label) : [...prev.jenis, label],
+    }))
+  }
+
+  const addPhotos = (files: FileList | null) => {
+    if (!files) return
+    const allowed = MAX_PHOTOS - formData.productPhoto.length
+    const incoming = Array.from(files).slice(0, allowed)
+
+    const validFiles = incoming.filter((f) => {
+      if (f.size > 2 * 1024 * 1024) return false
+      if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) return false
+      return true
+    })
+
+    const newPreviews: string[] = []
+    let loaded = 0
+
+    validFiles.forEach((file) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        newPreviews.push(reader.result as string)
+        loaded++
+        if (loaded === validFiles.length) {
+          setFormData((prev) => ({
+            ...prev,
+            productPhoto: [...prev.productPhoto, ...validFiles],
+            productPhotoPreview: [...prev.productPhotoPreview, ...newPreviews],
+          }))
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const handleMainUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    addPhotos(e.target.files)
+    e.target.value = ""
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+  const handleDragLeave = () => setIsDragging(false)
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    addPhotos(e.dataTransfer.files)
+  }
+
+  const removePhoto = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      productPhoto: prev.productPhoto.filter((_, i) => i !== index),
+      productPhotoPreview: prev.productPhotoPreview.filter((_, i) => i !== index),
+    }))
+  }
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-
-    if (!formData.productPhoto) {
-      newErrors.productPhoto = 'Foto produk wajib diunggah'
-    }
-    if (!formData.productName.trim()) {
-      newErrors.productName = 'Nama produk wajib diisi'
-    }
-    if (!formData.brandName.trim()) {
-      newErrors.brandName = 'Nama brand wajib diisi'
-    }
-    if (!formData.price.trim()) {
-      newErrors.price = 'Harga wajib diisi'
-    }
-    if (!formData.weight.trim()) {
-      newErrors.weight = 'Berat/volume wajib diisi'
-    }
-
+    if (formData.productPhoto.length === 0) newErrors.productPhoto = "Foto produk wajib diunggah"
+    if (!formData.productName.trim()) newErrors.productName = "Nama produk wajib diisi"
+    if (!formData.brandName.trim()) newErrors.brandName = "Nama brand wajib diisi"
+    if (!formData.price.trim()) newErrors.price = "Harga wajib diisi"
+    if (!formData.weight.trim()) newErrors.weight = "Berat/volume wajib diisi"
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validateForm() && onSubmit) {
-      onSubmit(formData)
-    }
+    if (validateForm() && onSubmit) onSubmit(formData)
   }
 
-  const resetForm = () => {
-    setFormData({
-      productPhoto: null,
-      productPhotoPreview: '',
-      productName: '',
-      brandName: '',
-      price: '',
-      weight: '',
-      unit: 'ml',
-    })
+  const handleReset = () => {
+    setFormData(INITIAL_FORM)
     setErrors({})
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Main Card Container */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        {/* Header */}
-        <div className="border-b border-gray-200 px-8 py-6">
-          <div className="flex items-center gap-3">
-            <Package className="h-6 w-6 text-blue-600" />
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">Informasi Produk</h2>
-            </div>
-          </div>
-        </div>
-
-        {/* Content: Two Column Layout */}
-        <div className="grid gap-6 px-8 py-8 lg:grid-cols-2">
-          {/* Product Photo Section - Left Column */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Foto Produk <span className="text-red-500">*</span>
-            </label>
-
-            {formData.productPhotoPreview ? (
-              <div className="mt-4 space-y-3">
-                <div className="relative h-64 w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                  <Image
-                    src={formData.productPhotoPreview}
-                    alt="Preview"
-                    className="h-full w-full object-cover"
-                    width={300}
-                    height={300}
-                  />
-                </div>
-                <label htmlFor="productPhoto" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full text-sm">
-                    Ubah Foto
-                  </Button>
-                </label>
-              </div>
-            ) : (
-              <label htmlFor="productPhoto" className="cursor-pointer">
-                <div className="mt-4 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-20 transition-all hover:border-blue-400 hover:bg-blue-50">
-                  <ImageIcon className="h-10 w-10 text-gray-400" />
-                  <p className="mt-2 text-sm font-medium text-gray-700">Upload foto produk</p>
-                  <p className="mt-1 text-xs text-gray-500">dengan kualitas baik</p>
-                  <div className="mt-3 space-y-0.5 text-xs text-gray-500">
-                    <p>• Format: JPG, PNG (max 5MB)</p>
-                    <p>• Resolusi minimal: 800x800px</p>
-                    <p>• Background putih atau netral</p>
-                  </div>
-                </div>
-              </label>
-            )}
-
-            <input
-              id="productPhoto"
-              type="file"
-              accept="image/jpeg,image/png"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            {errors.productPhoto && (
-              <p className="mt-2 text-xs font-semibold text-red-600">
-                {errors.productPhoto}
-              </p>
-            )}
-          </div>
-
-          {/* Product Details Section - Right Column */}
-          <div className="space-y-5 lg:py-5">
-            {/* Product Name */}
-            <div>
-              <label htmlFor="productName" className="block text-sm font-semibold text-gray-700">
-                Nama Produk <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="productName"
-                name="productName"
-                value={formData.productName}
-                onChange={handleChange}
-                placeholder="Contoh: Sambal Pedas Original"
-                className={`mt-2 block w-full rounded-lg border ${
-                  errors.productName ? 'border-red-500' : 'border-gray-300'
-                } bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-              />
-              {errors.productName && (
-                <p className="mt-1 text-xs font-semibold text-red-600">
-                  {errors.productName}
-                </p>
-              )}
-            </div>
-
-            {/* Brand Name */}
-            <div>
-              <label htmlFor="brandName" className="block text-sm font-semibold text-gray-700">
-                Nama Brand <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="brandName"
-                name="brandName"
-                value={formData.brandName}
-                onChange={handleChange}
-                placeholder="Contoh: Rasa Nusantara"
-                className={`mt-2 block w-full rounded-lg border ${
-                  errors.brandName ? 'border-red-500' : 'border-gray-300'
-                } bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-              />
-              {errors.brandName && (
-                <p className="mt-1 text-xs font-semibold text-red-600">
-                  {errors.brandName}
-                </p>
-              )}
-            </div>
-
-            {/* Price and Weight Row */}
-            <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={handleSubmit}>
+      <div className="rounded-xl border border-gray-200 bg-white">
+        <div className="flex gap-0 divide-x divide-gray-200">
+          <div className="flex-65 space-y-6 p-8">
+            <div className="grid grid-cols-2 gap-5">
               <div>
-                <label htmlFor="price" className="block text-sm font-semibold text-gray-700">
-                  Harga <span className="text-red-500">*</span>
-                </label>
-                <div className="relative mt-2">
-                  <span className="absolute left-3 top-2.5 text-gray-500">Rp</span>
-                  <input
-                    type="text"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    placeholder="25.000"
-                    className={`block w-full rounded-lg border ${
-                      errors.price ? 'border-red-500' : 'border-gray-300'
-                    } bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                  />
-                </div>
-                {errors.price && (
-                  <p className="mt-1 text-xs font-semibold text-red-600">
-                    {errors.price}
-                  </p>
-                )}
+                <label className="mb-1.5 block text-sm font-semibold text-gray-800">Nama Produk</label>
+                <input
+                  type="text"
+                  name="productName"
+                  value={formData.productName}
+                  onChange={handleChange}
+                  placeholder="Contoh: Susu Segar Full Cream 1L"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    errors.productName ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
+                  }`}
+                />
+                {errors.productName && <p className="mt-1 text-xs text-red-500">{errors.productName}</p>}
               </div>
 
               <div>
-                <label htmlFor="weight" className="block text-sm font-semibold text-gray-700">
-                  Berat/Volume <span className="text-red-500">*</span>
-                </label>
-                <div className="mt-2 grid grid-cols-3 gap-3">
+                <label className="mb-1.5 block text-sm font-semibold text-gray-800">Nama Brand</label>
+                <input
+                  type="text"
+                  name="brandName"
+                  value={formData.brandName}
+                  onChange={handleChange}
+                  placeholder="Contoh: Cimory Yogurt"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    errors.brandName ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
+                  }`}
+                />
+                {errors.brandName && <p className="mt-1 text-xs text-red-500">{errors.brandName}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-gray-800">Harga</label>
+                <input
+                  type="text"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="Contoh: 100.000"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    errors.price ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
+                  }`}
+                />
+                {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-gray-800">Berat/Volume</label>
+                <div className="flex gap-2">
                   <input
                     type="text"
-                    id="weight"
                     name="weight"
                     value={formData.weight}
                     onChange={handleChange}
-                    placeholder="250"
-                    className={`col-span-2 rounded-lg border ${
-                      errors.weight ? 'border-red-500' : 'border-gray-300'
-                    } bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                    placeholder="Contoh: 1000"
+                    className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                      errors.weight ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
+                    }`}
                   />
                   <select
                     name="unit"
                     value={formData.unit}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-300 bg-gray-50 px-2 py-2 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-20 rounded-lg border border-gray-200 bg-white px-2 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="pcs">pcs</option>
+                    {SATUAN_OPTIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                {errors.weight && (
-                  <p className="mt-1 text-xs font-semibold text-red-600">
-                    {errors.weight}
-                  </p>
-                )}
+                {errors.weight && <p className="mt-1 text-xs text-red-500">{errors.weight}</p>}
+              </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-gray-800">Jenis</label>
+              <div className="flex flex-wrap gap-2">
+                {JENIS_OPTIONS.map((opt) => {
+                  const active = formData.jenis.includes(opt.label)
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleToggleJenis(opt.label)}
+                      className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition ${
+                        active
+                          ? "border-blue-600 text-blue-600 bg-white"
+                          : "border-gray-200 text-gray-500 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
-            {/* Submit Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700"
-              >
-                {isLoading ? 'Memproses...' : 'Lanjutkan'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="px-6 py-6 font-semibold"
-                onClick={resetForm}
-              >
-                Bersihkan
-              </Button>
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-gray-800">Deskripsi Produk</label>
+              <textarea
+                name="deskripsi"
+                value={formData.deskripsi}
+                onChange={handleChange}
+                placeholder="Keripik singkong renyah dengan bumbu balado khas, dibuat dari singkong pilihan."
+                rows={3}
+                className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
             </div>
           </div>
+
+          <div className="flex-35 p-6">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-800">Foto Produk</span>
+              <span className="text-sm font-medium text-blue-600">
+                {formData.productPhoto.length}/{MAX_PHOTOS} Foto
+              </span>
+            </div>
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => mainUploadRef.current?.click()}
+              className={`relative mb-3 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gray-50 py-8 transition ${
+                isDragging ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-400 hover:bg-blue-50"
+              }`}
+            >
+              {formData.productPhotoPreview[0] ? (
+                <div className="relative h-36 w-full overflow-hidden rounded-lg">
+                  <Image src={formData.productPhotoPreview[0]} alt="Foto utama" fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removePhoto(0)
+                    }}
+                    className="absolute right-2 top-2 rounded-full bg-white/80 p-0.5 text-gray-600 hover:bg-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+                    <svg
+                      className="h-5 w-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      viewBox="0 0 24 24"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">Upload Foto Produk</p>
+                  <p className="mt-0.5 text-xs text-gray-500">Klik atau seret foto ke sini</p>
+                  <p className="mt-0.5 text-xs text-gray-400">PNG, JPG, WEBP • Maks. 2MB</p>
+                </>
+              )}
+            </div>
+            {errors.productPhoto && <p className="mb-2 text-xs text-red-500">{errors.productPhoto}</p>}
+
+            <input
+              ref={mainUploadRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={handleMainUpload}
+              className="hidden"
+            />
+
+            <div className="mb-4 grid grid-cols-4 gap-2">
+              {[1, 2, 3, 4].map((slotIndex) => {
+                const preview = formData.productPhotoPreview[slotIndex]
+                return (
+                  <div
+                    key={slotIndex}
+                    onClick={() => {
+                      if (!preview) mainUploadRef.current?.click()
+                    }}
+                    className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
+                      preview ? "" : "border-gray-200 hover:border-blue-400"
+                    }`}
+                  >
+                    {preview ? (
+                      <>
+                        <Image src={preview} alt={`Foto ${slotIndex + 1}`} fill className="rounded-lg object-cover" />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removePhoto(slotIndex)
+                          }}
+                          className="absolute right-0.5 top-0.5 rounded-full bg-white/80 p-0.5 text-[10px] text-gray-600 hover:bg-white"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="mb-1 h-4 w-4 text-gray-300"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                          viewBox="0 0 24 24"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <path d="m21 15-5-5L5 21" />
+                        </svg>
+                        <span className="text-[10px] text-gray-400">Foto {slotIndex + 1}</span>
+                      </>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div>
+              <p className="mb-1.5 text-xs font-semibold text-gray-700">💡 Tips foto produk</p>
+              {TIPS_FOTO.map((tip, i) => (
+                <p key={i} className="text-xs leading-relaxed text-gray-500">
+                  {tip}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4 border-t border-gray-200 px-8 py-5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleReset}
+            className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+          >
+            Bersihkan
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            {isLoading ? "Memproses..." : "Selanjutnya →"}
+          </Button>
         </div>
       </div>
     </form>

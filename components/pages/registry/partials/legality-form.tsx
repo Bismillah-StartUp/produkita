@@ -1,27 +1,213 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { BadgeCheck, FileBadge, PackageCheck, Shield } from 'lucide-react'
+import { useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+
+function TogglePill({
+  checked,
+  onChange,
+  color,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+  color: "blue" | "purple" | "green" | "orange"
+}) {
+  const activeCls: Record<string, string> = {
+    blue: "bg-blue-600 text-white",
+    purple: "bg-purple-500 text-white",
+    green: "bg-green-500 text-white",
+    orange: "bg-orange-400 text-white",
+  }
+  const active = activeCls[color]
+  const inactive = "bg-white text-gray-500"
+
+  return (
+    <div className="flex gap-0.5 rounded-full border border-gray-200 bg-gray-100 p-0.5">
+      <button
+        type="button"
+        onClick={() => onChange(false)}
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${!checked ? active : inactive}`}
+      >
+        Tidak
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(true)}
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${checked ? active : inactive}`}
+      >
+        Punya
+      </button>
+    </div>
+  )
+}
+
+function UploadArea({
+  color,
+  fileName,
+  onUpload,
+  disabled = false,
+}: {
+  color: "blue" | "purple" | "green" | "orange"
+  fileName?: string
+  onUpload: (preview: string, name: string) => void
+  disabled?: boolean
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const ringCls: Record<string, string> = {
+    blue: "bg-blue-500",
+    purple: "bg-purple-400",
+    green: "bg-green-500",
+    orange: "bg-orange-400",
+  }
+  const borderCls: Record<string, string> = {
+    blue: "border-blue-100 bg-blue-50 hover:opacity-80",
+    purple: "border-purple-100 bg-purple-50 hover:opacity-80",
+    green: "border-green-100 bg-green-50 hover:opacity-80",
+    orange: "border-orange-100 bg-orange-50 hover:opacity-80",
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return
+
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran file maksimal 5MB")
+      e.target.value = ""
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      onUpload(reader.result as string, file.name)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div
+      onClick={() => !disabled && fileInputRef.current?.click()}
+      className={`flex items-center gap-3 rounded-lg border px-4 py-3 transition ${
+        disabled ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-60" : `cursor-pointer ${borderCls[color]}`
+      }`}
+    >
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+          disabled ? "bg-gray-300" : ringCls[color]
+        }`}
+      >
+        {fileName ? (
+          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16" />
+          </svg>
+        )}
+      </div>
+      <div className="overflow-hidden">
+        <p className={`truncate text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>
+          {fileName || "Upload File"}
+        </p>
+        <p className={`text-xs ${disabled ? "text-gray-300" : "text-gray-400"}`}>
+          {fileName ? "Klik untuk mengganti" : "PDF, JPG, PNG (Max. 5MB)"}
+        </p>
+      </div>
+
+      <input
+        type="file"
+        className="hidden"
+        ref={fileInputRef}
+        accept=".pdf,image/jpeg,image/png,image/webp"
+        onChange={handleFileChange}
+        disabled={disabled}
+      />
+    </div>
+  )
+}
+
+function Field({
+  label,
+  id,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  error,
+  required,
+  disabled = false,
+}: {
+  label: string
+  id: string
+  name: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  placeholder?: string
+  type?: string
+  error?: string
+  required?: boolean
+  disabled?: boolean
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className={`mb-1.5 block text-sm font-semibold transition-colors ${disabled ? "text-gray-400" : "text-gray-800"}`}
+      >
+        {label} {required && !disabled && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        type={type}
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition ${
+          disabled
+            ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400 placeholder-gray-300"
+            : error
+              ? "border-red-400 bg-red-50 text-gray-900"
+              : "border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        }`}
+      />
+      {error && !disabled && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  )
+}
 
 export interface LegalityFormData {
   hasBpom: boolean
   hasPirt: boolean
   hasHalal: boolean
+  hasCoa: boolean
   bpomNumber: string
-  productCategory: string
   bpomRegistrationDate: string
   bpomValidUntil: string
+  bpomFilePreview?: string
+  bpomFileName?: string
   pirtNumber: string
   pirtRegistrationDate: string
   pirtValidUntil: string
+  pirtFilePreview?: string
+  pirtFileName?: string
   halalCertificateNumber: string
   halalCertifiedBy: string
   halalIssuanceDate: string
   halalValidUntil: string
+  halalFilePreview?: string
+  halalFileName?: string
+  coaNumber: string
+  coaLaboratoryName: string
+  coaTestDate: string
+  coaFilePreview?: string
+  coaFileName?: string
 }
-
-const DEFAULT_PRODUCT_CATEGORY = 'Food & Beverage'
 
 interface LegalityFormProps {
   onSubmit?: (data: LegalityFormData) => void
@@ -34,424 +220,512 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
   const initialHasBpom = initialData?.hasBpom ?? Boolean(initialData?.bpomNumber)
   const initialHasPirt = initialData?.hasPirt ?? Boolean(initialData?.pirtNumber)
   const initialHasHalal = initialData?.hasHalal ?? Boolean(initialData?.halalCertificateNumber)
+  const initialHasCoa = initialData?.hasCoa ?? Boolean(initialData?.coaNumber)
 
   const [hasBpom, setHasBpom] = useState(initialHasBpom)
   const [hasPirt, setHasPirt] = useState(initialHasPirt)
   const [hasHalal, setHasHalal] = useState(initialHasHalal)
+  const [hasCoa, setHasCoa] = useState(initialHasCoa)
+
   const [formData, setFormData] = useState<LegalityFormData>({
     hasBpom: initialHasBpom,
     hasPirt: initialHasPirt,
     hasHalal: initialHasHalal,
-    bpomNumber: initialData?.bpomNumber ?? '',
-    productCategory: DEFAULT_PRODUCT_CATEGORY,
-    bpomRegistrationDate: initialData?.bpomRegistrationDate ?? '',
-    bpomValidUntil: initialData?.bpomValidUntil ?? '',
-    pirtNumber: initialData?.pirtNumber ?? '',
-    pirtRegistrationDate: initialData?.pirtRegistrationDate ?? '',
-    pirtValidUntil: initialData?.pirtValidUntil ?? '',
-    halalCertificateNumber: initialData?.halalCertificateNumber ?? '',
-    halalCertifiedBy: initialData?.halalCertifiedBy ?? '',
-    halalIssuanceDate: initialData?.halalIssuanceDate ?? '',
-    halalValidUntil: initialData?.halalValidUntil ?? '',
+    hasCoa: initialHasCoa,
+    bpomNumber: initialData?.bpomNumber ?? "",
+    bpomRegistrationDate: initialData?.bpomRegistrationDate ?? "",
+    bpomValidUntil: initialData?.bpomValidUntil ?? "",
+    bpomFilePreview: initialData?.bpomFilePreview ?? "",
+    bpomFileName: initialData?.bpomFileName ?? "",
+    pirtNumber: initialData?.pirtNumber ?? "",
+    pirtRegistrationDate: initialData?.pirtRegistrationDate ?? "",
+    pirtValidUntil: initialData?.pirtValidUntil ?? "",
+    pirtFilePreview: initialData?.pirtFilePreview ?? "",
+    pirtFileName: initialData?.pirtFileName ?? "",
+    halalCertificateNumber: initialData?.halalCertificateNumber ?? "",
+    halalCertifiedBy: initialData?.halalCertifiedBy ?? "",
+    halalIssuanceDate: initialData?.halalIssuanceDate ?? "",
+    halalValidUntil: initialData?.halalValidUntil ?? "",
+    halalFilePreview: initialData?.halalFilePreview ?? "",
+    halalFileName: initialData?.halalFileName ?? "",
+    coaNumber: initialData?.coaNumber ?? "",
+    coaLaboratoryName: initialData?.coaLaboratoryName ?? "",
+    coaTestDate: initialData?.coaTestDate ?? "",
+    coaFilePreview: initialData?.coaFilePreview ?? "",
+    coaFileName: initialData?.coaFileName ?? "",
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-
+    setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) {
       setErrors((prev) => {
-        const nextErrors = { ...prev }
-        delete nextErrors[name]
-        return nextErrors
+        const n = { ...prev }
+        delete n[name]
+        return n
       })
     }
   }
 
   const clearSectionErrors = (fieldNames: string[]) => {
     setErrors((prev) => {
-      const nextErrors = { ...prev }
-      fieldNames.forEach((fieldName) => {
-        delete nextErrors[fieldName]
-      })
-      return nextErrors
+      const n = { ...prev }
+      fieldNames.forEach((f) => delete n[f])
+      return n
     })
   }
 
-  const toggleSection = (section: 'bpom' | 'pirt' | 'halal', checked: boolean) => {
-    if (section === 'bpom') {
+  const toggleSection = (section: "bpom" | "pirt" | "halal" | "coa", checked: boolean) => {
+    if (section === "bpom") {
       setHasBpom(checked)
       setFormData((prev) => ({
         ...prev,
         hasBpom: checked,
-        bpomNumber: checked ? prev.bpomNumber : '',
-        bpomRegistrationDate: checked ? prev.bpomRegistrationDate : '',
-        bpomValidUntil: checked ? prev.bpomValidUntil : '',
+        ...(checked
+          ? {}
+          : { bpomNumber: "", bpomRegistrationDate: "", bpomValidUntil: "", bpomFilePreview: "", bpomFileName: "" }),
       }))
-      if (!checked) {
-        clearSectionErrors(['bpomNumber', 'bpomRegistrationDate', 'bpomValidUntil'])
-      }
+      if (!checked) clearSectionErrors(["bpomNumber", "bpomRegistrationDate", "bpomValidUntil"])
       return
     }
-
-    if (section === 'pirt') {
+    if (section === "pirt") {
       setHasPirt(checked)
       setFormData((prev) => ({
         ...prev,
         hasPirt: checked,
-        pirtNumber: checked ? prev.pirtNumber : '',
-        pirtRegistrationDate: checked ? prev.pirtRegistrationDate : '',
-        pirtValidUntil: checked ? prev.pirtValidUntil : '',
+        ...(checked
+          ? {}
+          : { pirtNumber: "", pirtRegistrationDate: "", pirtValidUntil: "", pirtFilePreview: "", pirtFileName: "" }),
       }))
-      if (!checked) {
-        clearSectionErrors(['pirtNumber', 'pirtRegistrationDate', 'pirtValidUntil'])
-      }
+      if (!checked) clearSectionErrors(["pirtNumber", "pirtRegistrationDate", "pirtValidUntil"])
       return
     }
-
-    setHasHalal(checked)
+    if (section === "halal") {
+      setHasHalal(checked)
+      setFormData((prev) => ({
+        ...prev,
+        hasHalal: checked,
+        ...(checked
+          ? {}
+          : {
+              halalCertificateNumber: "",
+              halalCertifiedBy: "",
+              halalIssuanceDate: "",
+              halalValidUntil: "",
+              halalFilePreview: "",
+              halalFileName: "",
+            }),
+      }))
+      if (!checked)
+        clearSectionErrors(["halalCertificateNumber", "halalCertifiedBy", "halalIssuanceDate", "halalValidUntil"])
+      return
+    }
+    setHasCoa(checked)
     setFormData((prev) => ({
       ...prev,
-      hasHalal: checked,
-      halalCertificateNumber: checked ? prev.halalCertificateNumber : '',
-      halalCertifiedBy: checked ? prev.halalCertifiedBy : '',
-      halalIssuanceDate: checked ? prev.halalIssuanceDate : '',
-      halalValidUntil: checked ? prev.halalValidUntil : '',
+      hasCoa: checked,
+      ...(checked ? {} : { coaNumber: "", coaLaboratoryName: "", coaTestDate: "", coaFilePreview: "", coaFileName: "" }),
     }))
-    if (!checked) {
-      clearSectionErrors(['halalCertificateNumber', 'halalCertifiedBy', 'halalIssuanceDate', 'halalValidUntil'])
-    }
+    if (!checked) clearSectionErrors(["coaNumber", "coaLaboratoryName", "coaTestDate"])
   }
 
   const validateForm = (): boolean => {
     const nextErrors: Record<string, string> = {}
-
-    if (!formData.productCategory.trim()) {
-      nextErrors.productCategory = 'Kategori produk wajib diisi'
-    }
-
     if (hasBpom) {
-      if (!formData.bpomNumber.trim()) {
-        nextErrors.bpomNumber = 'Nomor BPOM wajib diisi'
-      }
-      if (!formData.bpomRegistrationDate.trim()) {
-        nextErrors.bpomRegistrationDate = 'Tanggal registrasi wajib diisi'
-      }
-      if (!formData.bpomValidUntil.trim()) {
-        nextErrors.bpomValidUntil = 'Berlaku hingga wajib diisi'
-      }
+      if (!formData.bpomNumber.trim()) nextErrors.bpomNumber = "Nomor BPOM wajib diisi"
+      if (!formData.bpomRegistrationDate.trim()) nextErrors.bpomRegistrationDate = "Tanggal registrasi wajib diisi"
+      if (!formData.bpomValidUntil.trim()) nextErrors.bpomValidUntil = "Berlaku hingga wajib diisi"
     }
-
     if (hasPirt) {
-      if (!formData.pirtNumber.trim()) {
-        nextErrors.pirtNumber = 'Nomor PIRT wajib diisi'
-      }
-      if (!formData.pirtRegistrationDate.trim()) {
-        nextErrors.pirtRegistrationDate = 'Tanggal registrasi wajib diisi'
-      }
-      if (!formData.pirtValidUntil.trim()) {
-        nextErrors.pirtValidUntil = 'Berlaku hingga wajib diisi'
-      }
+      if (!formData.pirtNumber.trim()) nextErrors.pirtNumber = "Nomor PIRT wajib diisi"
+      if (!formData.pirtRegistrationDate.trim()) nextErrors.pirtRegistrationDate = "Tanggal registrasi wajib diisi"
+      if (!formData.pirtValidUntil.trim()) nextErrors.pirtValidUntil = "Berlaku hingga wajib diisi"
     }
-
     if (hasHalal) {
-      if (!formData.halalCertificateNumber.trim()) {
-        nextErrors.halalCertificateNumber = 'Nomor sertifikat halal wajib diisi'
-      }
-      if (!formData.halalCertifiedBy.trim()) {
-        nextErrors.halalCertifiedBy = 'Disertifikasi oleh wajib dipilih'
-      }
-      if (!formData.halalIssuanceDate.trim()) {
-        nextErrors.halalIssuanceDate = 'Tanggal terbit wajib diisi'
-      }
-      if (!formData.halalValidUntil.trim()) {
-        nextErrors.halalValidUntil = 'Berlaku hingga wajib diisi'
-      }
+      if (!formData.halalCertificateNumber.trim()) nextErrors.halalCertificateNumber = "Nomor sertifikat halal wajib diisi"
+      if (!formData.halalCertifiedBy.trim()) nextErrors.halalCertifiedBy = "Disertifikasi oleh wajib diisi"
+      if (!formData.halalIssuanceDate.trim()) nextErrors.halalIssuanceDate = "Tanggal terbit wajib diisi"
+      if (!formData.halalValidUntil.trim()) nextErrors.halalValidUntil = "Berlaku hingga wajib diisi"
     }
-
+    if (hasCoa) {
+      if (!formData.coaNumber.trim()) nextErrors.coaNumber = "Nomor COA wajib diisi"
+      if (!formData.coaLaboratoryName.trim()) nextErrors.coaLaboratoryName = "Nama laboratorium wajib diisi"
+      if (!formData.coaTestDate.trim()) nextErrors.coaTestDate = "Tanggal pengujian wajib diisi"
+    }
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validateForm() && onSubmit) {
-      onSubmit({
-        ...formData,
-        hasBpom,
-        hasPirt,
-        hasHalal,
-      })
-    }
+    if (validateForm() && onSubmit) onSubmit({ ...formData, hasBpom, hasPirt, hasHalal, hasCoa })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-8 py-6">
-          <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-gray-900" />
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+          <svg className="h-4 w-4 shrink-0 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <p className="text-sm text-blue-600">Anda dapat memilih lebih dari satu sertifikasi yang dimiliki produk</p>
+        </div>
+
+        {/* BPOM Section */}
+        <div className="overflow-hidden rounded-xl border border-blue-200">
+          <div className="flex items-center justify-between bg-blue-50 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-white shadow-sm">
+                <div className="flex items-end gap-0.5">
+                  <div className="h-4 w-0.5 rounded-full bg-teal-600" />
+                  <div className="h-5 w-0.5 rounded-full bg-teal-600" />
+                  <div className="h-6 w-0.5 rounded-full bg-teal-600" />
+                  <div className="h-5 w-0.5 rounded-full bg-teal-600" />
+                  <div className="h-4 w-0.5 rounded-full bg-teal-600" />
+                </div>
+                <p className="mt-0.5 text-[7px] font-bold tracking-tight text-teal-700">BADAN POM</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">BPOM (Badan Pengawas Obat dan Makanan)</p>
+                <p className="text-xs text-gray-500">Produk memiliki izin edar BPOM</p>
+              </div>
+            </div>
+            <TogglePill checked={hasBpom} onChange={(v) => toggleSection("bpom", v)} color="blue" />
+          </div>
+
+          <div className="grid grid-cols-4 gap-4 bg-white px-6 py-5">
+            <Field
+              label="Nomor BPOM"
+              id="bpomNumber"
+              name="bpomNumber"
+              value={formData.bpomNumber}
+              onChange={handleChange}
+              placeholder="Contoh: MD 1234567890"
+              error={errors.bpomNumber}
+              required={hasBpom}
+              disabled={!hasBpom}
+            />
+            <Field
+              label="Tanggal Registrasi"
+              id="bpomRegistrationDate"
+              name="bpomRegistrationDate"
+              value={formData.bpomRegistrationDate}
+              onChange={handleChange}
+              type="date"
+              error={errors.bpomRegistrationDate}
+              required={hasBpom}
+              disabled={!hasBpom}
+            />
+            <Field
+              label="Berlaku Hingga"
+              id="bpomValidUntil"
+              name="bpomValidUntil"
+              value={formData.bpomValidUntil}
+              onChange={handleChange}
+              type="date"
+              error={errors.bpomValidUntil}
+              required={hasBpom}
+              disabled={!hasBpom}
+            />
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Sertifikasi & Legalitas</h2>
-              <p className="text-sm text-gray-600">Pilih sertifikat yang dimiliki. Jika tidak ada, bagian ini bisa dilewati.</p>
+              <p
+                className={`mb-1.5 text-sm font-semibold transition-colors ${!hasBpom ? "text-gray-400" : "text-gray-800"}`}
+              >
+                Upload Sertifikat{" "}
+                <span className={`font-normal ${!hasBpom ? "text-gray-300" : "text-gray-400"}`}>(Opsional)</span>
+              </p>
+              <UploadArea
+                color="blue"
+                fileName={formData.bpomFileName}
+                onUpload={(preview, name) =>
+                  setFormData((prev) => ({ ...prev, bpomFilePreview: preview, bpomFileName: name }))
+                }
+                disabled={!hasBpom}
+              />
             </div>
           </div>
         </div>
 
-        <div className="space-y-6 px-8 py-8">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 ${hasBpom ? 'border-blue-300 bg-blue-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
-              <input type="checkbox" checked={hasBpom} onChange={(e) => toggleSection('bpom', e.target.checked)} className="mt-1 h-4 w-4" />
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">BPOM</span>
-                <span className="block text-xs text-gray-600">Opsional, isi hanya jika produk memiliki izin BPOM.</span>
-              </span>
-            </label>
-
-            <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 ${hasPirt ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
-              <input type="checkbox" checked={hasPirt} onChange={(e) => toggleSection('pirt', e.target.checked)} className="mt-1 h-4 w-4" />
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">PIRT</span>
-                <span className="block text-xs text-gray-600">Opsional, isi hanya jika produk memiliki izin PIRT.</span>
-              </span>
-            </label>
-
-            <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 ${hasHalal ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
-              <input type="checkbox" checked={hasHalal} onChange={(e) => toggleSection('halal', e.target.checked)} className="mt-1 h-4 w-4" />
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">Halal</span>
-                <span className="block text-xs text-gray-600">Opsional, isi hanya jika produk memiliki sertifikat halal.</span>
-              </span>
-            </label>
+        {/* PIRT Section */}
+        <div className="overflow-hidden rounded-xl border border-purple-200">
+          <div className="flex items-center justify-between bg-purple-50 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+                <svg className="h-7 w-7 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">PIRT (Pangan Industri Rumah Tangga)</p>
+                <p className="text-xs text-gray-500">Produk memiliki izin PIRT.</p>
+              </div>
+            </div>
+            <TogglePill checked={hasPirt} onChange={(v) => toggleSection("pirt", v)} color="purple" />
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <label className="block text-sm font-semibold text-gray-700">Kategori Produk</label>
-            <input type="hidden" name="productCategory" value={formData.productCategory} />
-            <div className="mt-2 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              {DEFAULT_PRODUCT_CATEGORY}
+          <div className="grid grid-cols-4 gap-4 bg-white px-6 py-5">
+            <Field
+              label="Nomor PIRT"
+              id="pirtNumber"
+              name="pirtNumber"
+              value={formData.pirtNumber}
+              onChange={handleChange}
+              placeholder="Contoh: 1234567890"
+              error={errors.pirtNumber}
+              required={hasPirt}
+              disabled={!hasPirt}
+            />
+            <Field
+              label="Tanggal Registrasi"
+              id="pirtRegistrationDate"
+              name="pirtRegistrationDate"
+              value={formData.pirtRegistrationDate}
+              onChange={handleChange}
+              type="date"
+              error={errors.pirtRegistrationDate}
+              required={hasPirt}
+              disabled={!hasPirt}
+            />
+            <Field
+              label="Berlaku Hingga"
+              id="pirtValidUntil"
+              name="pirtValidUntil"
+              value={formData.pirtValidUntil}
+              onChange={handleChange}
+              type="date"
+              error={errors.pirtValidUntil}
+              required={hasPirt}
+              disabled={!hasPirt}
+            />
+            <div>
+              <p
+                className={`mb-1.5 text-sm font-semibold transition-colors ${!hasPirt ? "text-gray-400" : "text-gray-800"}`}
+              >
+                Upload Sertifikat{" "}
+                <span className={`font-normal ${!hasPirt ? "text-gray-300" : "text-gray-400"}`}>(Opsional)</span>
+              </p>
+              <UploadArea
+                color="purple"
+                fileName={formData.pirtFileName}
+                onUpload={(preview, name) =>
+                  setFormData((prev) => ({ ...prev, pirtFilePreview: preview, pirtFileName: name }))
+                }
+                disabled={!hasPirt}
+              />
             </div>
           </div>
-
-          {hasBpom && (
-            <div className="rounded-lg border border-blue-200 bg-white">
-              <div className="border-b border-blue-200 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <PackageCheck className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-base font-bold text-gray-900">BPOM Distribution Permit</h3>
-                </div>
-              </div>
-              <div className="space-y-5 px-6 py-6">
-                <div>
-                  <label htmlFor="bpomNumber" className="block text-sm font-semibold text-gray-700">
-                    Nomor BPOM <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="bpomNumber"
-                    name="bpomNumber"
-                    value={formData.bpomNumber}
-                    onChange={handleChange}
-                    placeholder="Contoh: MD 12345678901"
-                    className={`mt-2 block w-full rounded-lg border ${errors.bpomNumber ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {errors.bpomNumber && <p className="mt-1 text-xs font-semibold text-red-600">{errors.bpomNumber}</p>}
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="bpomRegistrationDate" className="block text-sm font-semibold text-gray-700">
-                      Tanggal Registrasi <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="bpomRegistrationDate"
-                      name="bpomRegistrationDate"
-                      value={formData.bpomRegistrationDate}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.bpomRegistrationDate ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                    />
-                    {errors.bpomRegistrationDate && <p className="mt-1 text-xs font-semibold text-red-600">{errors.bpomRegistrationDate}</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="bpomValidUntil" className="block text-sm font-semibold text-gray-700">
-                      Berlaku Hingga <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="bpomValidUntil"
-                      name="bpomValidUntil"
-                      value={formData.bpomValidUntil}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.bpomValidUntil ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                    />
-                    {errors.bpomValidUntil && <p className="mt-1 text-xs font-semibold text-red-600">{errors.bpomValidUntil}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {hasPirt && (
-            <div className="rounded-lg border border-purple-200 bg-white">
-              <div className="border-b border-purple-200 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <FileBadge className="h-5 w-5 text-purple-600" />
-                  <h3 className="text-base font-bold text-gray-900">PIRT Permit</h3>
-                </div>
-              </div>
-              <div className="space-y-5 px-6 py-6">
-                <div>
-                  <label htmlFor="pirtNumber" className="block text-sm font-semibold text-gray-700">
-                    Nomor PIRT <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="pirtNumber"
-                    name="pirtNumber"
-                    value={formData.pirtNumber}
-                    onChange={handleChange}
-                    placeholder="Contoh: P-IRT 2088370101234"
-                    className={`mt-2 block w-full rounded-lg border ${errors.pirtNumber ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                  />
-                  {errors.pirtNumber && <p className="mt-1 text-xs font-semibold text-red-600">{errors.pirtNumber}</p>}
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="pirtRegistrationDate" className="block text-sm font-semibold text-gray-700">
-                      Tanggal Registrasi <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="pirtRegistrationDate"
-                      name="pirtRegistrationDate"
-                      value={formData.pirtRegistrationDate}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.pirtRegistrationDate ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                    />
-                    {errors.pirtRegistrationDate && <p className="mt-1 text-xs font-semibold text-red-600">{errors.pirtRegistrationDate}</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="pirtValidUntil" className="block text-sm font-semibold text-gray-700">
-                      Berlaku Hingga <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="pirtValidUntil"
-                      name="pirtValidUntil"
-                      value={formData.pirtValidUntil}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.pirtValidUntil ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                    />
-                    {errors.pirtValidUntil && <p className="mt-1 text-xs font-semibold text-red-600">{errors.pirtValidUntil}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {hasHalal && (
-            <div className="rounded-lg border border-green-200 bg-white">
-              <div className="border-b border-green-200 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <BadgeCheck className="h-5 w-5 text-green-600" />
-                  <h3 className="text-base font-bold text-gray-900">Halal Certification</h3>
-                </div>
-              </div>
-              <div className="space-y-5 px-6 py-6">
-                <div>
-                  <label htmlFor="halalCertificateNumber" className="block text-sm font-semibold text-gray-700">
-                    Nomor Sertifikat Halal <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="halalCertificateNumber"
-                    name="halalCertificateNumber"
-                    value={formData.halalCertificateNumber}
-                    onChange={handleChange}
-                    placeholder="Contoh: ID33210012345678"
-                    className={`mt-2 block w-full rounded-lg border ${errors.halalCertificateNumber ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-green-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-green-500`}
-                  />
-                  {errors.halalCertificateNumber && <p className="mt-1 text-xs font-semibold text-red-600">{errors.halalCertificateNumber}</p>}
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label htmlFor="halalCertifiedBy" className="block text-sm font-semibold text-gray-700">
-                      Disertifikasi oleh <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="halalCertifiedBy"
-                      name="halalCertifiedBy"
-                      value={formData.halalCertifiedBy}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.halalCertifiedBy ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-green-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-green-500`}
-                    >
-                      <option value="">Pilih Lembaga</option>
-                      <option value="MUI">MUI</option>
-                      <option value="LPPOM MUI">LPPOM MUI</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                    {errors.halalCertifiedBy && <p className="mt-1 text-xs font-semibold text-red-600">{errors.halalCertifiedBy}</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="halalIssuanceDate" className="block text-sm font-semibold text-gray-700">
-                      Tanggal Terbit <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="halalIssuanceDate"
-                      name="halalIssuanceDate"
-                      value={formData.halalIssuanceDate}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.halalIssuanceDate ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-green-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-green-500`}
-                    />
-                    {errors.halalIssuanceDate && <p className="mt-1 text-xs font-semibold text-red-600">{errors.halalIssuanceDate}</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="halalValidUntil" className="block text-sm font-semibold text-gray-700">
-                      Berlaku Hingga <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      id="halalValidUntil"
-                      name="halalValidUntil"
-                      value={formData.halalValidUntil}
-                      onChange={handleChange}
-                      className={`mt-2 block w-full rounded-lg border ${errors.halalValidUntil ? 'border-red-500' : 'border-gray-300'} bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:border-green-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-green-500`}
-                    />
-                    {errors.halalValidUntil && <p className="mt-1 text-xs font-semibold text-red-600">{errors.halalValidUntil}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!hasBpom && !hasPirt && !hasHalal && (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
-              Tidak ada sertifikat yang dipilih. Anda dapat lanjut tanpa mengisi legalitas tambahan.
-            </div>
-          )}
         </div>
-      </div>
 
-      <div className="flex gap-3 pt-8">
-        <Button type="button" variant="outline" className="flex-1 py-6 font-semibold" onClick={onPrevious}>
-          Sebelumnya
-        </Button>
-        <Button type="submit" disabled={isLoading} className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700">
-          {isLoading ? 'Memproses...' : 'Selanjutnya'}
-        </Button>
+        {/* Halal Section */}
+        <div className="overflow-hidden rounded-xl border border-green-200">
+          <div className="flex items-center justify-between bg-green-50 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-green-600 bg-white">
+                <svg
+                  className="h-7 w-7 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">Halal (Sertifikasi Halal MUI)</p>
+                <p className="text-xs text-gray-500">Produk memiliki sertifikat halal.</p>
+              </div>
+            </div>
+            <TogglePill checked={hasHalal} onChange={(v) => toggleSection("halal", v)} color="green" />
+          </div>
+
+          <div className="space-y-4 bg-white px-6 py-5">
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Nomor Sertifikat"
+                id="halalCertificateNumber"
+                name="halalCertificateNumber"
+                value={formData.halalCertificateNumber}
+                onChange={handleChange}
+                placeholder="Contoh: ID1234567890"
+                error={errors.halalCertificateNumber}
+                required={hasHalal}
+                disabled={!hasHalal}
+              />
+              <div>
+                <label
+                  htmlFor="halalCertifiedBy"
+                  className={`mb-1.5 block text-sm font-semibold transition-colors ${
+                    !hasHalal ? "text-gray-400" : "text-gray-800"
+                  }`}
+                >
+                  Disertifikasi oleh {hasHalal && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  id="halalCertifiedBy"
+                  name="halalCertifiedBy"
+                  value={formData.halalCertifiedBy}
+                  onChange={handleChange}
+                  placeholder="Contoh: BPJPH"
+                  disabled={!hasHalal}
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition ${
+                    !hasHalal
+                      ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400 placeholder-gray-300"
+                      : errors.halalCertifiedBy
+                        ? "border-red-400 bg-red-50 text-gray-900"
+                        : "border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  }`}
+                />
+                {errors.halalCertifiedBy && hasHalal && (
+                  <p className="mt-1 text-xs text-red-500">{errors.halalCertifiedBy}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <Field
+                label="Tanggal Registrasi"
+                id="halalIssuanceDate"
+                name="halalIssuanceDate"
+                value={formData.halalIssuanceDate}
+                onChange={handleChange}
+                type="date"
+                error={errors.halalIssuanceDate}
+                required={hasHalal}
+                disabled={!hasHalal}
+              />
+              <Field
+                label="Berlaku Hingga"
+                id="halalValidUntil"
+                name="halalValidUntil"
+                value={formData.halalValidUntil}
+                onChange={handleChange}
+                type="date"
+                error={errors.halalValidUntil}
+                required={hasHalal}
+                disabled={!hasHalal}
+              />
+              <div>
+                <p
+                  className={`mb-1.5 text-sm font-semibold transition-colors ${
+                    !hasHalal ? "text-gray-400" : "text-gray-800"
+                  }`}
+                >
+                  Upload Sertifikat{" "}
+                  <span className={`font-normal ${!hasHalal ? "text-gray-300" : "text-gray-400"}`}>(Opsional)</span>
+                </p>
+                <UploadArea
+                  color="green"
+                  fileName={formData.halalFileName}
+                  onUpload={(preview, name) =>
+                    setFormData((prev) => ({ ...prev, halalFilePreview: preview, halalFileName: name }))
+                  }
+                  disabled={!hasHalal}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* COA Section */}
+        <div className="overflow-hidden rounded-xl border border-orange-200">
+          <div className="flex items-center justify-between bg-orange-50 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+                <svg className="h-7 w-7 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">COA (Certificate of Analysis)</p>
+                <p className="text-xs text-gray-500">Produk memiliki sertifikat hasil uji laboratorium.</p>
+              </div>
+            </div>
+            <TogglePill checked={hasCoa} onChange={(v) => toggleSection("coa", v)} color="orange" />
+          </div>
+
+          <div className="space-y-4 bg-white px-6 py-5">
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Nomor COA"
+                id="coaNumber"
+                name="coaNumber"
+                value={formData.coaNumber}
+                onChange={handleChange}
+                placeholder="Contoh: 1234567890"
+                error={errors.coaNumber}
+                required={hasCoa}
+                disabled={!hasCoa}
+              />
+              <Field
+                label="Nama Laboratorium"
+                id="coaLaboratoryName"
+                name="coaLaboratoryName"
+                value={formData.coaLaboratoryName}
+                onChange={handleChange}
+                placeholder="Contoh: Lab Kesehatan Daerah"
+                error={errors.coaLaboratoryName}
+                required={hasCoa}
+                disabled={!hasCoa}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Tanggal Pengujian"
+                id="coaTestDate"
+                name="coaTestDate"
+                value={formData.coaTestDate}
+                onChange={handleChange}
+                type="date"
+                error={errors.coaTestDate}
+                required={hasCoa}
+                disabled={!hasCoa}
+              />
+              <div>
+                <p
+                  className={`mb-1.5 text-sm font-semibold transition-colors ${!hasCoa ? "text-gray-400" : "text-gray-800"}`}
+                >
+                  Upload Sertifikat{" "}
+                  <span className={`font-normal ${!hasCoa ? "text-gray-300" : "text-gray-400"}`}>(Opsional)</span>
+                </p>
+                <UploadArea
+                  color="orange"
+                  fileName={formData.coaFileName}
+                  onUpload={(preview, name) =>
+                    setFormData((prev) => ({ ...prev, coaFilePreview: preview, coaFileName: name }))
+                  }
+                  disabled={!hasCoa}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onPrevious}
+            className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+          >
+            &#8592; Sebelumnya
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
+          </Button>
+        </div>
       </div>
     </form>
   )

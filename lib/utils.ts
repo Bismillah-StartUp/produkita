@@ -3,7 +3,6 @@ import { twMerge } from "tailwind-merge"
 import { createHash, randomBytes } from "crypto"
 import QRCode from "qrcode"
 
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -15,7 +14,7 @@ export const generateLicensesCode = (productName: string, productType: string) =
   const hash = createHash("sha256").update(data).digest("hex")
 
   const codeResult = hash.substring(0, 10).toUpperCase()
-  
+
   return codeResult
 }
 
@@ -45,7 +44,7 @@ export const generateBarcode = async (value: string) => {
         }
 
         resolve(png)
-      }
+      },
     )
   })
 
@@ -56,4 +55,13 @@ export const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+export const SATUAN = {
+  bbb: ["Kg", "Gram", "Liter", "ml", "Pcs", "Lembar", "Meter", "Sak", "Ikat"],
+  btkl: ["Orang/Hari", "Orang/Jam", "Orang/Bulan", "Borongan", "Pcs"],
+  packaging: ["Pcs", "Box", "Pack", "Roll", "Lusin", "Dus", "Lembar"],
+  bop_var: ["kWh", "m3", "Tabung", "Liter", "Jam", "Hari", "Bulan", "Pcs"],
+  bop_fix: ["Bulan", "Tahun", "Hari", "Paket"],
+  Produksi: ["Kg", "Gram", "Liter", "ml", "Pcs", "Box", "Pack", "Lusin", "Karton", "Botol", "Porsi", "Cup"],
 }
