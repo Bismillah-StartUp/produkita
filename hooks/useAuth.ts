@@ -2,16 +2,21 @@
 
 import { useState } from "react"
 import { login, register, verifyOtp, logout, getSession, updateProfileAction, requestUpdateEmail, verifyUpdateEmail, updatePasswordAction } from "@/servers/auth/auth.actions"
+import { useAuthStore } from "@/servers/stores/useAuthStore"
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleLogin = async (email: string, password: string) => {
+  const { setSession, clearSession } = useAuthStore()
+
+  const handleLogin = async (email: string, password: string, rememberMe: boolean = false) => {
     setLoading(true)
     setError(null)
     try {
-      return await login(email, password)
+      const result = await login(email, password, rememberMe)
+      if (result) setSession(result)
+      return result
     } catch (err: any) {
       setError(err.message)
       return null
@@ -56,6 +61,7 @@ export const useAuth = () => {
     setError(null)
     try {
       await logout()
+      clearSession()
     } catch (err: any) {
       setError(err.message)
     } finally {
