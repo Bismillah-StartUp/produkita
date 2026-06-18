@@ -38,7 +38,7 @@ const menuItems = [
   },
   {
     title: "Informasi UMKM",
-    href: "/dashboard/info",
+    href: "/dashboard/umkm",
     icon: Info,
   },
 ];
