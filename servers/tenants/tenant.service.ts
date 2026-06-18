@@ -4,6 +4,11 @@ import { uploadImage, deleteImage } from "@/configs/cloudinary/utils"
 export const findTenantByUserUuid = async (userUuid: string) => {
   return await prisma.tenant.findFirst({
     where: { user: { uuid: userUuid } },
+    include: {
+      _count: {
+        select: { products: { where: { deleted_at: null } } },
+      },
+    },
   })
 }
 

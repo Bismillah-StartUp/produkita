@@ -1,10 +1,5 @@
 import { MapPin, ExternalLink } from "lucide-react"
-import { TenantData } from ".."
-
-interface ViewFieldProps {
-  label: string
-  value: string
-}
+import { TenantData, ViewFieldProps } from "../types/tenants.interface"
 
 const ViewField = ({ label, value }: ViewFieldProps) => (
   <div>

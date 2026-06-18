@@ -1,56 +1,67 @@
 "use client"
 
-import { useState } from "react"
-import { Building2, CheckCircle, Pencil, X, Check } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Building2, CheckCircle, Pencil, X, Check, Camera } from "lucide-react"
 import Image from "next/image"
-import { Camera } from "lucide-react"
 import ProfilePartial from "./partials/profile"
 import ContactPartial from "./partials/contact"
 import PhotosPartial from "./partials/photos"
-
-export interface TenantData {
-  companyName: string
-  tradeName: string
-  businessField: string
-  npwp: string
-  businessDescription: string
-  address: string
-  district: string
-  postalCode: string
-  province: string
-  mapsQuery: string
-  phone: string
-  email: string
-  website: string
-  foundedYear: string
-  productCount: string
-}
-
-const defaultData: TenantData = {
-  companyName: "PT. Cimory Dairy Foods",
-  tradeName: "Cimory",
-  businessField: "Produk Olahan Susu",
-  npwp: "01.234.567.8-000.000",
-  businessDescription:
-    "Cimory adalah merek produk olahan susu yang didirikan di Cisarua, Bogor. " +
-    "Memproduksi berbagai produk seperti yogurt, keju, dan minuman susu berkualitas " +
-    "tinggi dengan bahan baku pilihan langsung dari peternak lokal.",
-  address: "Jl. Raya Puncak No. 435, Cisarua",
-  district: "Bogor",
-  postalCode: "16750",
-  province: "Jawa Barat",
-  mapsQuery: "Cimory Dairy Cisarua Bogor",
-  phone: "+62 251 8254880",
-  email: "info@cimory.com",
-  website: "www.cimory.com",
-  foundedYear: "2006",
-  productCount: "50+",
-}
+import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useTenant } from "@/hooks/useTenants"
+import { emptyData, TenantData } from "./types/tenants.interface"
 
 export default function TenantsPage() {
+  const { uuid } = useAuthStore()
+  const { getTenant, updateTenant, loading } = useTenant()
+
   const [isEditing, setIsEditing] = useState(false)
-  const [savedData, setSavedData] = useState<TenantData>(defaultData)
-  const [tempData, setTempData] = useState<TenantData>(defaultData)
+  const [savedData, setSavedData] = useState<TenantData>(emptyData)
+  const [tempData, setTempData] = useState<TenantData>(emptyData)
+  const [tenantUuid, setTenantUuid] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [placeUrl, setPlaceUrl] = useState<string | null>(null)
+  const [isFetching, setIsFetching] = useState(true)
+
+  useEffect(() => {
+    if (!uuid) return
+
+    const fetchTenant = async () => {
+      setIsFetching(true)
+      const result = await getTenant(uuid)
+      if (!result) {
+        setIsFetching(false)
+        return
+      }
+
+      setTenantUuid(result.uuid)
+      setLogoUrl(result.logo_url ?? null)
+      setPlaceUrl(result.place_url ?? null)
+
+      const mapped: TenantData = {
+        companyName: result.name ?? "",
+        tradeName: result.trade_name ?? "",
+        businessField: result.business_field ?? "",
+        npwp: result.npwp ?? "",
+        businessDescription: result.description ?? "",
+        address: result.address ?? "",
+        district: result.city ?? "",
+        postalCode: result.postal_code ?? "",
+        province: result.province ?? "",
+        mapsQuery: `${result.city ?? ""} ${result.province ?? ""}`,
+        phone: result.phonenumber ?? "",
+        email: result.email ?? "",
+        website: result.website ?? "",
+        foundedYear: result.year?.toString() ?? "",
+        productCount: result._count.products.toString(),
+      }
+
+      setSavedData(mapped)
+      setTempData(mapped)
+      setIsFetching(false)
+    }
+
+    fetchTenant()
+  }, [uuid])
 
   const data = isEditing ? tempData : savedData
 
@@ -64,9 +75,29 @@ export default function TenantsPage() {
     setIsEditing(false)
   }
 
-  const handleSave = () => {
-    setSavedData({ ...tempData })
-    setIsEditing(false)
+  const handleSave = async () => {
+    if (!uuid) return
+
+    const result = await updateTenant(uuid, {
+      name: tempData.companyName,
+      trade_name: tempData.tradeName,
+      business_field: tempData.businessField,
+      npwp: tempData.npwp,
+      description: tempData.businessDescription,
+      address: tempData.address,
+      city: tempData.district,
+      postal_code: tempData.postalCode,
+      province: tempData.province,
+      phonenumber: tempData.phone,
+      email: tempData.email,
+      website: tempData.website,
+      year: tempData.foundedYear ? parseInt(tempData.foundedYear) : undefined,
+    })
+
+    if (result) {
+      setSavedData({ ...tempData })
+      setIsEditing(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -74,35 +105,57 @@ export default function TenantsPage() {
     setTempData((prev) => ({ ...prev, [name]: value }))
   }
 
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-sm text-gray-500">Memuat data...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Cover Photo */}
       <div className="relative h-48 bg-gray-700 overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1400&q=80"
-          alt="Foto perusahaan"
-          fill
-          className="object-cover"
-          style={{ filter: "brightness(0.7)" }}
-        />
-        <button className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-black/60 transition-colors">
+        {placeUrl ? (
+          <Image
+            src={placeUrl}
+            alt="Foto perusahaan"
+            fill
+            className="object-cover"
+            style={{ filter: "brightness(0.7)" }}
+          />
+        ) : (
+          <div className="w-full h-full bg-linear-to-r from-blue-800 to-blue-600" />
+        )}
+        <button
+          onClick={() => {}}
+          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-black/60 transition-colors"
+        >
           <Camera size={13} />
           Ganti Foto Tempat
         </button>
         <div className="absolute bottom-4 left-5 z-10 flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md shrink-0">
-            <Building2 className="text-blue-600" size={22} />
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md shrink-0 overflow-hidden">
+            {logoUrl ? (
+              <Image src={logoUrl} alt="Logo" width={48} height={48} className="object-contain" />
+            ) : (
+              <Building2 className="text-blue-600" size={22} />
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-white font-bold text-lg leading-tight">{savedData.companyName}</h1>
+              <h1 className="text-white font-bold text-lg leading-tight">
+                {savedData.companyName || "Nama UMKM"}
+              </h1>
               <span className="flex items-center gap-1 bg-green-500 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
                 <CheckCircle size={11} />
                 Verified
               </span>
             </div>
             <p className="text-white/75 text-sm mt-0.5">
-              {savedData.businessField} · Sejak {savedData.foundedYear}
+              {savedData.businessField || "Bidang Usaha"}
+              {savedData.foundedYear ? ` · Sejak ${savedData.foundedYear}` : ""}
             </p>
           </div>
         </div>
@@ -121,13 +174,17 @@ export default function TenantsPage() {
                 className="text-base font-bold text-gray-900 border-b border-gray-400 bg-transparent focus:outline-none w-24 mt-0.5"
               />
             ) : (
-              <p className="text-base font-bold text-gray-900 mt-0.5">{savedData.foundedYear}</p>
+              <p className="text-base font-bold text-gray-900 mt-0.5">
+                {savedData.foundedYear || "—"}
+              </p>
             )}
           </div>
           <div className="w-px h-10 bg-gray-200 mr-10" />
           <div>
             <p className="text-xs text-gray-500">Jumlah Produk</p>
-            <p className="text-base font-bold text-gray-900 mt-0.5">{savedData.productCount}</p>
+            <p className="text-base font-bold text-gray-900 mt-0.5">
+              {savedData.productCount || "0"}
+            </p>
           </div>
         </div>
 
@@ -135,17 +192,19 @@ export default function TenantsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleCancel}
-              className="flex items-center gap-1.5 border border-gray-300 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              className="flex items-center gap-1.5 border border-gray-300 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <X size={14} />
               Batal
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-1.5 bg-blue-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={loading}
+              className="flex items-center gap-1.5 bg-blue-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               <Check size={14} />
-              Simpan
+              {loading ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         ) : (
@@ -175,7 +234,14 @@ export default function TenantsPage() {
             isEditing={isEditing}
             onChange={handleChange}
           />
-          <PhotosPartial />
+          <PhotosPartial
+            userUuid={uuid ?? ""}
+            tenantUuid={tenantUuid ?? ""}
+            logoUrl={logoUrl}
+            placeUrl={placeUrl}
+            onLogoChange={setLogoUrl}
+            onPlaceChange={setPlaceUrl}
+          />
         </div>
       </div>
     </div>

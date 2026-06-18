@@ -1,11 +1,5 @@
 import { Phone, Mail, Globe } from "lucide-react"
-import type { TenantData } from ".."
-
-interface ContactPartialProps {
-  data: TenantData
-  isEditing: boolean
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
-}
+import { ContactPartialProps } from "../types/tenants.interface"
 
 export default function ContactPartial({ data, isEditing, onChange }: ContactPartialProps) {
   const contacts = [
