@@ -1,4 +1,4 @@
-import { TransactionForm } from '@/components/pages/financials/partials/transaction-form'
+import { TransactionForm } from '@/components/pages/dashboard/financials/partials/transaction-form'
 
 export default function TambahTransaksiPage() {
   return (

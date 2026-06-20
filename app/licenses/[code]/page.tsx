@@ -1,4 +1,4 @@
-import { LicenceLayout } from '@/components/pages/licences'
+import { LicenceLayout } from '@/components/pages/licenses'
 import { getCertificateDetailsByCode } from '@/lib/certificate'
 
 type LicencePageProps = {
