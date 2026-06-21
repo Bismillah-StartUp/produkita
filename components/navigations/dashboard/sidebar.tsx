@@ -9,8 +9,10 @@ import {
   TrendingUp,
   Calculator,
   Info,
-  ChevronDown,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 const menuItems = [
   {
@@ -20,11 +22,8 @@ const menuItems = [
   },
   {
     title: "Produk UMKM",
+    href: "/dashboard/products",
     icon: Package,
-    submenu: [
-      { title: "List Produk", href: "/dashboard/products" },
-      { title: "Pendaftaran Produk", href: "/dashboard/products/register" },
-    ],
   },
   {
     title: "Manajemen Keuangan",
@@ -45,19 +44,19 @@ const menuItems = [
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const router = useRouter();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
-  const isSubmenuActive = (submenu: Array<{ href: string }>) =>
-    submenu.some(
-      (item) => pathname === item.href || pathname.startsWith(item.href + "/"),
-    );
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard"
+    return pathname === href || pathname.startsWith(href + "/")
+  }
 
-  const toggleSubmenu = (title: string) => {
-    setOpenSubmenu(openSubmenu === title ? null : title);
-  };
+  const handleLogout = async () => {
+    await logout()
+    router.push("/login")
+  }
 
   return (
     <aside
@@ -65,6 +64,7 @@ export const Sidebar = () => {
         isOpen ? "w-64" : "w-20"
       }`}
     >
+      {/* Logo */}
       <div className="border-b border-slate-200 px-6 py-4 flex items-center h-15">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -78,82 +78,39 @@ export const Sidebar = () => {
         </button>
       </div>
 
-      <nav className={`flex-1 space-y-2 ${isOpen ? "px-4 py-6" : "px-2 py-6"}`}>
+      {/* Nav */}
+      <nav className={`flex-1 space-y-1 ${isOpen ? "px-4 py-6" : "px-2 py-6"}`}>
         {menuItems.map((item) => {
-          const Icon = item.icon;
-          const hasSubmenu = !!item.submenu;
-          const isOpenItem = openSubmenu === item.title;
-          const submenuActive = hasSubmenu && isSubmenuActive(item.submenu);
+          const Icon = item.icon
+          const active = isActive(item.href)
 
           return (
-            <div key={item.title}>
-              {hasSubmenu ? (
-                <button
-                  onClick={() => isOpen && toggleSubmenu(item.title)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    submenuActive
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                  title={!isOpen ? item.title : ""}
-                >
-                  <Icon size={20} className="shrink-0" />
-                  {isOpen && (
-                    <>
-                      <span>{item.title}</span>
-                      <ChevronDown
-                        size={16}
-                        className={`ml-auto transition-transform ${
-                          isOpenItem ? "rotate-180" : ""
-                        }`}
-                      />
-                    </>
-                  )}
-                </button>
-              ) : (
-                <Link href={item.href!}>
-                  <button
-                    className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
-                      isActive(item.href!)
-                        ? "bg-blue-50 font-medium text-blue-600"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }`}
-                    title={!isOpen ? item.title : ""}
-                  >
-                    <Icon size={20} className="shrink-0" />
-                    {isOpen && <span>{item.title}</span>}
-                  </button>
-                </Link>
-              )}
-
-              {hasSubmenu && isOpenItem && isOpen && (
-                <div className="ml-4 mt-2 space-y-1">
-                  {item.submenu!.map((subitem) => (
-                    <Link key={subitem.href} href={subitem.href}>
-                      <button
-                        className={`w-full rounded px-4 py-2 text-left text-sm transition-colors ${
-                          pathname === subitem.href
-                            ? "bg-blue-50 font-medium text-blue-600"
-                            : "text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {subitem.title}
-                      </button>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
+            <Link key={item.title} href={item.href}>
+              <button
+                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
+                  active
+                    ? "bg-blue-50 font-medium text-blue-600"
+                    : "text-slate-600 hover:bg-slate-50"
+                }`}
+                title={!isOpen ? item.title : ""}
+              >
+                <Icon size={20} className="shrink-0" />
+                {isOpen && <span className="text-sm">{item.title}</span>}
+              </button>
+            </Link>
+          )
         })}
       </nav>
 
+      {/* Logout */}
       <div className="border-t border-slate-200 p-4">
         <button
-          className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-          title={!isOpen ? "Logout" : ""}
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+          title={!isOpen ? "Keluar" : ""}
         >
-          {isOpen && <span className="text-sm">Logout</span>}
+          <LogOut size={20} className="shrink-0" />
+          {isOpen && <span className="text-sm">Keluar</span>}
         </button>
       </div>
     </aside>
