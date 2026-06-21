@@ -13,7 +13,9 @@ export const createFinancialRecord = async (
     notes?: string
   }
 ) => {
-  const tenant = await prisma.tenant.findUnique({ where: { uuid: tenantUuid } })
+  const tenant = await prisma.tenant.findFirst({
+    where: { user: { uuid: tenantUuid } },
+  })
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
   return await prisma.financialRecord.create({
@@ -24,6 +26,14 @@ export const createFinancialRecord = async (
   })
 }
 
+export const getFinanceByUUID = async (cuid: string, tenantUuid: string) => {
+  return await prisma.financialRecord.findFirst({
+    where: {
+      cuid,
+      tenant: { user: { uuid: tenantUuid } },
+    },
+  })
+}
 
 export const getFinancialSummary = async (tenantUuid: string, year: number, month: number) => {
   const startDate = new Date(year, month - 1, 1)
@@ -95,6 +105,7 @@ export const getFinancialRecords = async (
     },
     select: {
       id: true,
+      cuid: true, 
       product_name: true,
       transaction_type: true,
       amount: true,

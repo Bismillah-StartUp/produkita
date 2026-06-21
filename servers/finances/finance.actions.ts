@@ -10,6 +10,7 @@ import {
   updateFinancialRecordController,
   deleteFinancialRecordController,
   exportFinancialRecordsController,
+  getFinancialRecordByUuidController,
 } from "./finance.controller"
 import { TransactionType } from "@prisma/client"
 
@@ -33,6 +34,10 @@ export const getFinancialSummary = async (
   month: number
 ) => {
   return await getFinancialSummaryController(tenantUuid, year, month)
+}
+
+export const getFinancialRecordById = async (cuid: string, tenantUuid: string) => {
+  return await getFinancialRecordByUuidController(cuid, tenantUuid)
 }
 
 export const getTransactionDates = async (

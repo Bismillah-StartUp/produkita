@@ -8,6 +8,7 @@ import {
   updateFinancialRecord,
   deleteFinancialRecord,
   getFinancialRecordsForExport,
+  getFinanceByUUID,
 } from "./finance.service"
 import { TransactionType } from "@prisma/client"
 import ExcelJS from "exceljs"
@@ -29,6 +30,11 @@ export const createFinancialRecordController = async (
   if (!data.transaction_type) throw new Error("Tipe transaksi wajib diisi")
 
   return await createFinancialRecord(tenantUuid, data)
+}
+
+export const getFinancialRecordByUuidController = async (cuid: string, tenantUuid: string) => {
+  if (!cuid) throw new Error("UUID wajib diisi")
+  return await getFinanceByUUID(cuid, tenantUuid)
 }
 
 export const getFinancialSummaryController = async (

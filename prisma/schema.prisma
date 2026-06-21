@@ -247,7 +247,8 @@ model ProductServingImage {
 
 
 model FinancialRecord {
-  id                String          @id @default(cuid())
+  id                Int          @id @default(autoincrement())
+  cuid              String       @unique @default(cuid())
   tenant_id         Int
   product_id        Int?
   product_name      String

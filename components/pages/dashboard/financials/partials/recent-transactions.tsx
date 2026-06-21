@@ -87,7 +87,7 @@ export default function RecentTransactions({
             <Download className="h-4 w-4" />
             {exportLoading ? "Mengunduh..." : "Download Laporan"}
           </Button>
-          <Link href="/dashboard/financials/tambah">
+          <Link href="/dashboard/financials/records">
             <Button className="h-10 gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
               <Plus className="h-4 w-4" /> Tambah Laporan
             </Button>
@@ -139,7 +139,7 @@ export default function RecentTransactions({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-1">
-                      <Link href={`/dashboard/financials/${record.id}`}>
+                      <Link href={`/dashboard/financials/${record.cuid}`}>
                         <button className="rounded-md bg-blue-600 p-1.5 text-white transition hover:bg-blue-700">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
