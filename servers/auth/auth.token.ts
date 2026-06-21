@@ -28,17 +28,17 @@ export const setAuthCookie = async (token: string, rememberMe: boolean = false) 
   })
 }
 
-export async function verifyToken(token: string) {
+export const verifyToken = async (token: string) => {
   const { payload } = await jwtVerify(token, SECRET)
   return payload as { uuid: string; email: string; role: string }
 }
 
-export async function getAuthCookie() {
+export const getAuthCookie = async () => {
   const cookieStore = await cookies()
   return cookieStore.get(COOKIE_NAME)?.value ?? null
 }
 
-export async function removeAuthCookie() {
+export const removeAuthCookie = async () => {
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE_NAME)
 }

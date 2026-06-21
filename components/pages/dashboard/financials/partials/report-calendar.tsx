@@ -5,7 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
-export default function ReportCalendar({ records, activeDateStr }: { records: any[]; activeDateStr: string }) {
+export default function ReportCalendar({
+  transactionDates,
+  activeDateStr,
+  year,
+  month,
+}: {
+  transactionDates: number[]
+  activeDateStr: string
+  year: number
+  month: number
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -41,16 +51,18 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1)
   const emptyCells = Array.from({ length: firstDayOfMonth }, (_, i) => i)
 
-  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString("id-ID", { month: "long", year: "numeric" })
+  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  })
 
   const getDayStatus = (day: number) => {
     const currentDate = new Date(viewYear, viewMonth, day)
     const isToday = currentDate.toDateString() === today.toDateString()
 
-    const hasRecord = records.some((r) => {
-      const rDate = new Date(r.transaction_date)
-      return rDate.getDate() === day && rDate.getMonth() === viewMonth && rDate.getFullYear() === viewYear
-    })
+    // hanya cek transactionDates kalau bulan dan tahun yang dilihat sama dengan data
+    const isCurrentMonthYear = viewMonth === month - 1 && viewYear === year
+    const hasRecord = isCurrentMonthYear && transactionDates.includes(day)
 
     if (isToday) return "today"
     if (currentDate > today) return "upcoming"
@@ -72,7 +84,11 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
   }
 
   if (isNaN(activeDate.getTime())) {
-    return <div className="rounded-xl bg-red-50 p-4 text-red-500">Error: Format tanggal tidak valid.</div>
+    return (
+      <div className="rounded-xl bg-red-50 p-4 text-red-500">
+        Error: Format tanggal tidak valid.
+      </div>
+    )
   }
 
   return (
@@ -114,26 +130,36 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
 
         <div className="grid grid-cols-7 gap-x-2 gap-y-3 text-center text-sm font-medium">
           {emptyCells.map((cell) => (
-            <div key={`empty-${cell}`}></div>
+            <div key={`empty-${cell}`} />
           ))}
 
           {daysArray.map((day) => {
             const status = getDayStatus(day)
-
             const isSelected =
-              activeDate.getDate() === day && activeDate.getMonth() === viewMonth && activeDate.getFullYear() === viewYear
+              activeDate.getDate() === day &&
+              activeDate.getMonth() === viewMonth &&
+              activeDate.getFullYear() === viewYear
 
             return (
               <button
                 key={day}
                 type="button"
                 onClick={() => handleDateClick(day)}
-                className={`relative flex h-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-lg px-1 transition-all ${isSelected ? "ring-2 ring-blue-600 ring-offset-2" : ""} ${status === "today" ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700" : ""} ${status === "completed" ? "bg-green-50 text-green-700 hover:bg-green-100" : ""} ${status === "missing" ? "bg-red-50 text-red-700 hover:bg-red-100" : ""} ${status === "upcoming" ? "text-slate-400 hover:bg-slate-50" : ""} `}
+                className={`relative flex h-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-lg px-1 transition-all
+                  ${isSelected ? "ring-2 ring-blue-600 ring-offset-2" : ""}
+                  ${status === "today" ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700" : ""}
+                  ${status === "completed" ? "bg-green-50 text-green-700 hover:bg-green-100" : ""}
+                  ${status === "missing" ? "bg-red-50 text-red-700 hover:bg-red-100" : ""}
+                  ${status === "upcoming" ? "text-slate-400 hover:bg-slate-50" : ""}
+                `}
               >
                 <span className="text-xs font-bold">{day}</span>
-
-                {status === "completed" && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-green-500"></span>}
-                {status === "missing" && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-red-500"></span>}
+                {status === "completed" && (
+                  <span className="absolute bottom-1 h-1 w-1 rounded-full bg-green-500" />
+                )}
+                {status === "missing" && (
+                  <span className="absolute bottom-1 h-1 w-1 rounded-full bg-red-500" />
+                )}
               </button>
             )
           })}
@@ -141,16 +167,19 @@ export default function ReportCalendar({ records, activeDateStr }: { records: an
 
         <div className="mt-4 flex flex-wrap gap-4 border-t border-slate-100 pt-4 text-[10px] font-bold text-slate-500">
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-[3px] bg-green-500"></span>Sudah dicatat
+            <span className="h-2.5 w-2.5 rounded-[3px] bg-green-500" />
+            Sudah dicatat
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-[3px] bg-red-500"></span>Belum dicatat
+            <span className="h-2.5 w-2.5 rounded-[3px] bg-red-500" />
+            Belum dicatat
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-[3px] bg-blue-600"></span>Hari ini
+            <span className="h-2.5 w-2.5 rounded-[3px] bg-blue-600" />
+            Hari ini
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-[3px] bg-slate-300"></span>
+            <span className="h-2.5 w-2.5 rounded-[3px] bg-slate-300" />
             Mendatang
           </div>
         </div>

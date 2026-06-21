@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Save, X } from "lucide-react"
+import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { createFinancialRecord, updateFinancialRecord } from "@/servers/finances/finance.actions"
+import { TransactionType } from "@prisma/client"
 
 interface TransactionFormProps {
   initialData?: any
@@ -15,7 +18,9 @@ interface TransactionFormProps {
 
 export function TransactionForm({ initialData, className }: TransactionFormProps) {
   const router = useRouter()
+  const { uuid } = useAuthStore()
   const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const getLocalDateString = () => {
     const date = new Date()
@@ -27,9 +32,8 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
 
   const [formData, setFormData] = React.useState({
     product_name: initialData?.product_name || "",
-    transaction_type: initialData?.transaction_type || "income",
-    amount: initialData?.amount || "",
-    transaction_status: initialData?.transaction_status || "completed",
+    transaction_type: (initialData?.transaction_type || "income") as TransactionType,
+    amount: initialData?.amount?.toString() || "",
     transaction_date: initialData?.transaction_date
       ? new Date(initialData.transaction_date).toISOString().split("T")[0]
       : getLocalDateString(),
@@ -38,29 +42,34 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
 
   const todaydate = getLocalDateString()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!uuid) return
     setLoading(true)
+    setError(null)
 
     try {
-      const url = initialData?.id ? `/api/financials/${initialData.id}` : "/api/financials"
-      const method = initialData?.id ? "PATCH" : "POST"
-
-      const response = await fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
+      if (initialData?.id) {
+        await updateFinancialRecord(initialData.id, uuid, {
+          product_name: formData.product_name,
+          transaction_type: formData.transaction_type,
           amount: Number(formData.amount),
-        }),
-      })
-
-      if (response.ok) {
-        router.push("/dashboard/financials")
-        router.refresh()
+          transaction_date: new Date(formData.transaction_date),
+          notes: formData.notes,
+        })
+      } else {
+        await createFinancialRecord(uuid, {
+          product_name: formData.product_name,
+          transaction_type: formData.transaction_type,
+          amount: Number(formData.amount),
+          transaction_date: new Date(formData.transaction_date),
+          notes: formData.notes,
+        })
       }
-    } catch (error) {
-      console.error("Gagal menyimpan:", error)
+      router.push("/dashboard/financials")
+      router.refresh()
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -68,9 +77,10 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
 
   return (
     <div className={cn("w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8", className)}>
-      {/* Header Form */}
       <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-        <h2 className="text-xl font-bold text-blue-600">Tambah Laporan</h2>
+        <h2 className="text-xl font-bold text-blue-600">
+          {initialData?.id ? "Edit Laporan" : "Tambah Laporan"}
+        </h2>
         <button
           type="button"
           onClick={() => router.back()}
@@ -80,6 +90,12 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
           <X className="h-5 w-5" />
         </button>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="grid gap-6">
         <div className="grid gap-2.5">
@@ -153,6 +169,7 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
             id="amount"
             type="number"
             step="1"
+            min="1"
             required
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -177,7 +194,7 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
         <Button
           type="submit"
           disabled={loading}
-          className="mt-2 h-12 w-full gap-2 rounded-lg bg-blue-600 text-base font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98]"
+          className="mt-2 h-12 w-full gap-2 rounded-lg bg-blue-600 text-base font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
         >
           <Save className="h-4.5 w-4.5" />
           {loading ? "Menyimpan..." : initialData?.id ? "Simpan Perubahan" : "Tambahkan Laporan"}
