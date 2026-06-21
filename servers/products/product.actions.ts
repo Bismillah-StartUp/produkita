@@ -6,14 +6,10 @@ import {
   submitProductController,
   softDeleteProductController,
   updateProductBasicController,
-  addProductImagesController,
   softDeleteProductImageController,
   updateNutritionController,
-  addCertificateController,
   updateCertificateController,
   softDeleteCertificateController,
-  updateServingController,
-  addServingImagesController,
   softDeleteServingImageController,
 } from "./product.controller"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
@@ -92,10 +88,6 @@ export const updateProductBasic = async (
   return await updateProductBasicController(uuid, data)
 }
 
-export const addProductImages = async (uuid: string, files: Buffer[]) => {
-  return await addProductImagesController(uuid, files)
-}
-
 export const softDeleteProductImage = async (imageUuid: string) => {
   return await softDeleteProductImageController(imageUuid)
 }
@@ -107,19 +99,6 @@ export const updateNutrition = async (
   return await updateNutritionController(productUuid, data)
 }
 
-export const addCertificate = async (
-  productUuid: string,
-  data: {
-    type: CertificateType
-    number?: string
-    registered_at?: Date
-    valid_until?: Date
-    lab_name?: string
-    file?: Buffer
-  }
-) => {
-  return await addCertificateController(productUuid, data)
-}
 
 export const updateCertificate = async (
   certificateUuid: string,
@@ -136,17 +115,6 @@ export const updateCertificate = async (
 
 export const softDeleteCertificate = async (certificateUuid: string) => {
   return await softDeleteCertificateController(certificateUuid)
-}
-
-export const updateServing = async (
-  productUuid: string,
-  data: Parameters<typeof updateServingController>[1]
-) => {
-  return await updateServingController(productUuid, data)
-}
-
-export const addServingImages = async (productUuid: string, files: Buffer[]) => {
-  return await addServingImagesController(productUuid, files)
 }
 
 export const softDeleteServingImage = async (imageUuid: string) => {
