@@ -44,7 +44,7 @@ export const submitProductController = async (
       weight?: number
       weight_unit?: WeightUnits
     }
-    productImages: Buffer[]
+    productImages: string[]
     nutrition: {
       servings?: number
       serving_pkgs?: number
@@ -64,14 +64,14 @@ export const submitProductController = async (
       registered_at?: Date
       valid_until?: Date
       lab_name?: string
-      file?: Buffer
+      file?: string
     }[]
     serving: {
       serving_info?: string
       serving_portion?: string
       storage_info?: string
       video_url?: string
-      images?: Buffer[]
+      images?: string[]
     }
   }
 ) => {

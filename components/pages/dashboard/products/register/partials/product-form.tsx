@@ -1,23 +1,17 @@
 "use client"
 
+import Image from "next/image"
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
-
-type Satuan = "ml" | "g" | "kg" | "L" | "pcs"
-
-interface JenisOption {
-  id: string
-  label: string
-}
+import { CATEGORY_OPTIONS, SATUAN } from "@/lib/utils"
 
 export interface ProductFormData {
   productName: string
   brandName: string
   price: string
   weight: string
-  unit: Satuan
-  jenis: string[]
+  unit: string
+  jenis: string
   deskripsi: string
   productPhoto: File[]
   productPhotoPreview: string[]
@@ -29,17 +23,10 @@ interface ProductInfoFormProps {
   isLoading?: boolean
 }
 
-const SATUAN_OPTIONS: Satuan[] = ["ml", "g", "kg", "L", "pcs"]
-
-const JENIS_OPTIONS: JenisOption[] = [
-  { id: "fnb", label: "Food & Beverage" },
-  { id: "fnb-short", label: "FnB" },
-]
-
 const TIPS_FOTO: string[] = [
   "Gunakan latar belakang putih/terang",
   "Tampilkan label/kemasan produk jelas",
-  "Resolusi minimal 800×800 px",
+  "Resolusi minimal 800x800 px",
 ]
 
 const MAX_PHOTOS = 5
@@ -49,8 +36,8 @@ const INITIAL_FORM: ProductFormData = {
   brandName: "",
   price: "",
   weight: "",
-  unit: "ml",
-  jenis: ["Food & Beverage"],
+  unit: "g",
+  jenis: "fnb",
   deskripsi: "",
   productPhoto: [],
   productPhotoPreview: [],
@@ -78,12 +65,11 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
     }
   }
 
-  const handleToggleJenis = (label: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      jenis: prev.jenis.includes(label) ? prev.jenis.filter((j) => j !== label) : [...prev.jenis, label],
-    }))
+  const handleToggleJenis = (id: string) => {
+    setFormData((prev) => ({ ...prev, jenis: id }))
   }
+
+  if (!formData.jenis) errors.jenis = "Jenis produk wajib dipilih"
 
   const addPhotos = (files: FileList | null) => {
     if (!files) return
@@ -147,11 +133,12 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
     if (!formData.brandName.trim()) newErrors.brandName = "Nama brand wajib diisi"
     if (!formData.price.trim()) newErrors.price = "Harga wajib diisi"
     if (!formData.weight.trim()) newErrors.weight = "Berat/volume wajib diisi"
+    if (formData.jenis.length === 0) newErrors.jenis = "Jenis produk wajib dipilih"
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (validateForm() && onSubmit) onSubmit(formData)
   }
@@ -165,6 +152,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
     <form onSubmit={handleSubmit}>
       <div className="rounded-xl border border-gray-200 bg-white">
         <div className="flex gap-0 divide-x divide-gray-200">
+          {/* Left — form fields */}
           <div className="flex-65 space-y-6 p-8">
             <div className="grid grid-cols-2 gap-5">
               <div>
@@ -231,11 +219,11 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                     name="unit"
                     value={formData.unit}
                     onChange={handleChange}
-                    className="w-20 rounded-lg border border-gray-200 bg-white px-2 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-24 rounded-lg border border-gray-200 bg-white px-2 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
-                    {SATUAN_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                    {SATUAN.produk.map((s: any) => (
+                      <option key={s.id} value={s.id}>
+                        {s.label}
                       </option>
                     ))}
                   </select>
@@ -243,20 +231,21 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                 {errors.weight && <p className="mt-1 text-xs text-red-500">{errors.weight}</p>}
               </div>
             </div>
+
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-800">Jenis</label>
+              <label className="mb-2 block text-sm font-semibold text-gray-800">Jenis Produk</label>
               <div className="flex flex-wrap gap-2">
-                {JENIS_OPTIONS.map((opt) => {
-                  const active = formData.jenis.includes(opt.label)
+                {CATEGORY_OPTIONS.map((opt) => {
+                  const active = formData.jenis === opt.id
                   return (
                     <button
                       key={opt.id}
                       type="button"
-                      onClick={() => handleToggleJenis(opt.label)}
+                      onClick={() => handleToggleJenis(opt.id)}
                       className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition ${
                         active
-                          ? "border-blue-600 text-blue-600 bg-white"
-                          : "border-gray-200 text-gray-500 bg-white hover:border-gray-300"
+                          ? "border-blue-600 bg-white text-blue-600"
+                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                       }`}
                     >
                       {opt.label}
@@ -264,6 +253,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                   )
                 })}
               </div>
+              {errors.jenis && <p className="mt-1 text-xs text-red-500">{errors.jenis}</p>}
             </div>
 
             <div>
@@ -279,6 +269,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
             </div>
           </div>
 
+          {/* Right — foto */}
           <div className="flex-35 p-6">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-800">Foto Produk</span>
@@ -313,13 +304,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
               ) : (
                 <>
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-                    <svg
-                      className="h-5 w-5 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.8}
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <path d="m21 15-5-5L5 21" />
@@ -348,9 +333,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                 return (
                   <div
                     key={slotIndex}
-                    onClick={() => {
-                      if (!preview) mainUploadRef.current?.click()
-                    }}
+                    onClick={() => { if (!preview) mainUploadRef.current?.click() }}
                     className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
                       preview ? "" : "border-gray-200 hover:border-blue-400"
                     }`}
@@ -371,13 +354,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                       </>
                     ) : (
                       <>
-                        <svg
-                          className="mb-1 h-4 w-4 text-gray-300"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                        >
+                        <svg className="mb-1 h-4 w-4 text-gray-300" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                           <rect x="3" y="3" width="18" height="18" rx="2" />
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <path d="m21 15-5-5L5 21" />
@@ -393,9 +370,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
             <div>
               <p className="mb-1.5 text-xs font-semibold text-gray-700">💡 Tips foto produk</p>
               {TIPS_FOTO.map((tip, i) => (
-                <p key={i} className="text-xs leading-relaxed text-gray-500">
-                  {tip}
-                </p>
+                <p key={i} className="text-xs leading-relaxed text-gray-500">{tip}</p>
               ))}
             </div>
           </div>

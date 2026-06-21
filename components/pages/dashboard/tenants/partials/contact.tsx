@@ -1,5 +1,5 @@
 import { Phone, Mail, Globe } from "lucide-react"
-import { ContactPartialProps } from "../types/tenants.interface"
+import { ContactPartialProps } from "../types/tenants.i"
 
 export default function ContactPartial({ data, isEditing, onChange }: ContactPartialProps) {
   const contacts = [

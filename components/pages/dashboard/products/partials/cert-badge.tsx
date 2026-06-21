@@ -1,11 +1,8 @@
 "use client"
 
-interface CertBadgeProps {
-  type: "BPOM" | "HALAL" | "PIRT" | "COA"
-  active?: boolean
-}
+import { ICertBadge } from "../types/product.i"
 
-export function CertBadge({ type, active = true }: CertBadgeProps) {
+export function CertBadge({ type, active = true }: ICertBadge) {
   const styles = {
     BPOM: active
       ? "bg-blue-50 text-blue-600 font-medium"

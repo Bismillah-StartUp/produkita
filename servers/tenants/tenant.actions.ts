@@ -7,6 +7,7 @@ import {
   uploadTenantPlaceController,
   deleteTenantLogoController,
   deleteTenantPlaceController,
+  getTenantEmailController,
 } from "./tenant.controller"
 
 export const getTenant = async (userUuid: string) => {
@@ -50,4 +51,8 @@ export const deleteTenantLogo = async (userUuid: string) => {
 
 export const deleteTenantPlace = async (userUuid: string) => {
   return await deleteTenantPlaceController(userUuid)
+}
+
+export const getTenantEmail = async (userUuid: string) => {
+  return await getTenantEmailController(userUuid)
 }

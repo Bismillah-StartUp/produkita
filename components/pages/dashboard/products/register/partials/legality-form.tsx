@@ -2,22 +2,16 @@
 
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { IToogle } from "../../types/product.i"
 
-function TogglePill({
-  checked,
-  onChange,
-  color,
-}: {
-  checked: boolean
-  onChange: (v: boolean) => void
-  color: "blue" | "purple" | "green" | "orange"
-}) {
+function TogglePill({checked, onChange, color}: IToogle) {
   const activeCls: Record<string, string> = {
     blue: "bg-blue-600 text-white",
     purple: "bg-purple-500 text-white",
     green: "bg-green-500 text-white",
     orange: "bg-orange-400 text-white",
   }
+  
   const active = activeCls[color]
   const inactive = "bg-white text-gray-500"
 

@@ -288,7 +288,7 @@ export const submitProduct = async (
       weight?: number
       weight_unit?: WeightUnits
     }
-    productImages: Buffer[]
+    productImages: string[]
     nutrition: {
       servings?: number
       serving_pkgs?: number
@@ -308,18 +308,21 @@ export const submitProduct = async (
       registered_at?: Date
       valid_until?: Date
       lab_name?: string
-      file?: Buffer
+      file?: string
     }[]
     serving: {
       serving_info?: string
       serving_portion?: string
       storage_info?: string
       video_url?: string
-      images?: Buffer[]
+      images?: string[]
     }
   }
 ) => {
-  const tenant = await prisma.tenant.findUnique({ where: { uuid: tenantUuid } })
+  const tenant = await prisma.tenant.findFirst({
+    where: { user: { uuid: tenantUuid } },
+  })
+
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
   const licenseCode = generateLicensesCode(data.product.name, data.product.type)

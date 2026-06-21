@@ -8,7 +8,7 @@ import ContactPartial from "./partials/contact"
 import PhotosPartial from "./partials/photos"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
 import { useTenant } from "@/hooks/useTenants"
-import { emptyData, TenantData } from "./types/tenants.interface"
+import { emptyData, TenantData } from "./types/tenants.i"
 
 export default function TenantsPage() {
   const { uuid } = useAuthStore()

@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createHash, randomBytes } from "crypto"
 import QRCode from "qrcode"
+import { ProductCategory } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -57,11 +58,35 @@ export const formatTime = (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-export const SATUAN = {
-  bbb: ["Kg", "Gram", "Liter", "ml", "Pcs", "Lembar", "Meter", "Sak", "Ikat"],
-  btkl: ["Orang/Hari", "Orang/Jam", "Orang/Bulan", "Borongan", "Pcs"],
-  packaging: ["Pcs", "Box", "Pack", "Roll", "Lusin", "Dus", "Lembar"],
-  bop_var: ["kWh", "m3", "Tabung", "Liter", "Jam", "Hari", "Bulan", "Pcs"],
-  bop_fix: ["Bulan", "Tahun", "Hari", "Paket"],
-  Produksi: ["Kg", "Gram", "Liter", "ml", "Pcs", "Box", "Pack", "Lusin", "Karton", "Botol", "Porsi", "Cup"],
+export const toBase64 = async (file: File) => {
+  const buffer = await file.arrayBuffer()
+  return Buffer.from(buffer).toString("base64")
 }
+
+export const SATUAN = {
+  produk: [
+    { id: "g", label: "Gram (g)" },
+    { id: "kg", label: "Kilogram (kg)" },
+    { id: "ml", label: "Mililiter (ml)" },
+    { id: "l", label: "Liter (l)" },
+    { id: "pcs", label: "Pieces (pcs)" },
+    { id: "lusin", label: "Lusin" },
+  ],
+
+  bahan_baku: ["Kg", "Gram", "Liter", "ml", "Pcs", "Lembar", "Meter", "Sak", "Ikat"],
+  tenaga_kerja: ["Orang/Hari", "Orang/Jam", "Orang/Bulan", "Borongan", "Pcs"],
+  packaging: ["Pcs", "Box", "Pack", "Roll", "Lusin", "Dus", "Lembar"],
+  bop_variabel: ["kWh", "m3", "Tabung", "Liter", "Jam", "Hari", "Bulan", "Pcs"],
+  bop_tetap: ["Bulan", "Tahun", "Hari", "Paket"],
+  hasil_produksi: ["Kg", "Gram", "Liter", "ml", "Pcs", "Box", "Pack", "Lusin", "Karton", "Botol", "Porsi", "Cup"],
+}
+
+export const CATEGORY_OPTIONS: { id: ProductCategory ; label: string }[] = [
+  { id: "fnb", label: "Makanan & Minuman" },
+  { id: "cosmetic", label: "Kosmetik" },
+  { id: "pharmaceutical", label: "Farmasi" },
+]
+
+export const CERT_TYPES = ["bpom", "pirt", "halal", "coa"] as const
+
+export const ALLERGEN_OPTIONS = ["Susu", "Kacang Tanah", "Telur", "Gandum", "Ikan", "Udang", "Ayam"]

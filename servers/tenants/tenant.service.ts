@@ -111,3 +111,15 @@ export const deleteTenantPlace = async (uuid: string) => {
     },
   })
 }
+
+export const getTenantEmail = async (userUuid: string) => {
+  const tenant = await prisma.tenant.findFirst({
+    where: { user: { uuid: userUuid } },
+    select: {
+      email: true,
+      user: { select: { email: true } },
+    },
+  })
+  if (!tenant) throw new Error("Tenant tidak ditemukan")
+  return tenant.email ?? tenant.user.email
+}

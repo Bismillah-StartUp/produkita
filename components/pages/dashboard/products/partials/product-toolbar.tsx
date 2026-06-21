@@ -3,13 +3,9 @@
 import { Search, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { IProductToolbar } from "../types/product.i"
 
-interface ProductToolbarProps {
-  search: string
-  onSearch: (value: string) => void
-}
-
-export function ProductToolbar({ search, onSearch }: ProductToolbarProps) {
+export function ProductToolbar({ search, onSearch }: IProductToolbar) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="relative w-full max-w-md">
@@ -20,7 +16,7 @@ export function ProductToolbar({ search, onSearch }: ProductToolbarProps) {
           type="text"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
-          placeholder="Cari produk..."
+          placeholder="Cari Produk"
           className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
       </div>

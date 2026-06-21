@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { AKG, percentAKG, roundAKG } from "@/lib/nutrition"
-const ALLERGEN_OPTIONS = ["Susu", "Kacang Tanah", "Telur", "Gandum", "Ikan", "Udang", "Ayam"]
+import { ALLERGEN_OPTIONS } from "@/lib/utils"
 
 function AKGBox({ value }: { value: string }) {
   return (

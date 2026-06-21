@@ -18,6 +18,7 @@ import {
   addServingImages,
 } from "@/servers/products/product.actions"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
+import { toBase64 } from "@/lib/utils"
 
 export const useProduct = () => {
   const [loading, setLoading] = useState(false)
@@ -91,17 +92,20 @@ export const useProduct = () => {
   ) =>
     handle(async () => {
       const productImages = await Promise.all(
-        data.productImages.map(async (f) => Buffer.from(await f.arrayBuffer()))
+        data.productImages.map(toBase64)
       )
+
       const certificates = await Promise.all(
         data.certificates.map(async (cert) => ({
           ...cert,
-          file: cert.file ? Buffer.from(await cert.file.arrayBuffer()) : undefined,
+          file: cert.file ? await toBase64(cert.file) : undefined,
         }))
       )
+
       const servingImages = await Promise.all(
-        (data.serving.images ?? []).map(async (f) => Buffer.from(await f.arrayBuffer()))
+        (data.serving.images ?? []).map(toBase64)
       )
+
       return await submitProduct(tenantUuid, tenantEmail, {
         ...data,
         productImages,

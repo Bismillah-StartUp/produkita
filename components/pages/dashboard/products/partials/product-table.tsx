@@ -5,15 +5,11 @@ import { Eye, Pencil, Trash2, QrCode } from "lucide-react"
 import { CertBadge } from "./cert-badge"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
 import { useProduct } from "@/hooks/useProducts"
+import { CERT_TYPES } from "@/lib/utils"
+import { IProductTable } from "../types/product.i"
 
-const CERT_TYPES = ["bpom", "pirt", "halal", "coa"] as const
 
-interface ProductTableProps {
-  search: string
-  onTotalChange: (total: number) => void
-}
-
-export function ProductTable({ search, onTotalChange }: ProductTableProps) {
+export function ProductTable({ search, onTotalChange }: IProductTable) {
   const { uuid } = useAuthStore()
   const { getProductsByTenant, softDeleteProduct, loading } = useProduct()
 

@@ -5,6 +5,7 @@ import {
   uploadTenantPlace,
   deleteTenantLogo,
   deleteTenantPlace,
+  getTenantEmail,
 } from "./tenant.service"
 
 export const getTenantController = async (userUuid: string) => {
@@ -69,4 +70,8 @@ export const deleteTenantPlaceController = async (userUuid: string) => {
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
   return await deleteTenantPlace(tenant.uuid)
+}
+
+export const getTenantEmailController = async (userUuid: string) => {
+  return await getTenantEmail(userUuid)
 }
