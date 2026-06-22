@@ -1,5 +1,6 @@
 import { MapPin, ExternalLink } from "lucide-react"
 import { TenantData, ViewFieldProps } from "../types/tenants.i"
+import Link from "next/link"
 
 const ViewField = ({ label, value }: ViewFieldProps) => (
   <div>
@@ -14,10 +15,15 @@ interface EditFieldProps {
   value: string
   multiline?: boolean
   rows?: number
+  type?: string
+  min?: string
+  max?: string
+  maxLength?: number
+  placeholder?: string
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
-const EditField = ({ label, name, value, multiline = false, rows = 3, onChange }: EditFieldProps) => (
+const EditField = ({ label, name, value, multiline = false, rows = 3, type = "text", min, max, maxLength, placeholder, onChange }: EditFieldProps) => (
   <div>
     <p className="text-xs text-gray-500 mb-1">{label}</p>
     {multiline ? (
@@ -26,28 +32,66 @@ const EditField = ({ label, name, value, multiline = false, rows = 3, onChange }
         value={value}
         onChange={onChange}
         rows={rows}
+        placeholder={placeholder}
         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
       />
     ) : (
       <input
-        type="text"
+        type={type}
         name={name}
         value={value}
         onChange={onChange}
+        min={min}
+        max={max}
+        maxLength={maxLength}
+        placeholder={placeholder}
         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
       />
     )}
   </div>
 )
 
+// format NPWP: XX.XXX.XXX.X-XXX.XXX
+const formatNpwp = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 15)
+  const parts = [
+    digits.slice(0, 2),
+    digits.slice(2, 5),
+    digits.slice(5, 8),
+    digits.slice(8, 9),
+    digits.slice(9, 12),
+    digits.slice(12, 15),
+  ]
+  let result = parts[0]
+  if (parts[1]) result += "." + parts[1]
+  if (parts[2]) result += "." + parts[2]
+  if (parts[3]) result += "." + parts[3]
+  if (parts[4]) result += "-" + parts[4]
+  if (parts[5]) result += "." + parts[5]
+  return result
+}
+
 interface ProfilePartialProps {
   data: TenantData
   isEditing: boolean
   tempData: TenantData
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+  onNpwpChange: (value: string) => void
+  onPostalCodeChange: (value: string) => void
+  onFoundedYearChange: (value: string) => void
 }
 
-export default function ProfilePartial({ data, isEditing, tempData, onChange }: ProfilePartialProps) {
+export default function ProfilePartial({
+  data,
+  isEditing,
+  tempData,
+  onChange,
+  onNpwpChange,
+  onPostalCodeChange,
+  onFoundedYearChange,
+}: ProfilePartialProps) {
+  const currentYear = new Date().getFullYear()
+
   return (
     <>
       {/* Profil Perusahaan */}
@@ -63,7 +107,21 @@ export default function ProfilePartial({ data, isEditing, tempData, onChange }: 
               <EditField label="Nama Perusahaan" name="companyName" value={tempData.companyName} onChange={onChange} />
               <EditField label="Nama Dagang" name="tradeName" value={tempData.tradeName} onChange={onChange} />
               <EditField label="Bidang Usaha" name="businessField" value={tempData.businessField} onChange={onChange} />
-              <EditField label="NPWP" name="npwp" value={tempData.npwp} onChange={onChange} />
+
+              {/* NPWP dengan auto-format */}
+              <div>
+                <p className="text-xs text-gray-500 mb-1">NPWP</p>
+                <input
+                  type="text"
+                  name="npwp"
+                  value={tempData.npwp}
+                  onChange={(e) => onNpwpChange(formatNpwp(e.target.value))}
+                  placeholder="XX.XXX.XXX.X-XXX.XXX"
+                  maxLength={20}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
               <div className="col-span-2">
                 <EditField
                   label="Deskripsi Usaha"
@@ -105,7 +163,24 @@ export default function ProfilePartial({ data, isEditing, tempData, onChange }: 
             {isEditing ? (
               <>
                 <EditField label="Kota" name="district" value={tempData.district} onChange={onChange} />
-                <EditField label="Kode Pos" name="postalCode" value={tempData.postalCode} onChange={onChange} />
+
+                {/* Kode Pos — hanya 5 digit angka */}
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Kode Pos</p>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={tempData.postalCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 5)
+                      onPostalCodeChange(val)
+                    }}
+                    placeholder="12345"
+                    maxLength={5}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
                 <EditField label="Provinsi" name="province" value={tempData.province} onChange={onChange} />
               </>
             ) : (
@@ -141,15 +216,15 @@ export default function ProfilePartial({ data, isEditing, tempData, onChange }: 
           </div>
 
           <div className="relative rounded-xl overflow-hidden border border-gray-200 h-48">
-            
-            <a  href={`https://maps.google.com/maps?q=${encodeURIComponent(data.mapsQuery)}`}
+            <Link
+              href={`https://maps.google.com/maps?q=${encodeURIComponent(data.mapsQuery)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-white text-gray-700 text-xs font-medium px-2.5 py-1.5 rounded-lg shadow border border-gray-200 hover:bg-gray-50"
             >
               <ExternalLink size={12} />
               Open in Maps
-            </a>
+            </Link>
             <iframe
               title="Peta Lokasi"
               src={`https://maps.google.com/maps?q=${encodeURIComponent(data.mapsQuery)}&output=embed&z=14`}

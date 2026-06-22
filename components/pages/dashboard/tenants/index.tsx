@@ -12,7 +12,7 @@ import { emptyData, TenantData } from "./types/tenants.i"
 
 export default function TenantsPage() {
   const { uuid } = useAuthStore()
-  const { getTenant, updateTenant, uploadLogo, uploadPlace, loading } = useTenant()
+  const { getTenant, updateTenant, uploadLogo, uploadPlace } = useTenant()
 
   const [isEditing, setIsEditing] = useState(false)
   const [savedData, setSavedData] = useState<TenantData>(emptyData)
@@ -136,6 +136,22 @@ export default function TenantsPage() {
     setTempData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleNpwpChange = (value: string) => {
+    setTempData((prev) => ({ ...prev, npwp: value }))
+  }
+
+  const handlePostalCodeChange = (value: string) => {
+    setTempData((prev) => ({ ...prev, postalCode: value }))
+  }
+
+  const handlePhoneChange = (value: string) => {
+    setTempData((prev) => ({ ...prev, phone: value }))
+  }
+
+  const handleFoundedYearChange = (value: string) => {
+    setTempData((prev) => ({ ...prev, foundedYear: value }))
+  }
+
   if (isFetching) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -200,9 +216,12 @@ export default function TenantsPage() {
             {isEditing ? (
               <input
                 name="foundedYear"
+                type="number"
+                min="1900"
+                max={new Date().getFullYear().toString()}
                 value={tempData.foundedYear}
-                onChange={handleChange}
-                className="text-base font-bold text-gray-900 border-b border-gray-400 bg-transparent focus:outline-none w-24 mt-0.5"
+                onChange={(e) => handleFoundedYearChange(e.target.value)}
+                className="text-base font-bold text-gray-900 border-b border-gray-400 bg-transparent focus:outline-none w-24 mt-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             ) : (
               <p className="text-base font-bold text-gray-900 mt-0.5">
@@ -258,6 +277,9 @@ export default function TenantsPage() {
             isEditing={isEditing}
             tempData={tempData}
             onChange={handleChange}
+            onNpwpChange={handleNpwpChange}
+            onPostalCodeChange={handlePostalCodeChange}
+            onFoundedYearChange={handleFoundedYearChange}
           />
         </div>
         <div className="w-72 shrink-0 space-y-4">
@@ -265,6 +287,7 @@ export default function TenantsPage() {
             data={data}
             isEditing={isEditing}
             onChange={handleChange}
+            onPhoneChange={handlePhoneChange}
           />
           <PhotosPartial
             userUuid={uuid ?? ""}
