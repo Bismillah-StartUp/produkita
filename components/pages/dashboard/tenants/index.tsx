@@ -59,6 +59,8 @@ export default function TenantsPage() {
         website: result.website ?? "",
         foundedYear: result.year?.toString() ?? "",
         productCount: result._count.products.toString(),
+        latitude: result.latitude ?? null,
+        longitude: result.longitude ?? null,
       }
 
       setSavedData(mapped)
@@ -105,6 +107,8 @@ export default function TenantsPage() {
           email: tempData.email,
           website: tempData.website,
           year: tempData.foundedYear ? parseInt(tempData.foundedYear) : undefined,
+          latitude: tempData.latitude ?? undefined,
+          longitude: tempData.longitude ?? undefined,
         }),
         pendingLogo ? uploadLogo(uuid, pendingLogo) : Promise.resolve(null),
         pendingPlace ? uploadPlace(uuid, pendingPlace) : Promise.resolve(null),
@@ -151,6 +155,11 @@ export default function TenantsPage() {
   const handleFoundedYearChange = (value: string) => {
     setTempData((prev) => ({ ...prev, foundedYear: value }))
   }
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setTempData((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+  }
+
 
   if (isFetching) {
     return (
@@ -280,6 +289,7 @@ export default function TenantsPage() {
             onNpwpChange={handleNpwpChange}
             onPostalCodeChange={handlePostalCodeChange}
             onFoundedYearChange={handleFoundedYearChange}
+            onLocationChange={handleLocationChange}
           />
         </div>
         <div className="w-72 shrink-0 space-y-4">

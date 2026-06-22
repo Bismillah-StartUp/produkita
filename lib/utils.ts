@@ -90,3 +90,23 @@ export const CATEGORY_OPTIONS: { id: ProductCategory ; label: string }[] = [
 export const CERT_TYPES = ["bpom", "pirt", "halal", "coa"] as const
 
 export const ALLERGEN_OPTIONS = ["Susu", "Kacang Tanah", "Telur", "Gandum", "Ikan", "Udang", "Ayam"]
+
+// format NPWP: XX.XXX.XXX.X-XXX.XXX
+export const formatNpwp = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 15)
+  const parts = [
+    digits.slice(0, 2),
+    digits.slice(2, 5),
+    digits.slice(5, 8),
+    digits.slice(8, 9),
+    digits.slice(9, 12),
+    digits.slice(12, 15),
+  ]
+  let result = parts[0]
+  if (parts[1]) result += "." + parts[1]
+  if (parts[2]) result += "." + parts[2]
+  if (parts[3]) result += "." + parts[3]
+  if (parts[4]) result += "-" + parts[4]
+  if (parts[5]) result += "." + parts[5]
+  return result
+}

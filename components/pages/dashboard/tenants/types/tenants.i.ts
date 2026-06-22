@@ -14,6 +14,8 @@ export interface TenantData {
   website: string
   foundedYear: string
   productCount: string
+  latitude: number | null
+  longitude: number | null
 }
 
 export const emptyData: TenantData = {
@@ -32,6 +34,8 @@ export const emptyData: TenantData = {
   website: "",
   foundedYear: "",
   productCount: "",
+  latitude: null,
+  longitude: null
 }
 
 export interface ViewFieldProps {

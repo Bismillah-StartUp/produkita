@@ -1,6 +1,18 @@
-import { MapPin, ExternalLink } from "lucide-react"
+"use client"
+
+import { MapPin } from "lucide-react"
 import { TenantData, ViewFieldProps } from "../types/tenants.i"
-import Link from "next/link"
+import { formatNpwp } from "@/lib/utils"
+import dynamic from "next/dynamic"
+import { useRef, useState } from "react"
+
+const LocationMap = dynamic(
+  () => import("./maps"),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 rounded-xl border border-gray-200 bg-gray-100 animate-pulse" />
+  }
+)
 
 const ViewField = ({ label, value }: ViewFieldProps) => (
   <div>
@@ -23,7 +35,10 @@ interface EditFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
-const EditField = ({ label, name, value, multiline = false, rows = 3, type = "text", min, max, maxLength, placeholder, onChange }: EditFieldProps) => (
+const EditField = ({
+  label, name, value, multiline = false, rows = 3,
+  type = "text", min, max, maxLength, placeholder, onChange
+}: EditFieldProps) => (
   <div>
     <p className="text-xs text-gray-500 mb-1">{label}</p>
     {multiline ? (
@@ -51,24 +66,11 @@ const EditField = ({ label, name, value, multiline = false, rows = 3, type = "te
   </div>
 )
 
-// format NPWP: XX.XXX.XXX.X-XXX.XXX
-const formatNpwp = (value: string) => {
-  const digits = value.replace(/\D/g, "").slice(0, 15)
-  const parts = [
-    digits.slice(0, 2),
-    digits.slice(2, 5),
-    digits.slice(5, 8),
-    digits.slice(8, 9),
-    digits.slice(9, 12),
-    digits.slice(12, 15),
-  ]
-  let result = parts[0]
-  if (parts[1]) result += "." + parts[1]
-  if (parts[2]) result += "." + parts[2]
-  if (parts[3]) result += "." + parts[3]
-  if (parts[4]) result += "-" + parts[4]
-  if (parts[5]) result += "." + parts[5]
-  return result
+interface NominatimResult {
+  place_id: number
+  display_name: string
+  lat: string
+  lon: string
 }
 
 interface ProfilePartialProps {
@@ -79,6 +81,7 @@ interface ProfilePartialProps {
   onNpwpChange: (value: string) => void
   onPostalCodeChange: (value: string) => void
   onFoundedYearChange: (value: string) => void
+  onLocationChange: (lat: number, lng: number) => void
 }
 
 export default function ProfilePartial({
@@ -88,9 +91,51 @@ export default function ProfilePartial({
   onChange,
   onNpwpChange,
   onPostalCodeChange,
-  onFoundedYearChange,
+  onLocationChange,
 }: ProfilePartialProps) {
-  const currentYear = new Date().getFullYear()
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onChange(e)
+
+    const val = e.target.value
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    if (!val.trim()) {
+      setSuggestions([])
+      return
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5&countrycodes=id`,
+          { headers: { "Accept-Language": "id" } }
+        )
+        const data: NominatimResult[] = await res.json()
+        setSuggestions(data)
+      } catch {
+        setSuggestions([])
+      } finally {
+        setSearching(false)
+      }
+    }, 800)
+  }
+
+  const handleSelectSuggestion = (result: NominatimResult) => {
+    const lat = parseFloat(result.lat)
+    const lng = parseFloat(result.lon)
+    setSuggestions([])
+    onLocationChange(lat, lng)
+
+    // update field address dengan display_name
+    onChange({
+      target: { name: "address", value: result.display_name }
+    } as React.ChangeEvent<HTMLInputElement>)
+  }
 
   return (
     <>
@@ -107,8 +152,6 @@ export default function ProfilePartial({
               <EditField label="Nama Perusahaan" name="companyName" value={tempData.companyName} onChange={onChange} />
               <EditField label="Nama Dagang" name="tradeName" value={tempData.tradeName} onChange={onChange} />
               <EditField label="Bidang Usaha" name="businessField" value={tempData.businessField} onChange={onChange} />
-
-              {/* NPWP dengan auto-format */}
               <div>
                 <p className="text-xs text-gray-500 mb-1">NPWP</p>
                 <input
@@ -121,7 +164,6 @@ export default function ProfilePartial({
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div className="col-span-2">
                 <EditField
                   label="Deskripsi Usaha"
@@ -153,8 +195,35 @@ export default function ProfilePartial({
         <h2 className="text-[15px] font-bold text-gray-900 mb-5">Alamat</h2>
 
         <div className="space-y-4">
+          {/* Field Alamat dengan suggestions */}
           {isEditing ? (
-            <EditField label="Jalan / Alamat" name="address" value={tempData.address} onChange={onChange} />
+            <div className="relative">
+              <p className="text-xs text-gray-500 mb-1">Jalan / Alamat</p>
+              <input
+                type="text"
+                name="address"
+                value={tempData.address}
+                onChange={handleAddressChange}
+                placeholder="Ketik alamat untuk mencari lokasi..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {searching && (
+                <p className="text-xs text-gray-400 mt-1">Mencari lokasi...</p>
+              )}
+              {suggestions.length > 0 && (
+                <ul className="absolute top-full left-0 right-0 z-[2000] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {suggestions.map((s) => (
+                    <li
+                      key={s.place_id}
+                      onClick={() => handleSelectSuggestion(s)}
+                      className="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0"
+                    >
+                      {s.display_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           ) : (
             <ViewField label="Jalan / Alamat" value={data.address} />
           )}
@@ -163,8 +232,6 @@ export default function ProfilePartial({
             {isEditing ? (
               <>
                 <EditField label="Kota" name="district" value={tempData.district} onChange={onChange} />
-
-                {/* Kode Pos — hanya 5 digit angka */}
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Kode Pos</p>
                   <input
@@ -180,7 +247,6 @@ export default function ProfilePartial({
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-
                 <EditField label="Provinsi" name="province" value={tempData.province} onChange={onChange} />
               </>
             ) : (
@@ -192,48 +258,29 @@ export default function ProfilePartial({
             )}
           </div>
 
-          <div className="flex items-start justify-between gap-4 pt-1">
-            <div className="flex items-start gap-2">
-              <MapPin size={16} className="text-blue-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-gray-900">Lokasi Usaha</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {data.address}, {data.district}
+          {/* Lokasi info */}
+          <div className="flex items-start gap-2 pt-1">
+            <MapPin size={16} className="text-blue-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Lokasi Usaha</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {data.address}, {data.district}
+              </p>
+              {(data.latitude || data.longitude) && (
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {data.latitude?.toFixed(6)}, {data.longitude?.toFixed(6)}
                 </p>
-              </div>
+              )}
             </div>
-            {isEditing && (
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-gray-500">Query Maps:</span>
-                <input
-                  name="mapsQuery"
-                  value={tempData.mapsQuery}
-                  onChange={onChange}
-                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            )}
           </div>
 
-          <div className="relative rounded-xl overflow-hidden border border-gray-200 h-48">
-            <Link
-              href={`https://maps.google.com/maps?q=${encodeURIComponent(data.mapsQuery)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-white text-gray-700 text-xs font-medium px-2.5 py-1.5 rounded-lg shadow border border-gray-200 hover:bg-gray-50"
-            >
-              <ExternalLink size={12} />
-              Open in Maps
-            </Link>
-            <iframe
-              title="Peta Lokasi"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(data.mapsQuery)}&output=embed&z=14`}
-              className="w-full h-full"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-            />
-          </div>
+          {/* Map */}
+          <LocationMap
+            latitude={isEditing ? (tempData.latitude ?? null) : (data.latitude ?? null)}
+            longitude={isEditing ? (tempData.longitude ?? null) : (data.longitude ?? null)}
+            isEditing={isEditing}
+            onLocationChange={onLocationChange}
+          />
         </div>
       </div>
     </>
