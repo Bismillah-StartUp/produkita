@@ -1,9 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { Upload, X } from "lucide-react"
+import { Upload, Camera } from "lucide-react"
 import { useRef } from "react"
-import { useTenant } from "@/hooks/useTenants"
 
 interface PhotosPartialProps {
   userUuid: string
@@ -12,45 +11,35 @@ interface PhotosPartialProps {
   placeUrl: string | null
   onLogoChange: (url: string | null) => void
   onPlaceChange: (url: string | null) => void
+  onLogoPending: (file: File, preview: string) => void
+  onPlacePending: (file: File, preview: string) => void
+  isEditing: boolean 
 }
 
 export default function PhotosPartial({
-  userUuid,
   logoUrl,
   placeUrl,
-  onLogoChange,
-  onPlaceChange,
+  onLogoPending,
+  onPlacePending,
+  isEditing,
 }: PhotosPartialProps) {
-  const { uploadLogo, uploadPlace, deleteLogo, deletePlace, loading } = useTenant()
   const logoRef = useRef<HTMLInputElement>(null)
   const placeRef = useRef<HTMLInputElement>(null)
 
-  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !userUuid) return
-    const result = await uploadLogo(userUuid, file)
-    if (result) onLogoChange(result.logo_url ?? null)
+    if (!file) return
+    const preview = URL.createObjectURL(file)
+    onLogoPending(file, preview)
     e.target.value = ""
   }
 
-  const handleUploadPlace = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePlaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !userUuid) return
-    const result = await uploadPlace(userUuid, file)
-    if (result) onPlaceChange(result.place_url ?? null)
+    if (!file) return
+    const preview = URL.createObjectURL(file)
+    onPlacePending(file, preview)
     e.target.value = ""
-  }
-
-  const handleDeleteLogo = async () => {
-    if (!userUuid) return
-    const result = await deleteLogo(userUuid)
-    if (result !== null) onLogoChange(null)
-  }
-
-  const handleDeletePlace = async () => {
-    if (!userUuid) return
-    const result = await deletePlace(userUuid)
-    if (result !== null) onPlaceChange(null)
   }
 
   return (
@@ -66,26 +55,29 @@ export default function PhotosPartial({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={handleUploadLogo}
+            onChange={handleLogoChange}
           />
           {logoUrl ? (
-            <div className="relative w-full h-24 rounded-xl overflow-hidden border border-gray-200">
+            <div
+              onClick={() => isEditing && logoRef.current?.click()}
+              className={`relative w-full h-24 rounded-xl overflow-hidden border border-gray-200 ${isEditing ? "cursor-pointer group" : "cursor-default"}`}
+            >
               <Image src={logoUrl} alt="Logo" fill className="object-contain p-2" />
-              <button
-                onClick={handleDeleteLogo}
-                disabled={loading}
-                className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors disabled:opacity-50"
-              >
-                <X size={12} />
-              </button>
+              {isEditing && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                  <Camera size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
             </div>
           ) : (
             <div
-              onClick={() => !loading && logoRef.current?.click()}
-              className="border-2 border-dashed border-gray-200 rounded-xl p-5 flex flex-col items-center gap-1.5 text-gray-400 cursor-pointer hover:border-blue-400 hover:text-blue-500 transition-colors"
+              onClick={() => isEditing && logoRef.current?.click()}
+              className={`border-2 border-dashed border-gray-200 rounded-xl p-5 flex flex-col items-center gap-1.5 text-gray-400 transition-colors ${
+                isEditing ? "cursor-pointer hover:border-blue-400 hover:text-blue-500" : "cursor-default opacity-50"
+              }`}
             >
               <Upload size={20} />
-              <p className="text-xs font-medium">{loading ? "Mengupload..." : "Upload Logo"}</p>
+              <p className="text-xs font-medium">Upload Logo</p>
               <p className="text-[11px] text-gray-400">PNG, JPG, SVG</p>
             </div>
           )}
@@ -99,31 +91,33 @@ export default function PhotosPartial({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={handleUploadPlace}
+            onChange={handlePlaceChange}
           />
           {placeUrl ? (
-            <div className="relative w-full h-36 rounded-xl overflow-hidden border border-gray-200">
+            <div
+              onClick={() => isEditing && placeRef.current?.click()}
+              className={`relative w-full h-36 rounded-xl overflow-hidden border border-gray-200 ${isEditing ? "cursor-pointer group" : "cursor-default"}`}
+            >
               <Image src={placeUrl} alt="Foto gedung" fill className="object-cover" />
-              <button
-                onClick={handleDeletePlace}
-                disabled={loading}
-                className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors disabled:opacity-50"
-              >
-                <X size={12} />
-              </button>
+              {isEditing && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                  <Camera size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
             </div>
           ) : (
             <div
-              onClick={() => !loading && placeRef.current?.click()}
-              className="relative w-full h-36 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-gray-400 cursor-pointer hover:border-blue-400 hover:text-blue-500 transition-colors"
+              onClick={() => isEditing && placeRef.current?.click()}
+              className={`relative w-full h-36 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-gray-400 transition-colors ${
+                isEditing ? "cursor-pointer hover:border-blue-400 hover:text-blue-500" : "cursor-default opacity-50"
+              }`}
             >
               <Upload size={20} />
-              <p className="text-xs font-medium">{loading ? "Mengupload..." : "Upload Foto Tempat"}</p>
-              <p className="text-[11px] text-gray.400">PNG, JPG, WEBP</p>
+              <p className="text-xs font-medium">Upload Foto Tempat</p>
+              <p className="text-[11px] text-gray-400">PNG, JPG, WEBP</p>
             </div>
           )}
         </div>
-
       </div>
     </div>
   )

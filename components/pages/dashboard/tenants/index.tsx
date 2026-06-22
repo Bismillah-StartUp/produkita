@@ -12,7 +12,7 @@ import { emptyData, TenantData } from "./types/tenants.i"
 
 export default function TenantsPage() {
   const { uuid } = useAuthStore()
-  const { getTenant, updateTenant, loading } = useTenant()
+  const { getTenant, updateTenant, uploadLogo, uploadPlace, loading } = useTenant()
 
   const [isEditing, setIsEditing] = useState(false)
   const [savedData, setSavedData] = useState<TenantData>(emptyData)
@@ -21,6 +21,12 @@ export default function TenantsPage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [placeUrl, setPlaceUrl] = useState<string | null>(null)
   const [isFetching, setIsFetching] = useState(true)
+
+  const [pendingLogo, setPendingLogo] = useState<File | null>(null)
+  const [pendingPlace, setPendingPlace] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [placePreview, setPlacePreview] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (!uuid) return
@@ -72,31 +78,56 @@ export default function TenantsPage() {
 
   const handleCancel = () => {
     setTempData({ ...savedData })
+    setPendingLogo(null)
+    setPendingPlace(null)
+    setLogoPreview(null)
+    setPlacePreview(null)
     setIsEditing(false)
   }
 
   const handleSave = async () => {
     if (!uuid) return
+    setIsSaving(true)
 
-    const result = await updateTenant(uuid, {
-      name: tempData.companyName,
-      trade_name: tempData.tradeName,
-      business_field: tempData.businessField,
-      npwp: tempData.npwp,
-      description: tempData.businessDescription,
-      address: tempData.address,
-      city: tempData.district,
-      postal_code: tempData.postalCode,
-      province: tempData.province,
-      phonenumber: tempData.phone,
-      email: tempData.email,
-      website: tempData.website,
-      year: tempData.foundedYear ? parseInt(tempData.foundedYear) : undefined,
-    })
+    try {
+      const [result, logoResult, placeResult] = await Promise.all([
+        updateTenant(uuid, {
+          name: tempData.companyName,
+          trade_name: tempData.tradeName,
+          business_field: tempData.businessField,
+          npwp: tempData.npwp,
+          description: tempData.businessDescription,
+          address: tempData.address,
+          city: tempData.district,
+          postal_code: tempData.postalCode,
+          province: tempData.province,
+          phonenumber: tempData.phone,
+          email: tempData.email,
+          website: tempData.website,
+          year: tempData.foundedYear ? parseInt(tempData.foundedYear) : undefined,
+        }),
+        pendingLogo ? uploadLogo(uuid, pendingLogo) : Promise.resolve(null),
+        pendingPlace ? uploadPlace(uuid, pendingPlace) : Promise.resolve(null),
+      ])
 
-    if (result) {
+      if (!result) return
+
+      if (logoResult) {
+        setLogoUrl(logoResult.logo_url ?? null)
+        setPendingLogo(null)
+        setLogoPreview(null)
+      }
+
+      if (placeResult) {
+        setPlaceUrl(placeResult.place_url ?? null)
+        setPendingPlace(null)
+        setPlacePreview(null)
+      }
+
       setSavedData({ ...tempData })
       setIsEditing(false)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -192,19 +223,20 @@ export default function TenantsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleCancel}
-              disabled={loading}
+              disabled={isSaving}
               className="flex items-center gap-1.5 border border-gray-300 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <X size={14} />
               Batal
             </button>
+
             <button
               onClick={handleSave}
-              disabled={loading}
-              className="flex items-center gap-1.5 bg-blue-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              disabled={isSaving}
+              className="flex items-center gap-1.5 bg-blue-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check size={14} />
-              {loading ? "Menyimpan..." : "Simpan"}
+              {isSaving ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         ) : (
@@ -237,10 +269,19 @@ export default function TenantsPage() {
           <PhotosPartial
             userUuid={uuid ?? ""}
             tenantUuid={tenantUuid ?? ""}
-            logoUrl={logoUrl}
-            placeUrl={placeUrl}
+            logoUrl={logoPreview ?? logoUrl}
+            placeUrl={placePreview ?? placeUrl}
             onLogoChange={setLogoUrl}
             onPlaceChange={setPlaceUrl}
+            onLogoPending={(file, preview) => {
+              setPendingLogo(file)
+              setLogoPreview(preview)
+            }}
+            onPlacePending={(file, preview) => {
+              setPendingPlace(file)
+              setPlacePreview(preview)
+            }}
+            isEditing={isEditing} 
           />
         </div>
       </div>

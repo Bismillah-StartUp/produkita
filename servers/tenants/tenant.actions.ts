@@ -37,11 +37,11 @@ export const updateTenant = async (
   return await updateTenantController(userUuid, data)
 }
 
-export const uploadTenantLogo = async (userUuid: string, file: Buffer) => {
+export const uploadTenantLogo = async (userUuid: string, file: string) => {
   return await uploadTenantLogoController(userUuid, file)
 }
 
-export const uploadTenantPlace = async (userUuid: string, file: Buffer) => {
+export const uploadTenantPlace = async (userUuid: string, file: string) => {
   return await uploadTenantPlaceController(userUuid, file)
 }
 

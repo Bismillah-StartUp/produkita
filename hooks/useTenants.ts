@@ -44,8 +44,8 @@ export const useTenant = () => {
     setLoading(true)
     setError(null)
     try {
-      const buffer = Buffer.from(await file.arrayBuffer())
-      return await uploadTenantLogo(userUuid, buffer)
+      const base64 = Buffer.from(await file.arrayBuffer()).toString("base64")
+      return await uploadTenantLogo(userUuid, base64)
     } catch (err: any) {
       setError(err.message)
       return null
@@ -58,8 +58,8 @@ export const useTenant = () => {
     setLoading(true)
     setError(null)
     try {
-      const buffer = Buffer.from(await file.arrayBuffer())
-      return await uploadTenantPlace(userUuid, buffer)
+      const base64 = Buffer.from(await file.arrayBuffer()).toString("base64")
+      return await uploadTenantPlace(userUuid, base64)
     } catch (err: any) {
       setError(err.message)
       return null

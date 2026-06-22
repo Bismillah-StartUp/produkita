@@ -42,7 +42,7 @@ export const updateTenantProfile = async (
   })
 }
 
-export const uploadTenantLogo = async (uuid: string, file: Buffer) => {
+export const uploadTenantLogo = async (uuid: string, file: string) => {
   const tenant = await findTenantByUuid(uuid)
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
@@ -50,7 +50,8 @@ export const uploadTenantLogo = async (uuid: string, file: Buffer) => {
     await deleteImage(tenant.logo_public_id)
   }
 
-  const result = await uploadImage(file, "tenants")
+  const buffer = Buffer.from(file, "base64")
+  const result = await uploadImage(buffer, "tenants")
 
   return await prisma.tenant.update({
     where: { uuid },
@@ -61,7 +62,7 @@ export const uploadTenantLogo = async (uuid: string, file: Buffer) => {
   })
 }
 
-export const uploadTenantPlace = async (uuid: string, file: Buffer) => {
+export const uploadTenantPlace = async (uuid: string, file: string) => {
   const tenant = await findTenantByUuid(uuid)
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
@@ -69,7 +70,8 @@ export const uploadTenantPlace = async (uuid: string, file: Buffer) => {
     await deleteImage(tenant.place_public_id)
   }
 
-  const result = await uploadImage(file, "tenants")
+  const buffer = Buffer.from(file, "base64")
+  const result = await uploadImage(buffer, "tenants")
 
   return await prisma.tenant.update({
     where: { uuid },

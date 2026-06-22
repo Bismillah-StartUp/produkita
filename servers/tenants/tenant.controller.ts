@@ -40,21 +40,17 @@ export const updateTenantController = async (
   return await updateTenantProfile(tenant.uuid, data)
 }
 
-export const uploadTenantLogoController = async (userUuid: string, file: Buffer) => {
+export const uploadTenantLogoController = async (userUuid: string, file: string) => {
   if (!file) throw new Error("File logo wajib diisi")
-
   const tenant = await findTenantByUserUuid(userUuid)
   if (!tenant) throw new Error("Tenant tidak ditemukan")
-
   return await uploadTenantLogo(tenant.uuid, file)
 }
 
-export const uploadTenantPlaceController = async (userUuid: string, file: Buffer) => {
+export const uploadTenantPlaceController = async (userUuid: string, file: string) => {
   if (!file) throw new Error("File foto tempat wajib diisi")
-
   const tenant = await findTenantByUserUuid(userUuid)
   if (!tenant) throw new Error("Tenant tidak ditemukan")
-
   return await uploadTenantPlace(tenant.uuid, file)
 }
 
