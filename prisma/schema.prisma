@@ -88,6 +88,7 @@ model Tenant {
   user            User          @relation(fields: [user_id], references: [id])
   products        Product[]
   financial_records FinancialRecord[]
+  hpp_calculations  HppCalculation[]
 
   @@map("tenants")
 }
@@ -274,4 +275,56 @@ enum TransactionType {
 enum TransactionStatus {
   completed
   pending
+}
+
+model HppCalculation {
+  id                  Int               @id @default(autoincrement())
+  uuid                String            @unique @default(uuid()) @db.Uuid
+  tenant_id           Int
+  product_name        String
+  production_unit     String
+  production_qty      Float
+  calculation_method  HppMethod
+  margin_percentage   Float
+  total_hpp           Float
+  hpp_per_unit        Float
+  recommended_price   Float
+  total_profit        Float
+  total_revenue       Float
+
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+
+  tenant              Tenant            @relation(fields: [tenant_id], references: [id])
+  items               HppItem[]
+
+  @@map("hpp_calculations")
+}
+
+model HppItem {
+  id              Int             @id @default(autoincrement())
+  calculation_id  Int
+  category        HppCategory
+  name            String
+  unit            String
+  quantity        Float
+  price_per_unit  Float
+  subtotal        Float
+
+  calculation     HppCalculation  @relation(fields: [calculation_id], references: [id])
+
+  @@map("hpp_items")
+}
+
+enum HppMethod {
+  full
+  variable
+}
+
+enum HppCategory {
+  bbb
+  btkl
+  packaging
+  bop_var
+  bop_fix
 }
