@@ -1,14 +1,22 @@
-"use client";
+"use client"
 
-import { useHppCalculator } from "@/hooks/useHppCalculator";
-import MethodSelector from "./partials/method-selector";
-import ProductInfo from "./partials/product-info";
-import CostSection from "./partials/cost-section";
-import MarginSelector from "./partials/margin-selector";
-import SummaryResult from "./partials/summary-result";
+import { useHppCalculator } from "@/hooks/useHppCalculator"
+import { useAuthStore } from "@/servers/stores/useAuthStore"
+import MethodSelector from "./partials/method-selector"
+import ProductInfo from "./partials/product-info"
+import CostSection from "./partials/cost-section"
+import MarginSelector from "./partials/margin-selector"
+import SummaryResult from "./partials/summary-result"
+import { Save } from "lucide-react"
 
 export default function CalculatorsPage() {
-  const { state, setters, actions, summary } = useHppCalculator();
+  const { uuid } = useAuthStore()
+  const { state, setters, actions, summary, loading, error, createHpp } = useHppCalculator()
+
+  const handleSave = async () => {
+    if (!uuid) return
+    await createHpp(uuid)
+  }
 
   return (
     <div className="w-full p-6 sm:p-8 space-y-6 pb-20">
@@ -42,6 +50,24 @@ export default function CalculatorsPage() {
         margin_percentage={state.margin_percentage}
         summary={summary}
       />
+
+      {/* Tombol Simpan */}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" />
+          {loading ? "Menyimpan..." : "Simpan Kalkulasi"}
+        </button>
+      </div>
     </div>
-  );
+  )
 }

@@ -72,13 +72,13 @@ export const SATUAN = {
     { id: "pcs", label: "Pieces (pcs)" },
     { id: "lusin", label: "Lusin" },
   ],
-
-  bahan_baku: ["Kg", "Gram", "Liter", "ml", "Pcs", "Lembar", "Meter", "Sak", "Ikat"],
-  tenaga_kerja: ["Orang/Hari", "Orang/Jam", "Orang/Bulan", "Borongan", "Pcs"],
+  
+  bbb: ["Kg", "Gram", "Liter", "ml", "Pcs", "Lembar", "Meter", "Sak", "Ikat"],
+  btkl: ["Orang/Hari", "Orang/Jam", "Orang/Bulan", "Borongan", "Pcs"],
   packaging: ["Pcs", "Box", "Pack", "Roll", "Lusin", "Dus", "Lembar"],
-  bop_variabel: ["kWh", "m3", "Tabung", "Liter", "Jam", "Hari", "Bulan", "Pcs"],
-  bop_tetap: ["Bulan", "Tahun", "Hari", "Paket"],
-  hasil_produksi: ["Kg", "Gram", "Liter", "ml", "Pcs", "Box", "Pack", "Lusin", "Karton", "Botol", "Porsi", "Cup"],
+  bop_var: ["kWh", "m3", "Tabung", "Liter", "Jam", "Hari", "Bulan", "Pcs"],
+  bop_fix: ["Bulan", "Tahun", "Hari", "Paket"],
+  Produksi: ["Kg", "Gram", "Liter", "ml", "Pcs", "Box", "Pack", "Lusin", "Karton", "Botol", "Porsi", "Cup"],
 }
 
 export const CATEGORY_OPTIONS: { id: ProductCategory ; label: string }[] = [

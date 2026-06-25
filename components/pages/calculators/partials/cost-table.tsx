@@ -207,9 +207,13 @@ function EditableRow({
 
         <td className="px-5 py-2.5 xl:px-6">
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={localData.quantity}
-            onChange={(e) => setLocalData({ ...localData, quantity: e.target.value })}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9.]/g, "")
+              setLocalData({ ...localData, quantity: val })
+            }}
             disabled={disabled}
             placeholder="0"
             className="h-8 w-full rounded-md border border-slate-200 px-3 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100"
@@ -217,9 +221,13 @@ function EditableRow({
         </td>
         <td className="px-5 py-2.5 xl:px-6">
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={localData.price_per_unit}
-            onChange={(e) => setLocalData({ ...localData, price_per_unit: e.target.value })}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9.]/g, "")
+              setLocalData({ ...localData, price_per_unit: val })
+            }}
             disabled={disabled}
             placeholder="0"
             className="h-8 w-full rounded-md border border-slate-200 px-3 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100"
