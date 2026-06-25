@@ -133,6 +133,11 @@ function EditableRow({
   })
 
   const handleSave = () => {
+    if (!localData.name.trim()) return
+    if (!localData.unit) return
+    if (!Number(localData.quantity) || Number(localData.quantity) <= 0) return
+    if (!Number(localData.price_per_unit) || Number(localData.price_per_unit) <= 0) return
+
     on_update(item.id, "name", localData.name)
     on_update(item.id, "unit", localData.unit)
     on_update(item.id, "quantity", Number(localData.quantity) || 0)
