@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma"
 
 export const getProductInfo = async (licenseCode: string) => {
-  return await prisma.product.findUnique({
-    where: { license_code: licenseCode },
+  return await prisma.product.findFirst({
+    where: { license_code: licenseCode, deleted_at: null },
     select: {
       uuid: true,
       name: true,
@@ -15,9 +15,11 @@ export const getProductInfo = async (licenseCode: string) => {
       license_code: true,
       updated_at: true,
       images: {
+        where: { deleted_at: null },
         select: { uuid: true, url: true },
       },
       certificates: {
+        where: { deleted_at: null },
         select: { type: true, number: true },
       },
       tenant: {
@@ -29,7 +31,7 @@ export const getProductInfo = async (licenseCode: string) => {
 
 export const getProductNutrition = async (licenseCode: string) => {
   return await prisma.nutritionInfo.findFirst({
-    where: { product: { license_code: licenseCode } },
+    where: { product: { license_code: licenseCode, deleted_at: null } },
     select: {
       servings: true,
       serving_pkgs: true,
@@ -48,7 +50,7 @@ export const getProductNutrition = async (licenseCode: string) => {
 
 export const getProductCertificates = async (licenseCode: string) => {
   return await prisma.certificate.findMany({
-    where: { product: { license_code: licenseCode } },
+    where: { product: { license_code: licenseCode, deleted_at: null }, deleted_at: null },
     select: {
       uuid: true,
       type: true,
@@ -63,13 +65,14 @@ export const getProductCertificates = async (licenseCode: string) => {
 
 export const getProductServing = async (licenseCode: string) => {
   return await prisma.productServing.findFirst({
-    where: { product: { license_code: licenseCode } },
+    where: { product: { license_code: licenseCode, deleted_at: null } },
     select: {
       serving_info: true,
       serving_portion: true,
       storage_info: true,
       video_url: true,
       images: {
+        where: { deleted_at: null },
         select: { uuid: true, url: true },
       },
     },
@@ -78,7 +81,7 @@ export const getProductServing = async (licenseCode: string) => {
 
 export const getProductCompany = async (licenseCode: string) => {
   return await prisma.tenant.findFirst({
-    where: { products: { some: { license_code: licenseCode } } },
+    where: { products: { some: { license_code: licenseCode, deleted_at: null } } },
     select: {
       uuid: true,
       name: true,

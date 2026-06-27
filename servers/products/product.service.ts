@@ -181,18 +181,57 @@ export const softDeleteProduct = async (uuid: string) => {
   const product = await prisma.product.findUnique({
     where: { uuid },
     include: {
-      images: true,
-      serving: { include: { images: true } },
-      certificates: true,
+      images: { where: { deleted_at: null } },
+      serving: { include: { images: { where: { deleted_at: null } } } },
+      certificates: { where: { deleted_at: null } },
     },
   })
   if (!product) throw new Error("Produk tidak ditemukan")
   if (product.deleted_at) throw new Error("Produk sudah dihapus")
 
-  return await prisma.product.update({
-    where: { uuid },
-    data: { deleted_at: new Date() },
+  const now = new Date()
+
+  const updatedProduct = await prisma.$transaction(async (tx) => {
+    await tx.product.update({
+      where: { uuid },
+      data: { deleted_at: now },
+    })
+
+    if (product.images.length > 0) {
+      await tx.productImage.updateMany({
+        where: { id: { in: product.images.map((img) => img.id) } },
+        data: { deleted_at: now },
+      })
+    }
+
+    if (product.certificates.length > 0) {
+      await tx.certificate.updateMany({
+        where: { id: { in: product.certificates.map((cert) => cert.id) } },
+        data: { deleted_at: now },
+      })
+    }
+
+    if (product.serving?.images.length) {
+      await tx.productServingImage.updateMany({
+        where: { id: { in: product.serving.images.map((img) => img.id) } },
+        data: { deleted_at: now },
+      })
+    }
+
+    return tx.product.findUniqueOrThrow({ where: { uuid } })
   })
+
+  const publicIdsToDelete = [
+    ...product.images.map((img) => img.public_id),
+    ...product.certificates
+      .map((cert) => cert.certificate_public_id)
+      .filter((id): id is string => !!id),
+    ...(product.serving?.images.map((img) => img.public_id) ?? []),
+  ]
+
+  await Promise.allSettled(publicIdsToDelete.map((publicId) => deleteImage(publicId)))
+
+  return updatedProduct
 }
 
 export const submitProduct = async (

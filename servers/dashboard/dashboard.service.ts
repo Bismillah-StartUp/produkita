@@ -30,10 +30,10 @@ export const getOverviewStats = async (userUuid: string) => {
       where: { tenant_id: tenant.id, deleted_at: null, created_at: { gte: startOfMonth } },
     }),
     prisma.productView.count({
-      where: { product: { tenant_id: tenant.id } },
+      where: { product: { tenant_id: tenant.id, deleted_at: null } },
     }),
     prisma.productView.count({
-      where: { product: { tenant_id: tenant.id }, created_at: { gte: startOfToday } },
+      where: { product: { tenant_id: tenant.id, deleted_at: null }, created_at: { gte: startOfToday } },
     }),
   ])
 

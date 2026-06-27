@@ -42,5 +42,6 @@ next-env.d.ts
 
 # agent notes
 /agents
+.claude
 
 prisma/generated
