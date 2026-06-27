@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Camera } from "lucide-react";
 
 export interface ServingFormData {
   servingInfo: string;
@@ -47,6 +48,8 @@ export function ServingForm({
 
   const mainUploadRef = useRef<HTMLInputElement>(null);
   const addUploadRef = useRef<HTMLInputElement>(null);
+  const replaceUploadRef = useRef<HTMLInputElement>(null);
+  const [replaceSlotIndex, setReplaceSlotIndex] = useState<number | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -132,14 +135,32 @@ export function ServingForm({
     e.target.value = "";
   };
 
-  const removePhoto = (index: number) =>
-    setFormData((prev) => ({
-      ...prev,
-      servingPhotos: prev.servingPhotos.filter((_, i) => i !== index),
-      servingPhotoPreviews: prev.servingPhotoPreviews.filter(
-        (_, i) => i !== index,
-      ),
-    }));
+  const openReplacePhoto = (index: number) => {
+    setReplaceSlotIndex(index);
+    replaceUploadRef.current?.click();
+  };
+
+  const handleReplaceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || replaceSlotIndex === null) return;
+    if (file.size > 2 * 1024 * 1024) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const index = replaceSlotIndex;
+      setFormData((prev) => {
+        const servingPhotos = [...prev.servingPhotos];
+        const servingPhotoPreviews = [...prev.servingPhotoPreviews];
+        servingPhotos[index] = file;
+        servingPhotoPreviews[index] = reader.result as string;
+        return { ...prev, servingPhotos, servingPhotoPreviews };
+      });
+      setReplaceSlotIndex(null);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -258,24 +279,23 @@ export function ServingForm({
                 }`}
               >
                 {formData.servingPhotoPreviews[0] ? (
-                  <>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openReplacePhoto(0);
+                    }}
+                    className="group absolute inset-0"
+                  >
                     <Image
                       src={formData.servingPhotoPreviews[0]}
                       alt="Foto penyajian utama"
                       fill
                       className="object-cover"
                     />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePhoto(0);
-                      }}
-                      className="absolute right-2 top-2 rounded-full bg-white/80 px-1.5 py-0.5 text-xs text-gray-600 hover:bg-white"
-                    >
-                      &#x2715;
-                    </button>
-                  </>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                      <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
@@ -310,8 +330,10 @@ export function ServingForm({
                   return (
                     <div
                       key={slotIdx}
-                      onClick={() => !preview && addUploadRef.current?.click()}
-                      className="relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 transition hover:border-blue-400 hover:bg-blue-50"
+                      onClick={() =>
+                        preview ? openReplacePhoto(slotIdx) : addUploadRef.current?.click()
+                      }
+                      className="group relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 transition hover:border-blue-400 hover:bg-blue-50"
                     >
                       {preview ? (
                         <>
@@ -321,16 +343,9 @@ export function ServingForm({
                             fill
                             className="object-cover"
                           />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removePhoto(slotIdx);
-                            }}
-                            className="absolute right-1 top-1 rounded-full bg-white/80 px-1 py-0.5 text-[10px] text-gray-600 hover:bg-white"
-                          >
-                            &#x2715;
-                          </button>
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                            <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                          </div>
                         </>
                       ) : (
                         <div className="flex flex-col items-center gap-1">
@@ -369,6 +384,13 @@ export function ServingForm({
               accept="image/jpeg,image/png,image/webp"
               multiple
               onChange={handleAddUpload}
+              className="hidden"
+            />
+            <input
+              ref={replaceUploadRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleReplaceUpload}
               className="hidden"
             />
           </div>

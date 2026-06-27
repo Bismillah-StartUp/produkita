@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, Pencil, Trash2, QrCode } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Eye, Trash2, QrCode } from "lucide-react"
 import { CertBadge } from "./cert-badge"
+import { QrCodeModal } from "./qr-code-modal"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
 import { useProduct } from "@/hooks/useProducts"
 import { CERT_TYPES } from "@/lib/utils"
@@ -10,11 +12,13 @@ import { IProductTable } from "../types/product.i"
 
 
 export function ProductTable({ search, onTotalChange }: IProductTable) {
+  const router = useRouter()
   const { uuid } = useAuthStore()
   const { getProductsByTenant, softDeleteProduct, loading } = useProduct()
 
   const [products, setProducts] = useState<any[]>([])
   const [isFetching, setIsFetching] = useState(true)
+  const [selectedQrProduct, setSelectedQrProduct] = useState<{ name: string; qrCodeUrl: string | null } | null>(null)
 
   useEffect(() => {
     if (!uuid) return
@@ -105,7 +109,7 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
                 <td className="px-6 py-4 text-center">
                   {product.qr_code_url ? (
                     <button
-                      onClick={() => window.open(product.qr_code_url, "_blank")}
+                      onClick={() => setSelectedQrProduct({ name: product.name, qrCodeUrl: product.qr_code_url })}
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50"
                     >
                       <QrCode className="h-4 w-4" />
@@ -118,17 +122,11 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-3">
                     <button
-                      onClick={() => window.open(`/licenses/${product.license_code}`, "_blank")}
+                      onClick={() => router.push(`/dashboard/products/${product.uuid}`)}
                       className="text-blue-500 transition-colors hover:text-blue-700"
-                      title="Lihat Detail"
+                      title="Lihat Produk"
                     >
                       <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="text-yellow-500 transition-colors hover:text-yellow-700"
-                      title="Edit"
-                    >
-                      <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(product.uuid)}
@@ -145,6 +143,13 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
           </tbody>
         </table>
       </div>
+
+      <QrCodeModal
+        open={!!selectedQrProduct}
+        onOpenChange={(open) => { if (!open) setSelectedQrProduct(null) }}
+        productName={selectedQrProduct?.name ?? ""}
+        qrCodeUrl={selectedQrProduct?.qrCodeUrl ?? null}
+      />
     </div>
   )
 }

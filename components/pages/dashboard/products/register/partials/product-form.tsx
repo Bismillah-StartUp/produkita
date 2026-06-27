@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useRef, useState } from "react"
+import { Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CATEGORY_OPTIONS, SATUAN } from "@/lib/utils"
 
@@ -50,8 +51,10 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDragging, setIsDragging] = useState(false)
+  const [replaceSlotIndex, setReplaceSlotIndex] = useState<number | null>(null)
 
   const mainUploadRef = useRef<HTMLInputElement>(null)
+  const replaceUploadRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -118,12 +121,31 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
     addPhotos(e.dataTransfer.files)
   }
 
-  const removePhoto = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      productPhoto: prev.productPhoto.filter((_, i) => i !== index),
-      productPhotoPreview: prev.productPhotoPreview.filter((_, i) => i !== index),
-    }))
+  const openReplacePhoto = (index: number) => {
+    setReplaceSlotIndex(index)
+    replaceUploadRef.current?.click()
+  }
+
+  const handleReplaceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file || replaceSlotIndex === null) return
+    if (file.size > 2 * 1024 * 1024) return
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const index = replaceSlotIndex
+      setFormData((prev) => {
+        const productPhoto = [...prev.productPhoto]
+        const productPhotoPreview = [...prev.productPhotoPreview]
+        productPhoto[index] = file
+        productPhotoPreview[index] = reader.result as string
+        return { ...prev, productPhoto, productPhotoPreview }
+      })
+      setReplaceSlotIndex(null)
+    }
+    reader.readAsDataURL(file)
   }
 
   const validateForm = (): boolean => {
@@ -288,18 +310,17 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
               }`}
             >
               {formData.productPhotoPreview[0] ? (
-                <div className="relative h-36 w-full overflow-hidden rounded-lg">
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openReplacePhoto(0)
+                  }}
+                  className="group relative h-36 w-full overflow-hidden rounded-lg"
+                >
                   <Image src={formData.productPhotoPreview[0]} alt="Foto utama" fill className="object-cover" />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removePhoto(0)
-                    }}
-                    className="absolute right-2 top-2 rounded-full bg-white/80 p-0.5 text-gray-600 hover:bg-white"
-                  >
-                    ✕
-                  </button>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                    <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
                 </div>
               ) : (
                 <>
@@ -326,6 +347,13 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
               onChange={handleMainUpload}
               className="hidden"
             />
+            <input
+              ref={replaceUploadRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleReplaceUpload}
+              className="hidden"
+            />
 
             <div className="mb-4 grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((slotIndex) => {
@@ -333,24 +361,17 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                 return (
                   <div
                     key={slotIndex}
-                    onClick={() => { if (!preview) mainUploadRef.current?.click() }}
-                    className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
+                    onClick={() => (preview ? openReplacePhoto(slotIndex) : mainUploadRef.current?.click())}
+                    className={`group relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
                       preview ? "" : "border-gray-200 hover:border-blue-400"
                     }`}
                   >
                     {preview ? (
                       <>
                         <Image src={preview} alt={`Foto ${slotIndex + 1}`} fill className="rounded-lg object-cover" />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            removePhoto(slotIndex)
-                          }}
-                          className="absolute right-0.5 top-0.5 rounded-full bg-white/80 p-0.5 text-[10px] text-gray-600 hover:bg-white"
-                        >
-                          ✕
-                        </button>
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-all group-hover:bg-black/40">
+                          <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
                       </>
                     ) : (
                       <>
