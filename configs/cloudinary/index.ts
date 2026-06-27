@@ -1,6 +1,9 @@
 import { v2 as cloudinary } from "cloudinary"
 
-// Configure Cloudinary
+if (!process.env.CLOUDINARY_API_KEY) {
+  throw new Error("Missing Cloudinary configuration")
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_USER,
   api_key: process.env.CLOUDINARY_API_KEY,

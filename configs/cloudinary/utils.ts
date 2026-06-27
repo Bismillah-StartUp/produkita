@@ -5,7 +5,7 @@ import { CloudinaryUploadResponse, CloudinaryTransformations } from "./types"
 // Upload image to Cloudinary
 export const uploadImage = async (
   file: Buffer | string,
-  uploadType: "avatars" | "certifications" | "documents" = "documents"
+  uploadType: "avatars" | "certifications" | "documents" | "tenants" | "products" = "documents"
 ): Promise<CloudinaryUploadResponse> => {
   const uploadOptions =
     CLOUDINARY_UPLOAD_OPTIONS[
@@ -27,7 +27,7 @@ export const uploadImage = async (
     )
 
     if (typeof file === "string") {
-      uploadStream.end(Buffer.from(file))
+      uploadStream.end(Buffer.from(file, "base64"))
     } else {
       uploadStream.end(file)
     }

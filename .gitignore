@@ -32,11 +32,16 @@ pnpm-debug.log*
 .env*.local
 .env
 
+
+.prettierignore
+.prettierrc
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 # agent notes
 /agents
+.claude
 
 prisma/generated

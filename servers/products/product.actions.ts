@@ -1,0 +1,122 @@
+"use server"
+
+import {
+  getProductController,
+  getProductsByTenantController,
+  submitProductController,
+  softDeleteProductController,
+  updateProductBasicController,
+  softDeleteProductImageController,
+  updateNutritionController,
+  updateCertificateController,
+  softDeleteCertificateController,
+  softDeleteServingImageController,
+} from "./product.controller"
+import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
+
+export const getProduct = async (uuid: string) => {
+  return await getProductController(uuid)
+}
+
+export const getProductsByTenant = async (tenantUuid: string) => {
+  return await getProductsByTenantController(tenantUuid)
+}
+
+export const softDeleteProduct = async (uuid: string) => {
+  return await softDeleteProductController(uuid)
+}
+
+export const submitProduct = async (
+  tenantUuid: string,
+  tenantEmail: string,
+  data: {
+    product: {
+      name: string
+      brand?: string
+      price?: number
+      description?: string
+      type: ProductCategory
+      weight?: number
+      weight_unit?: WeightUnits
+    }
+    productImages: string[]
+    nutrition: {
+      servings?: number
+      serving_pkgs?: number
+      energy?: number
+      fat?: number
+      saturated_fat?: number
+      protein?: number
+      carbo?: number
+      sugar?: number
+      natrium?: number
+      composition?: string
+      allergens?: string[]
+    }
+    certificates: {
+      type: CertificateType
+      number?: string
+      registered_at?: Date
+      valid_until?: Date
+      lab_name?: string
+      file?: string
+    }[]
+    serving: {
+      serving_info?: string
+      serving_portion?: string
+      storage_info?: string
+      video_url?: string
+      images?: string[]
+    }
+  }
+) => {
+  return await submitProductController(tenantUuid, tenantEmail, data)
+}
+
+export const updateProductBasic = async (
+  uuid: string,
+  data: {
+    name?: string
+    brand?: string
+    price?: number
+    description?: string
+    type?: ProductCategory
+    weight?: number
+    weight_unit?: WeightUnits
+  }
+) => {
+  return await updateProductBasicController(uuid, data)
+}
+
+export const softDeleteProductImage = async (imageUuid: string) => {
+  return await softDeleteProductImageController(imageUuid)
+}
+
+export const updateNutrition = async (
+  productUuid: string,
+  data: Parameters<typeof updateNutritionController>[1]
+) => {
+  return await updateNutritionController(productUuid, data)
+}
+
+
+export const updateCertificate = async (
+  certificateUuid: string,
+  data: {
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  return await updateCertificateController(certificateUuid, data)
+}
+
+export const softDeleteCertificate = async (certificateUuid: string) => {
+  return await softDeleteCertificateController(certificateUuid)
+}
+
+export const softDeleteServingImage = async (imageUuid: string) => {
+  return await softDeleteServingImageController(imageUuid)
+}

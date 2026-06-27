@@ -1,47 +1,55 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import type { ProductFormData } from '@/components/pages/registry/partials/product-form'
-import type { NutritionFormData } from '@/components/pages/registry/partials/nutritions-form'
-import type { EnterpriseFormData } from '@/components/pages/registry/partials/enterprise-form'
-import type { LegalityFormData } from '@/components/pages/registry/partials/legality-form'
+import { useState } from "react";
+import type { ProductFormData } from "@/components/pages/dashboard/products/register/partials/product-form";
+import type { NutritionFormData } from "@/components/pages/dashboard/products/register/partials/nutritions-form";
+import type { ServingFormData } from "@/components/pages/dashboard/products/register/partials/serving-form";
+import type { LegalityFormData } from "@/components/pages/dashboard/products/register/partials/legality-form";
 
 interface RegistrySubmitPayload {
-  productData: ProductFormData & { productPhotoBase64?: string }
-  nutritionData: NutritionFormData
-  legalityData: LegalityFormData
-  enterpriseData: EnterpriseFormData
+  productData: ProductFormData & { productPhotoBase64?: string };
+  nutritionData: NutritionFormData;
+  legalityData: LegalityFormData;
+  servingData: ServingFormData;
 }
 
 export function useRegistrySubmit() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const submit = async (data: RegistrySubmitPayload) => {
-    setLoading(true)
-    setError(null)
-    setSuccess(false)
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
     try {
       // Convert File to base64 if present
-      let productPhotoBase64: string | undefined
+      let productPhotoBase64: string | undefined;
+      const photos = data.productData.productPhoto;
+      const previews = data.productData.productPhotoPreview;
 
-      if (data.productData.productPhoto instanceof File) {
+      if (
+        Array.isArray(photos) &&
+        photos.length > 0 &&
+        photos[0] instanceof File
+      ) {
         productPhotoBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
+          const reader = new FileReader();
           reader.onloadend = () => {
-            if (typeof reader.result === 'string') {
-              resolve(reader.result)
+            if (typeof reader.result === "string") {
+              resolve(reader.result);
             } else {
-              reject(new Error('Failed to read file'))
+              reject(new Error("Failed to read file"));
             }
-          }
-          reader.onerror = () => reject(reader.error)
-          reader.readAsDataURL(data.productData.productPhoto as File)
-        })
-      } else if (data.productData.productPhotoPreview) {
-        productPhotoBase64 = data.productData.productPhotoPreview
+          };
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(photos[0]);
+        });
+      } else if (Array.isArray(previews) && previews.length > 0) {
+        productPhotoBase64 = previews[0];
+      } else if (typeof previews === "string") {
+        productPhotoBase64 = previews;
       }
 
       // Prepare payload for API
@@ -69,7 +77,6 @@ export function useRegistrySubmit() {
           hasPirt: data.legalityData.hasPirt,
           hasHalal: data.legalityData.hasHalal,
           bpomNumber: data.legalityData.bpomNumber,
-          productCategory: data.legalityData.productCategory,
           bpomRegistrationDate: data.legalityData.bpomRegistrationDate,
           bpomValidUntil: data.legalityData.bpomValidUntil,
           pirtNumber: data.legalityData.pirtNumber,
@@ -80,45 +87,60 @@ export function useRegistrySubmit() {
           halalIssuanceDate: data.legalityData.halalIssuanceDate,
           halalValidUntil: data.legalityData.halalValidUntil,
         },
-        enterpriseData: {
-          companyName: data.enterpriseData.companyName,
-          district: data.enterpriseData.district,
-          province: data.enterpriseData.province,
-          address: data.enterpriseData.address,
-          phone: data.enterpriseData.phone,
-          email: data.enterpriseData.email,
+        servingData: {
+          servingInfo: data.servingData.servingInfo,
+          storageInfo: data.servingData.storageInfo,
+          portionInfo: data.servingData.portionInfo,
+          videoLink: data.servingData.videoLink,
+          servingPhotoPreviews: data.servingData.servingPhotoPreviews,
         },
-      }
+      };
 
-      console.log('📤 Submitting registry data...')
+      console.log("📤 Submitting registry data (Payload Structure):", payload);
 
-      const response = await fetch('/api/registry/submit', {
-        method: 'POST',
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const randomCode = Math.random()
+        .toString(36)
+        .substring(2, 10)
+        .toUpperCase();
+      const result = {
+        status: 200,
+        message: "Success",
+        data: {
+          licenseCode: `UMKM-${randomCode}`,
+        },
+      };
+
+      /*
+      const response = await fetch("/api/registry/submit", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit registry')
+        throw new Error(result.error || "Failed to submit registry");
       }
+      */
 
-      setSuccess(true)
-      console.log('✅ Registry submitted successfully:', result)
+      setSuccess(true);
+      console.log("✅ Registry submitted successfully:", result);
 
-      return result
+      return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setError(errorMessage)
-      console.error('❌ Registry submission failed:', err)
-      throw err
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(errorMessage);
+      console.error("❌ Registry submission failed:", err);
+      throw err;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  return { submit, loading, error, success }
+  return { submit, loading, error, success };
 }

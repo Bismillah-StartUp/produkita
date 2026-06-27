@@ -1,20 +1,56 @@
-# Next.js template
+# Produkita
 
-This is a Next.js template with shadcn/ui.
+Platform manajemen produk dan sertifikat terintegrasi dengan Next.js dan Prisma.
 
-## Adding components
+## Setup
 
-To add components to your app, run the following command:
+### 1. Install Dependencies
 
 ```bash
-npx shadcn@latest add button
+pnpm install
 ```
 
-This will place the ui components in the `components` directory.
+### 2. Setup Environment
 
-## Using components
+Salin file `.env.example` ke `.env.local` dan isi konfigurasi yang diperlukan:
 
-To use the components in your app, import them as follows:
+```bash
+cp .env.example .env.local
+```
+
+### 3. Database Migration
+
+```bash
+pnpm exec prisma migrate dev
+```
+
+Jalankan seed database (jika tersedia):
+
+```bash
+pnpm exec prisma db seed
+```
+
+### 4. Development Server
+
+```bash
+pnpm dev
+```
+
+Buka [http://localhost:3000](http://localhost:3000) di browser.
+
+## Adding Components
+
+Untuk menambah komponen UI, jalankan:
+
+```bash
+pnpm exec shadcn@latest add button
+```
+
+Komponen akan ditempatkan di folder `components/ui`.
+
+## Using Components
+
+Import komponen seperti berikut:
 
 ```tsx
 import { Button } from "@/components/ui/button";
