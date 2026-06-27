@@ -21,6 +21,8 @@ const LicenceContext = createContext<{
   ) => void;
   enterpriseName: string;
   setEnterpriseName: (name: string) => void;
+  logoUrl: string | null;
+  setLogoUrl: (url: string | null) => void;
   showCertifications: boolean;
   setShowCertifications: (show: boolean) => void;
 }>({
@@ -29,6 +31,8 @@ const LicenceContext = createContext<{
   onTabChange: () => {},
   enterpriseName: "Company",
   setEnterpriseName: () => {},
+  logoUrl: null,
+  setLogoUrl: () => {},
   showCertifications: true,
   setShowCertifications: () => {},
 });
@@ -47,6 +51,7 @@ export default function LicenceLayout({ children }: LayoutProps) {
     "overview" | "nutrition" | "certifications" | "serving" | "company"
   >("overview");
   const [enterpriseName, setEnterpriseName] = useState("Company Name");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [showCertifications, setShowCertifications] = useState(true);
 
   // Detect mobile view
@@ -128,6 +133,8 @@ export default function LicenceLayout({ children }: LayoutProps) {
         onTabChange: handleTabChange,
         enterpriseName,
         setEnterpriseName,
+        logoUrl,
+        setLogoUrl,
         showCertifications,
         setShowCertifications,
       }}
@@ -143,7 +150,7 @@ export default function LicenceLayout({ children }: LayoutProps) {
 
       <div className="min-h-screen bg-slate-50/50">
         {/* Header */}
-        <HeaderLicences companyName={enterpriseName} isVerified={true} />
+        <HeaderLicences companyName={enterpriseName} logoUrl={logoUrl} isVerified={true} />
 
         {/* Navigation - Top on Desktop, Bottom on Mobile */}
         <NavbarLicences

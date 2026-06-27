@@ -1,7 +1,13 @@
 "use client";
 
-import { Navigation, MapPin } from "lucide-react";
+import { Navigation } from "lucide-react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+const LocationMap = dynamic(() => import("./location-map"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full animate-pulse bg-[#eef3f9]" />,
+});
 
 interface CompanyInfoProps {
   name: string;
@@ -17,6 +23,8 @@ interface CompanyInfoProps {
   businessType?: string;
   website?: string;
   mapUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export default function CompanyInfo({
@@ -33,7 +41,10 @@ export default function CompanyInfo({
   businessType,
   website,
   mapUrl,
+  latitude,
+  longitude,
 }: CompanyInfoProps) {
+  const hasCoords = typeof latitude === "number" && typeof longitude === "number";
   // Fallbacks to match the reference image exactly if data is not provided
   return (
     <div className="flex flex-col w-full -mt-2 lg:mt-0">
@@ -142,22 +153,14 @@ export default function CompanyInfo({
           <TableRow label="Alamat" value={address} />
 
           {/* Map Box */}
-          <div className="w-full aspect-2/1 sm:aspect-21/9 lg:aspect-3/1 bg-[#eef3f9] rounded-xl lg:rounded-2xl border border-[#dce6f2] relative overflow-hidden flex items-center justify-center mt-3 mb-4 lg:mb-5">
-            {/* Map Grid Pattern Placeholder */}
-            <div className="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-1.5 p-1.5 opacity-[0.85]">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="bg-[#e4ebf5] rounded-md"></div>
-              ))}
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center justify-center">
-              <div className="w-10 h-10 lg:w-16 lg:h-16 bg-[#185cf1] rounded-full flex items-center justify-center text-white shadow-[0_8px_16px_rgba(24,92,241,0.3)] relative">
-                <MapPin className="w-5 h-5 lg:w-8 lg:h-8" strokeWidth={2.5} />
-                {/* Pin tail */}
-                <div className="absolute -bottom-1 w-3 h-3 lg:w-4 lg:h-4 bg-[#185cf1] rotate-45 z-[-1] rounded-sm"></div>
+          <div className="w-full aspect-2/1 sm:aspect-21/9 lg:aspect-3/1 bg-[#eef3f9] rounded-xl lg:rounded-2xl border border-[#dce6f2] relative overflow-hidden mt-3 mb-4 lg:mb-5">
+            {hasCoords ? (
+              <LocationMap latitude={latitude!} longitude={longitude!} />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-sm text-slate-400">
+                Lokasi belum tersedia
               </div>
-              <div className="w-5 h-1.5 lg:w-6 lg:h-2 bg-blue-900/10 rounded-full mt-2 lg:mt-3 blur-[1px]"></div>
-            </div>
+            )}
           </div>
 
           <a

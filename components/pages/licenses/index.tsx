@@ -2,59 +2,32 @@
 
 import { useEffect } from "react";
 import ProductOverview from "./partials/product-overview";
-import CertificationsSection from "./partials/certifications-section";
+import CertificationsSection, { CertificationData } from "./partials/certifications-section";
 import NutritionFacts from "./partials/nutrition-facts";
 import ServingInfo from "./partials/serving-info";
 import CompanyInfo from "./partials/company-info";
 import { useLicenceContext } from "@/app/licenses/[code]/layout";
-
-interface CertificationData {
-  type: "BPOM" | "HALAL" | "PIRT" | "COA";
-  number: string;
-  issueDate?: Date;
-  validUntil?: Date;
-  authority?: string;
-}
-
-interface CertificateData {
-  id: number;
-  uuid: string;
-  bpom_number: string | null;
-  pirt_number: string | null;
-  license_number: string | null;
-  coa_number?: string | null;
-  createdAt: Date;
-}
+import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client";
 
 interface ProductData {
-  id: number;
   uuid: string;
   name: string;
-  image_url: string | null;
-  images?: string[];
-  price: number | null;
   brand: string | null;
+  price: number | null;
+  weight: number | null;
+  weight_unit: WeightUnits | null;
   description: string | null;
-  type: string;
-  enterprise_id: number;
-}
-
-interface EnterpriseData {
-  id: number;
-  uuid: string;
-  name: string;
-  district: string | null;
-  province: string | null;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
-  description: string | null;
+  type: ProductCategory;
+  license_code: string | null;
+  updated_at: Date;
+  images: { uuid: string; url: string }[];
+  certificates: { type: CertificateType; number: string | null }[];
+  tenant: { city: string | null; province: string | null } | null;
 }
 
 interface NutritionData {
-  id: number;
-  product_id: number;
   servings: number | null;
+  serving_pkgs: number | null;
   energy: number | null;
   fat: number | null;
   saturated_fat: number | null;
@@ -62,211 +35,172 @@ interface NutritionData {
   carbo: number | null;
   sugar: number | null;
   natrium: number | null;
+  composition: string | null;
+  allergens: string[];
 }
 
-interface HalalData {
-  id: number;
+interface CertificateData {
   uuid: string;
-  number: string;
-  authority: string | null;
+  type: CertificateType;
+  number: string | null;
+  registered_at: Date | null;
   valid_until: Date | null;
+  lab_name: string | null;
+  certificate_url: string | null;
+}
+
+interface ServingData {
+  serving_info: string | null;
+  serving_portion: string | null;
+  storage_info: string | null;
+  video_url: string | null;
+  images: { uuid: string; url: string }[];
+}
+
+interface CompanyData {
+  uuid: string;
+  name: string | null;
+  trade_name: string | null;
+  business_field: string | null;
+  description: string | null;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  postal_code: string | null;
+  email: string | null;
+  phonenumber: string | null;
+  website: string | null;
+  logo_url: string | null;
+  place_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  year: number | null;
 }
 
 interface LicenceLayoutData {
-  certificate: CertificateData | null;
-  product: ProductData | null;
-  enterprise: EnterpriseData | null;
+  product: ProductData;
   nutrition: NutritionData | null;
-  halal: HalalData | null;
+  certificates: CertificateData[];
+  serving: ServingData | null;
+  company: CompanyData | null;
 }
 
 interface LicenceLayoutProps {
   code: string;
-  data?: LicenceLayoutData;
+  data: LicenceLayoutData;
 }
 
-export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
-  const { setEnterpriseName, setShowCertifications } = useLicenceContext();
+const CERT_AUTHORITY: Record<CertificateType, string> = {
+  bpom: "Badan Pengawas Obat dan Makanan (BPOM)",
+  pirt: "Dinas Kesehatan",
+  halal: "Badan Penyelenggara Jaminan Produk Halal (BPJPH)",
+  coa: "Lab. Balai Besar Industri Agro",
+};
 
-  // Use provided data or fallback to dummy data
-  const certificateData = data?.certificate || {
-    id: 1,
-    uuid: code,
-    bpom_number: "MD 12345678901Z",
-    pirt_number: "P-IRT 2088370101234",
-    license_number: "LIC-001",
-    createdAt: new Date("2024-01-15"),
-  };
+const CERT_TYPE_LABEL: Record<CertificateType, CertificationData["type"]> = {
+  bpom: "BPOM",
+  pirt: "PIRT",
+  halal: "HALAL",
+  coa: "COA",
+};
 
-  const product = data?.product || {
-    id: 1,
-    uuid: "prod-uuid-123",
-    name: "Sambal Pedas Original",
-    image_url:
-      "https://images.unsplash.com/photo-1599599810694-b5ac4dd5ecc7?w=400&h=400&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1599599810694-b5ac4dd5ecc7?w=400&h=400&fit=crop",
-    ],
-    price: 25000,
-    brand: "Rasa Nusantara",
-    description: "250 ml",
-    type: "fnb",
-    enterprise_id: 1,
-  };
+export const LicenceLayout = ({ data }: LicenceLayoutProps) => {
+  const { setEnterpriseName, setLogoUrl, setShowCertifications } = useLicenceContext();
 
-  const enterprise = data?.enterprise || {
-    id: 1,
-    uuid: "ent-uuid-123",
-    name: "PT Rasa Nusantara Sejahtera",
-    district: "Bandung",
-    province: "Jawa Barat",
-    phone: "+62 22 1234 5678",
-    email: "info@rasanusantara.co.id",
-    address: "Jl. Industri No. 45, Bandung, Jawa Barat 40123",
-    description: "Produsen makanan dan minuman berkualitas tinggi",
-  };
+  const { product, nutrition, certificates, serving, company } = data;
 
-  const halal = data?.halal ?? null;
-
-  const nutrition_info = data?.nutrition || {
-    id: 1,
-    product_id: 1,
-    servings: 15,
-    energy: 25,
-    fat: 1.5,
-    saturated_fat: 0.5,
-    protein: 0.5,
-    carbo: 3,
-    sugar: 0,
-    natrium: 280,
-  };
-
-  const certificate = certificateData;
-  const showCertifications = Boolean(
-    certificate?.bpom_number || certificate?.pirt_number || data?.halal,
-  );
+  const enterpriseName = company?.trade_name || company?.name || "Enterprise";
+  const showCertifications = certificates.length > 0;
 
   useEffect(() => {
-    setEnterpriseName(enterprise?.name || "Company Name");
-  }, [enterprise?.name, setEnterpriseName]);
+    setEnterpriseName(enterpriseName);
+  }, [enterpriseName, setEnterpriseName]);
+
+  useEffect(() => {
+    setLogoUrl(company?.logo_url ?? null);
+  }, [company?.logo_url, setLogoUrl]);
 
   useEffect(() => {
     setShowCertifications(showCertifications);
   }, [setShowCertifications, showCertifications]);
 
-  // Prepare certifications array
-  const certifications: CertificationData[] = [];
+  const productImages = product.images.map((img) => img.url);
 
-  if (certificate?.bpom_number) {
-    certifications.push({
-      type: "BPOM",
-      number: certificate.bpom_number,
-      authority: "Badan Pengawas Obat dan Makanan (BPOM)",
-      issueDate: certificate.createdAt,
-      validUntil: new Date(
-        new Date(certificate.createdAt).setFullYear(
-          new Date(certificate.createdAt).getFullYear() + 5,
-        ),
-      ),
-    });
-  }
+  const certificationsData: CertificationData[] = certificates.map((cert) => ({
+    type: CERT_TYPE_LABEL[cert.type],
+    number: cert.number || "-",
+    authority: cert.lab_name || CERT_AUTHORITY[cert.type],
+    issueDate: cert.registered_at ?? undefined,
+    validUntil: cert.valid_until ?? undefined,
+  }));
 
-  if (certificate?.pirt_number) {
-    certifications.push({
-      type: "PIRT",
-      number: certificate.pirt_number,
-      authority: "Dinas Kesehatan",
-      issueDate: certificate.createdAt,
-      validUntil: new Date(
-        new Date(certificate.createdAt).setFullYear(
-          new Date(certificate.createdAt).getFullYear() + 3,
-        ),
-      ),
-    });
-  }
+  const certNumberByType = (type: CertificateType) =>
+    certificates.find((c) => c.type === type)?.number ?? undefined;
 
-  if (halal) {
-    certifications.push({
-      type: "HALAL",
-      number: halal.number,
-      authority: halal.authority || "MUI",
-      issueDate: new Date(), // Use current date if not provided
-      validUntil: halal.valid_until || undefined,
-    });
-  }
-
-  if (certificate?.coa_number) {
-    certifications.push({
-      type: "COA",
-      number: certificate.coa_number,
-      authority: "Lab. Balai Besar Industri Agro",
-      issueDate: certificate.createdAt,
-      validUntil: new Date(
-        new Date(certificate.createdAt).setFullYear(
-          new Date(certificate.createdAt).getFullYear() + 1,
-        ),
-      ),
-    });
-  }
+  const volume = product.weight && product.weight_unit
+    ? `${product.weight} ${product.weight_unit}`
+    : undefined;
 
   return (
     <>
       {/* Product Overview Section */}
       <section id="section-overview" className="pb-4 lg:pb-32">
         <ProductOverview
-          productName={product?.name || "Product Name"}
-          productImage={product?.image_url}
-          images={product?.images}
-          price={product?.price}
-          volume="250ml"
-          enterpriseName={enterprise?.name || "Enterprise"}
-          enterpriseDistrict={enterprise?.district}
-          enterpriseProvince={enterprise?.province}
+          productName={product.name}
+          productImage={productImages[0]}
+          images={productImages}
+          price={product.price}
+          volume={volume}
+          enterpriseName={enterpriseName}
+          enterpriseDistrict={company?.city}
+          enterpriseProvince={company?.province}
           certifications={{
-            bpomNumber: certificate?.bpom_number || undefined,
-            pirtNumber: certificate?.pirt_number || undefined,
-            halalNumber: halal?.number || undefined,
-            coaNumber: certificate?.coa_number || undefined,
-            isLicensed: !!certificate?.license_number,
+            bpomNumber: certNumberByType("bpom"),
+            pirtNumber: certNumberByType("pirt"),
+            halalNumber: certNumberByType("halal"),
+            coaNumber: certNumberByType("coa"),
+            isLicensed: !!product.license_code,
           }}
-          description={product?.description || undefined}
-          verificationDate="10 Mei 2026"
+          description={product.description ?? undefined}
+          verificationDate={new Date(product.updated_at).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
         />
       </section>
 
       {/* Nutrition Facts Section */}
-      {nutrition_info && (
+      {nutrition && (
         <section
           id="section-nutrition"
           className="pb-4 lg:border-t border-slate-200 pt-0 lg:pt-16"
         >
           <NutritionFacts
-            productName={product?.name || "CIMORY FRESH MILK"}
-            servings={nutrition_info?.servings ?? undefined}
-            calories={nutrition_info?.energy ?? undefined}
-            fat={nutrition_info?.fat ?? undefined}
-            saturatedFat={nutrition_info?.saturated_fat ?? undefined}
-            carbs={nutrition_info?.carbo ?? undefined}
-            protein={nutrition_info?.protein ?? undefined}
-            sodium={nutrition_info?.natrium ?? undefined}
-            sugar={nutrition_info?.sugar ?? undefined}
-            ingredients={
-              product?.description ||
-              "Susu segar murni (100%) — diperoleh langsung dari peternakan sapi Cimory di kawasan Puncak, Bogor. Tanpa bahan pengawet, tanpa pewarna tambahan, tanpa pemanis buatan."
-            }
+            productName={product.name}
+            servings={nutrition.servings ?? undefined}
+            calories={nutrition.energy ?? undefined}
+            fat={nutrition.fat ?? undefined}
+            saturatedFat={nutrition.saturated_fat ?? undefined}
+            carbs={nutrition.carbo ?? undefined}
+            protein={nutrition.protein ?? undefined}
+            sodium={nutrition.natrium ?? undefined}
+            sugar={nutrition.sugar ?? undefined}
+            allergens={nutrition.allergens}
+            ingredients={nutrition.composition ?? product.description ?? undefined}
           />
         </section>
       )}
 
       {/* Certifications Section */}
-      {certifications.length > 0 && (
+      {certificationsData.length > 0 && (
         <section
           id="section-certifications"
           className="pb-4 lg:pb-16 lg:border-t border-slate-200 pt-0 lg:pt-16"
         >
           <CertificationsSection
-            productName={product?.name || "CIMORY FRESH MILK"}
-            certifications={certifications as any}
+            productName={product.name}
+            certifications={certificationsData}
           />
         </section>
       )}
@@ -277,9 +211,13 @@ export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
         className="pb-4 lg:pb-16 lg:border-t border-slate-200 pt-0 lg:pt-16"
       >
         <ServingInfo
-          productName={product?.name || "CIMORY FRESH MILK"}
-          productImage={product?.image_url}
-          images={product?.images}
+          productName={product.name}
+          productImage={productImages[0]}
+          images={serving?.images.map((img) => img.url)}
+          servingInfo={serving?.serving_info}
+          storageInfo={serving?.storage_info}
+          servingPortion={serving?.serving_portion}
+          videoUrl={serving?.video_url}
         />
       </section>
 
@@ -289,25 +227,24 @@ export const LicenceLayout = ({ code, data }: LicenceLayoutProps) => {
         className="pb-4 lg:pb-16 pt-0 lg:pt-16 lg:border-t border-slate-200"
       >
         <CompanyInfo
-          name={enterprise?.name || "PT Cisarua Mountain Dairy Tbk"}
-          address={
-            enterprise?.address ||
-            "Jl. Raya Puncak No.435, Cipayung, Kec. Megamendung, PosBogor, Jawa Barat 16770"
+          name={enterpriseName}
+          address={company?.address ?? undefined}
+          phone={company?.phonenumber ?? undefined}
+          email={company?.email ?? undefined}
+          description={company?.description ?? undefined}
+          trademark={company?.trade_name ?? undefined}
+          businessType={company?.business_field ?? undefined}
+          foundedYear={company?.year?.toString()}
+          npwp={undefined}
+          website={company?.website ?? undefined}
+          mapUrl={
+            company?.latitude && company?.longitude
+              ? `https://www.google.com/maps?q=${company.latitude},${company.longitude}`
+              : undefined
           }
-          phone={enterprise?.phone || "+62 251 825 2828"}
-          email={enterprise?.email || "info@cimory.com"}
-          description={
-            enterprise?.description ||
-            "PT Cisarua Mountain Dairy (Cimory) adalah perusahaan produk susu dan olahan pangan yang berdiri sejak tahun 2006, berlokasi di kawasan Puncak, Cisarua, Kabupaten Bogor, Jawa Barat. Cimory mengintegrasikan peternakan sapi perah modern dengan fasilitas produksi berteknologi tinggi untuk menghasilkan susu segar pasteurisasi berkualitas premium. Seluruh produk diproses tanpa bahan pengawet buatan untuk menjaga kemurnian dan kandungan gizi susu."
-          }
-          trademark="Cimory"
-          businessType="Industri Pengolahan Susu & Produk Turunannya"
-          foundedYear="2006"
-          totalProducts="50+"
-          npwp="01.234.567.8-000.000"
-          website="www.cimory.com"
-          mapUrl="#"
-          bannerImage="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200&auto=format&fit=crop"
+          latitude={company?.latitude}
+          longitude={company?.longitude}
+          bannerImage={company?.place_url ?? undefined}
         />
       </section>
     </>

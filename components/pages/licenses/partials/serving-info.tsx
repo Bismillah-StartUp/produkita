@@ -1,19 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { ThermometerSnowflake, Droplets, PlayCircle } from "lucide-react";
+import { ThermometerSnowflake, PlayCircle } from "lucide-react";
 import Image from "next/image";
 
 interface ServingInfoProps {
   productName: string;
   productImage?: string | null;
   images?: string[];
+  servingInfo?: string | null;
+  storageInfo?: string | null;
+  servingPortion?: string | null;
+  videoUrl?: string | null;
 }
 
 export default function ServingInfo({
   productName,
   productImage,
   images = [],
+  servingInfo,
+  storageInfo,
+  servingPortion,
+  videoUrl,
 }: ServingInfoProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -42,22 +50,29 @@ export default function ServingInfo({
       </div>
 
       {/* Link Video Tutorial */}
-      <div className="mb-6 lg:mb-8">
-        <p className="mb-2 lg:mb-3 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
-          VIDEO TUTORIAL
-        </p>
-        <div className="flex items-center justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 pl-3 lg:p-2 lg:pl-4 shadow-sm">
-          <div className="flex items-center gap-2 lg:gap-3 overflow-hidden">
-            <PlayCircle className="h-5 w-5 lg:h-6 lg:w-6 shrink-0 text-slate-300 fill-slate-200" />
-            <span className="truncate text-[11px] lg:text-sm font-medium text-blue-600">
-              youtube.com/watch?v=cimory-fresh-milk
+      {videoUrl && (
+        <div className="mb-6 lg:mb-8">
+          <p className="mb-2 lg:mb-3 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
+            VIDEO TUTORIAL
+          </p>
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 pl-3 lg:p-2 lg:pl-4 shadow-sm"
+          >
+            <div className="flex items-center gap-2 lg:gap-3 overflow-hidden">
+              <PlayCircle className="h-5 w-5 lg:h-6 lg:w-6 shrink-0 text-slate-300 fill-slate-200" />
+              <span className="truncate text-[11px] lg:text-sm font-medium text-blue-600">
+                {videoUrl}
+              </span>
+            </div>
+            <span className="shrink-0 rounded-lg bg-blue-600 px-3 py-2 lg:px-4 lg:py-2 text-[10px] lg:text-xs font-bold text-white hover:bg-blue-700 transition-colors">
+              Tonton &rarr;
             </span>
-          </div>
-          <button className="shrink-0 rounded-lg bg-blue-600 px-3 py-2 lg:px-4 lg:py-2 text-[10px] lg:text-xs font-bold text-white hover:bg-blue-700 transition-colors">
-            Tonton &rarr;
-          </button>
+          </a>
         </div>
-      </div>
+      )}
 
       {/* Foto Penyajian */}
       <div className="mb-6 lg:mb-8">
@@ -104,67 +119,48 @@ export default function ServingInfo({
         )}
       </div>
 
-      {/* Langkah Penyajian */}
-      <div className="mb-6 lg:mb-8">
-        <p className="mb-3 lg:mb-4 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
-          LANGKAH PENYAJIAN
-        </p>
-        <div className="space-y-4 lg:space-y-5">
-          <div className="flex items-start gap-3 lg:gap-4 pb-4 border-b border-slate-100">
-            <div className="flex h-6 w-6 lg:h-7 lg:w-7 shrink-0 items-center justify-center rounded-full border-[1.5px] border-blue-600 text-[10px] lg:text-xs font-bold text-blue-600 bg-white mt-0.5">
-              01
-            </div>
-            <div>
-              <h4 className="text-[12px] lg:text-sm font-bold text-slate-900 leading-tight">
-                Kocok Sebelum Diminum
-              </h4>
-              <p className="mt-1 text-[11px] lg:text-[13px] leading-relaxed text-slate-400">
-                Kocok kemasan perlahan sebelum dibuka untuk memastikan kandungan
-                susu tercampur merata.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 lg:gap-4">
-            <div className="flex h-6 w-6 lg:h-7 lg:w-7 shrink-0 items-center justify-center rounded-full border-[1.5px] border-blue-600 text-[10px] lg:text-xs font-bold text-blue-600 bg-white mt-0.5">
-              02
-            </div>
-            <div>
-              <h4 className="text-[12px] lg:text-sm font-bold text-slate-900 leading-tight">
-                Sajikan Langsung
-              </h4>
-              <p className="mt-1 text-[11px] lg:text-[13px] leading-relaxed text-slate-400">
-                {productName} siap dikonsumsi langsung dari kemasan. Tidak perlu
-                dimasak atau dipanaskan.
-              </p>
-            </div>
-          </div>
+      {/* Informasi Penyajian */}
+      {servingInfo && (
+        <div className="mb-6 lg:mb-8">
+          <p className="mb-3 lg:mb-4 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
+            CARA PENYAJIAN
+          </p>
+          <p className="whitespace-pre-line text-[12px] lg:text-[14px] leading-relaxed text-slate-600">
+            {servingInfo}
+          </p>
         </div>
-      </div>
+      )}
+
+      {/* Informasi Porsi */}
+      {servingPortion && (
+        <div className="mb-6 lg:mb-8">
+          <p className="mb-2 lg:mb-3 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
+            INFORMASI PORSI
+          </p>
+          <p className="whitespace-pre-line text-[12px] lg:text-[14px] leading-relaxed text-slate-600">
+            {servingPortion}
+          </p>
+        </div>
+      )}
 
       {/* Tips Penyimpanan */}
-      <div>
-        <p className="mb-2 lg:mb-3 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
-          TIPS PENYIMPANAN
-        </p>
-        <div className="rounded-xl border border-blue-200 bg-[#f4f8ff] p-3 sm:p-4 lg:p-5 space-y-3 lg:space-y-4 shadow-sm">
-          <div className="flex items-start gap-2.5 lg:gap-3">
-            <div className="flex h-6 w-6 lg:h-7 lg:w-7 shrink-0 items-center justify-center rounded-full bg-blue-100/70 text-blue-600 mt-0.5">
-              <ThermometerSnowflake className="h-3 w-3 lg:h-4 lg:w-4" />
+      {storageInfo && (
+        <div>
+          <p className="mb-2 lg:mb-3 text-[10px] lg:text-xs font-bold text-slate-800 uppercase">
+            TIPS PENYIMPANAN
+          </p>
+          <div className="rounded-xl border border-blue-200 bg-[#f4f8ff] p-3 sm:p-4 lg:p-5 shadow-sm">
+            <div className="flex items-start gap-2.5 lg:gap-3">
+              <div className="flex h-6 w-6 lg:h-7 lg:w-7 shrink-0 items-center justify-center rounded-full bg-blue-100/70 text-blue-600 mt-0.5">
+                <ThermometerSnowflake className="h-3 w-3 lg:h-4 lg:w-4" />
+              </div>
+              <span className="whitespace-pre-line text-[11px] lg:text-sm font-medium text-blue-600 leading-relaxed pt-0.5">
+                {storageInfo}
+              </span>
             </div>
-            <span className="text-[11px] lg:text-sm font-medium text-blue-600 leading-relaxed pt-0.5">
-              Simpan pada suhu 4–10°C, jauhkan dari sinar matahari langsung.
-            </span>
-          </div>
-          <div className="flex items-start gap-2.5 lg:gap-3">
-            <div className="flex h-6 w-6 lg:h-7 lg:w-7 shrink-0 items-center justify-center rounded-full bg-blue-100/70 text-blue-600 mt-0.5">
-              <Droplets className="h-3 w-3 lg:h-4 lg:w-4" />
-            </div>
-            <span className="text-[11px] lg:text-sm font-medium text-blue-600 leading-relaxed pt-0.5">
-              Jangan bekukan produk — dapat mengubah tekstur & rasa alami susu.
-            </span>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
