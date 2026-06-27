@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login, loading, error } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -21,7 +22,9 @@ export default function LoginForm() {
 
     const result = await login(email, password)
     if (result) {
-      router.push('/dashboard')
+      const redirect = searchParams.get('redirect')
+      const destination = redirect?.startsWith('/dashboard') ? redirect : '/dashboard'
+      router.push(destination)
     }
   }
 
