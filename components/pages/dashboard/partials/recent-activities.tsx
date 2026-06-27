@@ -1,29 +1,36 @@
-import { Clock, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
+"use client"
 
-const activities = [
-  {
-    id: 1,
-    message: 'Produk "Susu Segar Premium" diperbarui',
-    time: "5 mnt lalu",
-  },
-  { id: 2, message: "Laporan pemasukan ditambahkan", time: "1 jam lalu" },
-  { id: 3, message: 'QR Code dibuat untuk "Kefir Plain"', time: "2 jam lalu" },
-  {
-    id: 4,
-    message: 'Sertifikat BPOM "Yogurt Stroberi" diperbarui',
-    time: "5 jam lalu",
-  },
-  { id: 5, message: '"Mentega Tawar" berhasil didaftarkan', time: "Kemarin" },
-  {
-    id: 6,
-    message: "Kalkulasi HPP dijalankan, margin 35%",
-    time: "2 hari lalu",
-  },
-];
+import { useEffect, useState } from "react"
+import { Clock, ArrowRight } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+import { id as idLocale } from "date-fns/locale"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useDashboard } from "@/hooks/useDashboard"
+
+interface Activity {
+  id: number
+  message: string
+  created_at: Date
+}
 
 export function RecentActivities() {
+  const { uuid } = useAuthStore()
+  const { getRecentActivities } = useDashboard()
+  const [activities, setActivities] = useState<Activity[]>([])
+
+  useEffect(() => {
+    if (!uuid) return
+
+    const fetchActivities = async () => {
+      const result = await getRecentActivities(uuid)
+      if (result) setActivities(result)
+    }
+
+    fetchActivities()
+  }, [uuid])
+
   return (
     <Card className="shadow-sm h-full">
       <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-slate-50">
@@ -44,22 +51,29 @@ export function RecentActivities() {
         </Link>
       </CardHeader>
       <CardContent className="mt-4">
-        <div className="space-y-6">
-          {activities.map((activity) => (
-            <div key={activity.id} className="relative flex items-start gap-4">
-              <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-600 z-10 ring-4 ring-white" />
-              <div className="flex flex-1 items-center justify-between border-b border-slate-50 pb-4">
-                <span className="text-sm text-slate-700">
-                  {activity.message}
-                </span>
-                <span className="text-xs text-slate-400 whitespace-nowrap ml-4">
-                  {activity.time}
-                </span>
+        {activities.length === 0 ? (
+          <p className="text-sm text-slate-400">Belum ada aktivitas tercatat.</p>
+        ) : (
+          <div className="space-y-6">
+            {activities.map((activity) => (
+              <div key={activity.id} className="relative flex items-start gap-4">
+                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-600 z-10 ring-4 ring-white" />
+                <div className="flex flex-1 items-center justify-between border-b border-slate-50 pb-4">
+                  <span className="text-sm text-slate-700">
+                    {activity.message}
+                  </span>
+                  <span className="text-xs text-slate-400 whitespace-nowrap ml-4">
+                    {formatDistanceToNow(new Date(activity.created_at), {
+                      addSuffix: true,
+                      locale: idLocale,
+                    })}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
+  )
 }

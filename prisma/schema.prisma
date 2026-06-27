@@ -89,6 +89,7 @@ model Tenant {
   products        Product[]
   financial_records FinancialRecord[]
   hpp_calculations  HppCalculation[]
+  activity_logs     ActivityLog[]
 
   @@map("tenants")
 }
@@ -154,8 +155,46 @@ model Product {
 
   images          ProductImage[]
   financial_records FinancialRecord[]
+  views           ProductView[]
 
   @@map("products")
+}
+
+model ProductView {
+  id          Int             @id @default(autoincrement())
+  product_id  Int
+  source      ProductViewSource @default(view)
+  created_at  DateTime        @default(now())
+
+  product     Product         @relation(fields: [product_id], references: [id])
+
+  @@map("product_views")
+}
+
+enum ProductViewSource {
+  view
+  scan
+}
+
+model ActivityLog {
+  id          Int             @id @default(autoincrement())
+  tenant_id   Int
+  type        ActivityType
+  message     String
+  created_at  DateTime        @default(now())
+
+  tenant      Tenant          @relation(fields: [tenant_id], references: [id])
+
+  @@map("activity_logs")
+}
+
+enum ActivityType {
+  product
+  finance
+  certificate
+  qr_code
+  hpp
+  tenant
 }
 
 enum ProductCategory {

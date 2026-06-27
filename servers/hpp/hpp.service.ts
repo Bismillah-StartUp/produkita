@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import { HppCategory, HppMethod } from "@prisma/client"
+import { logActivity } from "@/servers/dashboard/dashboard.service"
 
 export const findHppsByTenantUuid = async (tenantUuid: string) => {
   return await prisma.hppCalculation.findMany({
@@ -58,7 +59,7 @@ export const createHpp = async (
   })
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
-  return await prisma.hppCalculation.create({
+  const calculation = await prisma.hppCalculation.create({
     data: {
       tenant_id: tenant.id,
       product_name: data.product_name,
@@ -77,6 +78,14 @@ export const createHpp = async (
     },
     include: { items: true },
   })
+
+  await logActivity(
+    tenant.id,
+    "hpp",
+    `Kalkulasi HPP dijalankan, margin ${data.margin_percentage}%`
+  )
+
+  return calculation
 }
 
 export const updateHpp = async (

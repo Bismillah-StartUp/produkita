@@ -1,37 +1,63 @@
-import { Package, Eye, ArrowUpRight } from "lucide-react";
+"use client";
 
-const overviewData = [
-  {
-    id: "total-products",
-    title: "Total Produk Terdaftar",
-    value: "24",
-    description: "produk aktif dalam sistem",
-    trend: "+2 dari bulan lalu",
-    icon: Package,
-    gradient: "from-blue-600 to-blue-500",
-    textColors: {
-      title: "text-blue-100",
-      description: "text-blue-100/90",
-      badge: "text-blue-50",
-    },
-  },
-  {
-    id: "total-views",
-    title: "Total View & Scan QR",
-    value: "12.540",
-    description: "interaksi pengunjung pada produk",
-    trend: "+ 143 hari ini",
-    icon: Eye,
-    gradient: "from-cyan-600 to-cyan-500",
-    textColors: {
-      title: "text-cyan-100",
-      description: "text-cyan-100/90",
-      badge: "text-cyan-50",
-    },
-  },
-];
+import { useEffect, useState } from "react";
+import { Package, Eye, ArrowUpRight } from "lucide-react";
+import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export function OverviewStats() {
+  const { uuid } = useAuthStore();
+  const { getOverviewStats } = useDashboard();
+
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    productsThisMonth: 0,
+    totalViews: 0,
+    viewsToday: 0,
+  });
+
+  useEffect(() => {
+    if (!uuid) return;
+
+    const fetchStats = async () => {
+      const result = await getOverviewStats(uuid);
+      if (result) setStats(result);
+    };
+
+    fetchStats();
+  }, [uuid]);
+
+  const overviewData = [
+    {
+      id: "total-products",
+      title: "Total Produk Terdaftar",
+      value: stats.totalProducts.toLocaleString("id-ID"),
+      description: "produk aktif dalam sistem",
+      trend: `+${stats.productsThisMonth} dari bulan lalu`,
+      icon: Package,
+      gradient: "from-blue-600 to-blue-500",
+      textColors: {
+        title: "text-blue-100",
+        description: "text-blue-100/90",
+        badge: "text-blue-50",
+      },
+    },
+    {
+      id: "total-views",
+      title: "Total View & Scan QR",
+      value: stats.totalViews.toLocaleString("id-ID"),
+      description: "interaksi pengunjung pada produk",
+      trend: `+ ${stats.viewsToday} hari ini`,
+      icon: Eye,
+      gradient: "from-cyan-600 to-cyan-500",
+      textColors: {
+        title: "text-cyan-100",
+        description: "text-cyan-100/90",
+        badge: "text-cyan-50",
+      },
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       {overviewData.map((stat) => {

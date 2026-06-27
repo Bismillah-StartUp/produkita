@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma"
 import { uploadImage, deleteImage } from "@/configs/cloudinary/utils"
 import { generateLicensesCode, generateQRCode, generateBarcode } from "@/lib/utils"
+import { logActivity } from "@/servers/dashboard/dashboard.service"
 import { ProductCategory, WeightUnits, CertificateType } from "@prisma/client"
 
 export const findProductByUuid = async (uuid: string) => {
@@ -35,6 +36,9 @@ export const findProductsByTenantUuid = async (tenantUuid: string) => {
       certificates: {
         select: { type: true },
       },
+      _count: {
+        select: { views: true },
+      },
     },
     orderBy: { created_at: "desc" },
   })
@@ -55,10 +59,14 @@ export const updateProductBasic = async (
   const product = await prisma.product.findUnique({ where: { uuid, deleted_at: null } })
   if (!product) throw new Error("Produk tidak ditemukan")
 
-  return await prisma.product.update({
+  const updated = await prisma.product.update({
     where: { uuid },
     data,
   })
+
+  await logActivity(product.tenant_id, "product", `Produk "${updated.name}" diperbarui`)
+
+  return updated
 }
 
 export const updateNutrition = async (
@@ -96,7 +104,10 @@ export const updateCertificate = async (
     file?: Buffer
   }
 ) => {
-  const cert = await prisma.certificate.findUnique({ where: { uuid: certificateUuid } })
+  const cert = await prisma.certificate.findUnique({
+    where: { uuid: certificateUuid },
+    include: { product: { select: { name: true, tenant_id: true } } },
+  })
   if (!cert) throw new Error("Sertifikat tidak ditemukan")
   if (cert.deleted_at) throw new Error("Sertifikat sudah dihapus")
 
@@ -112,7 +123,7 @@ export const updateCertificate = async (
     certificatePublicId = result.public_id
   }
 
-  return await prisma.certificate.update({
+  const updated = await prisma.certificate.update({
     where: { uuid: certificateUuid },
     data: {
       number: data.number,
@@ -123,6 +134,14 @@ export const updateCertificate = async (
       certificate_public_id: certificatePublicId,
     },
   })
+
+  await logActivity(
+    cert.product.tenant_id,
+    "certificate",
+    `Sertifikat ${cert.type.toUpperCase()} "${cert.product.name}" diperbarui`
+  )
+
+  return updated
 }
 
 export const softDeleteCertificate = async (certificateUuid: string) => {
@@ -340,7 +359,7 @@ export const submitProduct = async (
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"
   const licensePageUrl = `${baseUrl}/licenses/${licenseCode}`
   try {
-    qrCodeDataUrl = await generateQRCode(licensePageUrl)
+    qrCodeDataUrl = await generateQRCode(`${licensePageUrl}?source=scan`)
     barcodeDataUrl = await generateBarcode(licensePageUrl)
 
     // upload ke cloudinary supaya kolom qr_code_url/barcode_url tidak menyimpan base64 raksasa
@@ -358,6 +377,9 @@ export const submitProduct = async (
         barcode_url: barcodeUpload.secure_url,
       },
     })
+
+    await logActivity(tenant.id, "product", `"${product.name}" berhasil didaftarkan`)
+    await logActivity(tenant.id, "qr_code", `QR Code dibuat untuk "${product.name}"`)
   } catch (err) {
     await Promise.allSettled(uploadedPublicIds.map((publicId) => deleteImage(publicId)))
     await prisma.product.update({

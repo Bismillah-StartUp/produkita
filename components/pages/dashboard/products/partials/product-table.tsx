@@ -47,11 +47,9 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
     if (!confirm("Yakin ingin menghapus produk ini?")) return
     const result = await softDeleteProduct(productUuid)
     if (result) {
-      setProducts((prev) => {
-        const updated = prev.filter((p) => p.uuid !== productUuid)
-        onTotalChange(updated.length)
-        return updated
-      })
+      const updated = products.filter((p) => p.uuid !== productUuid)
+      setProducts(updated)
+      onTotalChange(updated.length)
     }
   }
 
@@ -82,6 +80,7 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
               <th className="px-6 py-4">No</th>
               <th className="px-6 py-4">Nama Produk</th>
               <th className="px-6 py-4">Sertifikat</th>
+              <th className="px-6 py-4 text-center">Total View</th>
               <th className="px-6 py-4 text-center">Kode QR</th>
               <th className="px-6 py-4 text-center">Aksi</th>
             </tr>
@@ -105,6 +104,9 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
                       />
                     ))}
                   </div>
+                </td>
+                <td className="px-6 py-4 text-center font-medium text-gray-700">
+                  {(product._count?.views ?? 0).toLocaleString("id-ID")}
                 </td>
                 <td className="px-6 py-4 text-center">
                   {product.qr_code_url ? (

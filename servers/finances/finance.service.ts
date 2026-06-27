@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import { TransactionType } from "@prisma/client"
+import { logActivity } from "@/servers/dashboard/dashboard.service"
 
 
 export const createFinancialRecord = async (
@@ -18,12 +19,17 @@ export const createFinancialRecord = async (
   })
   if (!tenant) throw new Error("Tenant tidak ditemukan")
 
-  return await prisma.financialRecord.create({
+  const record = await prisma.financialRecord.create({
     data: {
       tenant_id: tenant.id,
       ...data,
     },
   })
+
+  const label = data.transaction_type === "income" ? "pemasukan" : "pengeluaran"
+  await logActivity(tenant.id, "finance", `Laporan ${label} ditambahkan`)
+
+  return record
 }
 
 export const getFinanceByUUID = async (cuid: string, tenantUuid: string) => {

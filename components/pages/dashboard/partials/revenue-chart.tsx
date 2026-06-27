@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ArrowUp } from "lucide-react";
 import {
@@ -17,15 +17,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { formatCompactIDR, formatIDR } from "@/lib/format-currency";
-
-const chartData = [
-  { month: "Jan", pemasukan: 18000000, pengeluaran: 8000000 },
-  { month: "Feb", pemasukan: 12000000, pengeluaran: 10000000 },
-  { month: "Mar", pemasukan: 24000000, pengeluaran: 12000000 },
-  { month: "Apr", pemasukan: 14000000, pengeluaran: 9000000 },
-  { month: "Mei", pemasukan: 20000000, pengeluaran: 14000000 },
-  { month: "Jun", pemasukan: 28600000, pengeluaran: 15000000 },
-];
+import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { useDashboard } from "@/hooks/useDashboard";
 
 const chartConfig = {
   pemasukan: {
@@ -39,13 +32,30 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function RevenueChart() {
+  const { uuid } = useAuthStore();
+  const { getRevenueChart } = useDashboard();
+  const [chartData, setChartData] = useState<
+    { month: string; pemasukan: number; pengeluaran: number }[]
+  >([]);
+
+  useEffect(() => {
+    if (!uuid) return;
+
+    const fetchChart = async () => {
+      const result = await getRevenueChart(uuid);
+      if (result) setChartData(result);
+    };
+
+    fetchChart();
+  }, [uuid]);
+
   const TotalPemasukan = useMemo(() => {
     return chartData.reduce((sum, item) => sum + (item.pemasukan || 0), 0);
-  }, []);
+  }, [chartData]);
 
   const TotalPengeluaran = useMemo(() => {
     return chartData.reduce((sum, item) => sum + (item.pengeluaran || 0), 0);
-  }, []);
+  }, [chartData]);
 
   const Trends = useMemo(() => {
     if (!chartData || chartData.length < 2) {
@@ -77,7 +87,7 @@ export function RevenueChart() {
         previous.pengeluaran || 0,
       ),
     };
-  }, []);
+  }, [chartData]);
 
   return (
     <Card className="shadow-sm">

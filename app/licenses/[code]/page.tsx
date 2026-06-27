@@ -6,10 +6,14 @@ import {
   getProductServing,
   getProductCompany,
 } from "@/servers/licenses/license.actions";
+import { recordProductView } from "@/servers/dashboard/dashboard.actions";
 
 type LicencePageProps = {
   params: Promise<{
     code: string;
+  }>;
+  searchParams: Promise<{
+    source?: string;
   }>;
 };
 
@@ -26,8 +30,9 @@ const NotFoundState = () => (
   </div>
 );
 
-const LicencePage = async ({ params }: LicencePageProps) => {
+const LicencePage = async ({ params, searchParams }: LicencePageProps) => {
   const { code } = await params;
+  const { source } = await searchParams;
 
   const [product, nutrition, certificates, serving, company] = await Promise.allSettled([
     getProductInfo(code),
@@ -40,6 +45,8 @@ const LicencePage = async ({ params }: LicencePageProps) => {
   if (product.status === "rejected" || !product.value) {
     return <NotFoundState />;
   }
+
+  recordProductView(code, source === "scan" ? "scan" : "view").catch(() => {});
 
   return (
     <LicenceLayout
