@@ -189,10 +189,10 @@ export const loginService = async (
   if (!isValid) throw new Error("Password salah")
 
   const token = await signToken(
-    { uuid: user.uuid, email: user.email, role: user.role },
+    { uuid: user.uuid, email: user.email, role: user.role, name: user.name },
     rememberMe
   )
   await setAuthCookie(token, rememberMe)
 
-  return { uuid: user.uuid, email: user.email, role: user.role }
+  return { uuid: user.uuid, email: user.email, role: user.role, name: user.name }
 }

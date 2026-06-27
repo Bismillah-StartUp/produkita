@@ -49,8 +49,8 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
     setError(null)
 
     try {
-      if (initialData?.id) {
-        await updateFinancialRecord(initialData.id, uuid, {
+      if (initialData?.cuid) {
+        await updateFinancialRecord(initialData.cuid, uuid, {
           product_name: formData.product_name,
           transaction_type: formData.transaction_type,
           amount: Number(formData.amount),

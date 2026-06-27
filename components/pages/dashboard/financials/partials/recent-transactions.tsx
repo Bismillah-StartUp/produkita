@@ -145,8 +145,8 @@ export default function RecentTransactions({
                         </button>
                       </Link>
                       <button
-                        onClick={() => handleDelete(record.id)}
-                        disabled={deletingId === record.id}
+                        onClick={() => handleDelete(record.cuid)}
+                        disabled={deletingId === record.cuid}
                         className="rounded-md bg-red-50 p-1.5 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />

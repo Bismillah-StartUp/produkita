@@ -185,7 +185,7 @@ export const getTenantProducts = async (tenantUuid: string) => {
 }
 
 export const updateFinancialRecord = async (
-  id: string,
+  cuid: string,
   tenantUuid: string,
   data: {
     product_id?: number | null
@@ -197,24 +197,24 @@ export const updateFinancialRecord = async (
   }
 ) => {
   const record = await prisma.financialRecord.findFirst({
-    where: { id, tenant: { uuid: tenantUuid } },
+    where: { cuid, tenant: { uuid: tenantUuid } },
   })
   if (!record) throw new Error("Transaksi tidak ditemukan")
 
   return await prisma.financialRecord.update({
-    where: { id },
+    where: { cuid },
     data,
   })
 }
 
 
-export const deleteFinancialRecord = async (id: string, tenantUuid: string) => {
+export const deleteFinancialRecord = async (cuid: string, tenantUuid: string) => {
   const record = await prisma.financialRecord.findFirst({
-    where: { id, tenant: { uuid: tenantUuid } },
+    where: { cuid, tenant: { uuid: tenantUuid } },
   })
   if (!record) throw new Error("Transaksi tidak ditemukan")
 
-  return await prisma.financialRecord.delete({ where: { id } })
+  return await prisma.financialRecord.delete({ where: { cuid } })
 }
 
 export const getFinancialRecordsForExport = async (

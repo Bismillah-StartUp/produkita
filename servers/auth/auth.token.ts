@@ -7,7 +7,7 @@ const EXPIRES_IN = process.env.JWT_EXPIRES_IN! || "1h"
 const REMEMBER_EXPIRES_IN = process.env.JWT_EXTENDED_EXPIRES! || "7d"
 
 export const signToken = async (
-  payload: { uuid: string; email: string; role: string },
+  payload: { uuid: string; email: string; role: string; name: string | null },
   rememberMe: boolean = false
 ) => {
   return await new SignJWT(payload)
@@ -30,7 +30,7 @@ export const setAuthCookie = async (token: string, rememberMe: boolean = false) 
 
 export const verifyToken = async (token: string) => {
   const { payload } = await jwtVerify(token, SECRET)
-  return payload as { uuid: string; email: string; role: string }
+  return payload as { uuid: string; email: string; role: string; name: string | null }
 }
 
 export const getAuthCookie = async () => {
