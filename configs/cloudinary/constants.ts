@@ -35,6 +35,15 @@ export const CLOUDINARY_UPLOAD_OPTIONS = {
     quality: "auto" as const,
     fetch_format: "auto" as const,
   },
+  PRODUCTS: {
+    folder: CLOUDINARY_FOLDERS.PRODUCTS,
+    resource_type: "auto" as const,
+    quality: "auto" as const,
+    fetch_format: "auto" as const,
+    width: 1200,
+    height: 1200,
+    crop: "fit" as const,
+  },
   TENANTS: {
     folder: CLOUDINARY_FOLDERS.TENANTS,
     resource_type: "auto" as const,

@@ -27,7 +27,7 @@ export const uploadImage = async (
     )
 
     if (typeof file === "string") {
-      uploadStream.end(Buffer.from(file))
+      uploadStream.end(Buffer.from(file, "base64"))
     } else {
       uploadStream.end(file)
     }

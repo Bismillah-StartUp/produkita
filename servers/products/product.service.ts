@@ -22,7 +22,7 @@ export const findProductByUuid = async (uuid: string) => {
 export const findProductsByTenantUuid = async (tenantUuid: string) => {
   return await prisma.product.findMany({
     where: {
-      tenant: { uuid: tenantUuid },
+      tenant: { user: { uuid: tenantUuid } },
       deleted_at: null,
     },
     select: {
@@ -248,94 +248,124 @@ export const submitProduct = async (
     (data.serving.images ?? []).map((file) => uploadImage(file, "products"))
   )
 
-  // 4. simpan semua ke DB dalam satu transaksi
-  const product = await prisma.$transaction(async (tx) => {
-    // create product
-    const product = await tx.product.create({
-      data: {
-        ...data.product,
-        tenant_id: tenant.id,
-        license_code: licenseCode,
-      },
-    })
+  const uploadedPublicIds = [
+    ...uploadedProductImages.map((r) => r.public_id),
+    ...uploadedCertFiles.filter((r): r is NonNullable<typeof r> => !!r).map((r) => r.public_id),
+    ...uploadedServingImages.map((r) => r.public_id),
+  ]
 
-    // create product images
-    if (uploadedProductImages.length > 0) {
-      await tx.productImage.createMany({
-        data: uploadedProductImages.map((result) => ({
-          product_id: product.id,
-          url: result.secure_url,
-          public_id: result.public_id,
-        })),
-      })
-    }
-
-    // create nutrition
-    await tx.nutritionInfo.create({
-      data: {
-        product_id: product.id,
-        ...data.nutrition,
-      },
-    })
-
-    // create certificates
-    for (let i = 0; i < data.certificates.length; i++) {
-      const cert = data.certificates[i]
-      const uploadedFile = uploadedCertFiles[i]
-
-      await tx.certificate.create({
+  // 4. simpan semua ke DB dalam satu transaksi; rollback upload Cloudinary kalau gagal
+  let product
+  try {
+    product = await prisma.$transaction(async (tx) => {
+      // create product
+      const product = await tx.product.create({
         data: {
-          product_id: product.id,
-          type: cert.type,
-          number: cert.number,
-          registered_at: cert.registered_at,
-          valid_until: cert.valid_until,
-          lab_name: cert.lab_name,
-          certificate_url: uploadedFile?.secure_url ?? null,
-          certificate_public_id: uploadedFile?.public_id ?? null,
+          ...data.product,
+          tenant_id: tenant.id,
+          license_code: licenseCode,
         },
       })
-    }
 
-    // create serving
-    const serving = await tx.productServing.create({
-      data: {
-        product_id: product.id,
-        serving_info: data.serving.serving_info,
-        serving_portion: data.serving.serving_portion,
-        storage_info: data.serving.storage_info,
-        video_url: data.serving.video_url,
-      },
-    })
+      // create product images
+      if (uploadedProductImages.length > 0) {
+        await tx.productImage.createMany({
+          data: uploadedProductImages.map((result) => ({
+            product_id: product.id,
+            url: result.secure_url,
+            public_id: result.public_id,
+          })),
+        })
+      }
 
-    // create serving images
-    if (uploadedServingImages.length > 0) {
-      await tx.productServingImage.createMany({
-        data: uploadedServingImages.map((result) => ({
-          serving_id: serving.id,
-          url: result.secure_url,
-          public_id: result.public_id,
-        })),
+      // create nutrition
+      await tx.nutritionInfo.create({
+        data: {
+          product_id: product.id,
+          ...data.nutrition,
+        },
       })
-    }
 
-    return product
-  })
+      // create certificates
+      for (let i = 0; i < data.certificates.length; i++) {
+        const cert = data.certificates[i]
+        const uploadedFile = uploadedCertFiles[i]
+
+        await tx.certificate.create({
+          data: {
+            product_id: product.id,
+            type: cert.type,
+            number: cert.number,
+            registered_at: cert.registered_at,
+            valid_until: cert.valid_until,
+            lab_name: cert.lab_name,
+            certificate_url: uploadedFile?.secure_url ?? null,
+            certificate_public_id: uploadedFile?.public_id ?? null,
+          },
+        })
+      }
+
+      // create serving
+      const serving = await tx.productServing.create({
+        data: {
+          product_id: product.id,
+          serving_info: data.serving.serving_info,
+          serving_portion: data.serving.serving_portion,
+          storage_info: data.serving.storage_info,
+          video_url: data.serving.video_url,
+        },
+      })
+
+      // create serving images
+      if (uploadedServingImages.length > 0) {
+        await tx.productServingImage.createMany({
+          data: uploadedServingImages.map((result) => ({
+            serving_id: serving.id,
+            url: result.secure_url,
+            public_id: result.public_id,
+          })),
+        })
+      }
+
+      return product
+    })
+  } catch (err) {
+    await Promise.allSettled(uploadedPublicIds.map((publicId) => deleteImage(publicId)))
+    throw err
+  }
 
   // 5. generate QR + barcode
+  let qrCodeDataUrl: string
+  let barcodeDataUrl: string
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"
   const licensePageUrl = `${baseUrl}/licenses/${licenseCode}`
-  const qrCodeDataUrl = await generateQRCode(licensePageUrl)
-  const barcodeDataUrl = await generateBarcode(licensePageUrl)
+  try {
+    qrCodeDataUrl = await generateQRCode(licensePageUrl)
+    barcodeDataUrl = await generateBarcode(licensePageUrl)
 
-  // 6. simpan QR + barcode ke product
-  await prisma.product.update({
-    where: { id: product.id },
-    data: {
-      qr_code_url: qrCodeDataUrl,
-      barcode_url: barcodeDataUrl,
-    },
-  })
+    // upload ke cloudinary supaya kolom qr_code_url/barcode_url tidak menyimpan base64 raksasa
+    const [qrUpload, barcodeUpload] = await Promise.all([
+      uploadImage(qrCodeDataUrl.replace(/^data:image\/\w+;base64,/, ""), "products"),
+      uploadImage(barcodeDataUrl.replace(/^data:image\/\w+;base64,/, ""), "products"),
+    ])
+    uploadedPublicIds.push(qrUpload.public_id, barcodeUpload.public_id)
+
+    // 6. simpan QR + barcode ke product
+    await prisma.product.update({
+      where: { id: product.id },
+      data: {
+        qr_code_url: qrUpload.secure_url,
+        barcode_url: barcodeUpload.secure_url,
+      },
+    })
+  } catch (err) {
+    await Promise.allSettled(uploadedPublicIds.map((publicId) => deleteImage(publicId)))
+    await prisma.product.update({
+      where: { id: product.id },
+      data: { deleted_at: new Date() },
+    })
+    throw err
+  }
 
   return {
     product,
