@@ -95,7 +95,7 @@ export const getInsights = async (userUuid: string) => {
   const soon = new Date()
   soon.setDate(soon.getDate() + 7)
 
-  const [expiringCerts, productsWithoutCerts, productsWithoutQr, totalProducts, tenantContactUpdatedAt] =
+  const [expiringCerts, productsWithoutCerts, productsWithoutQr, totalProducts] =
     await Promise.all([
       prisma.certificate.findMany({
         where: {
@@ -121,13 +121,18 @@ export const getInsights = async (userUuid: string) => {
       prisma.product.count({
         where: { tenant_id: tenant.id, deleted_at: null },
       }),
-      prisma.tenant.findUnique({
-        where: { id: tenant.id },
-        select: { updated_at: true },
-      }),
     ])
 
-  const insights: { id: string; message: string; type: "warning" | "success" }[] = []
+  type InsightItem = {
+    id: string
+    message: string
+    type: "warning" | "success"
+    href?: string
+    children?: { id: string; message: string; href?: string }[]
+  }
+
+  const insights: InsightItem[] = []
+  const umkmHref = "/dashboard/umkm"
 
   for (const cert of expiringCerts) {
     const days = Math.ceil((cert.valid_until!.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
@@ -154,14 +159,42 @@ export const getInsights = async (userUuid: string) => {
     })
   }
 
-  const contactStale =
-    !tenantContactUpdatedAt?.updated_at ||
-    Date.now() - tenantContactUpdatedAt.updated_at.getTime() > 1000 * 60 * 60 * 24 * 90
-  if (contactStale) {
+  const missingUmkmFields: { id: string; message: string; href?: string }[] = []
+
+  if (!tenant.trade_name) {
+    missingUmkmFields.push({ id: "umkm-no-trade-name", message: "Nama dagang belum diisi.", href: umkmHref })
+  }
+
+  if (!tenant.npwp) {
+    missingUmkmFields.push({ id: "umkm-no-npwp", message: "NPWP belum diisi.", href: umkmHref })
+  }
+
+  if (!tenant.description) {
+    missingUmkmFields.push({ id: "umkm-no-description", message: "Deskripsi usaha belum diisi.", href: umkmHref })
+  }
+
+  if (!tenant.address || !tenant.city || !tenant.province) {
+    missingUmkmFields.push({ id: "umkm-no-address", message: "Alamat usaha belum lengkap.", href: umkmHref })
+  }
+
+  if (!tenant.email && !tenant.phonenumber) {
+    missingUmkmFields.push({ id: "umkm-no-contact", message: "Informasi kontak belum diisi.", href: umkmHref })
+  }
+
+  if (!tenant.logo_url) {
+    missingUmkmFields.push({ id: "umkm-no-logo", message: "Logo perusahaan belum diunggah.", href: umkmHref })
+  }
+
+  if (!tenant.place_url) {
+    missingUmkmFields.push({ id: "umkm-no-place-photo", message: "Foto tempat / gedung usaha belum diunggah.", href: umkmHref })
+  }
+
+  if (missingUmkmFields.length > 0) {
     insights.push({
-      id: "contact-stale",
-      message: "Informasi kontak UMKM belum diperbarui.",
+      id: "umkm-incomplete",
+      message: `${missingUmkmFields.length} informasi UMKM belum diisi.`,
       type: "warning",
+      children: missingUmkmFields,
     })
   }
 
