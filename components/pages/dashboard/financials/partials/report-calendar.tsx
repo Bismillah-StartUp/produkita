@@ -8,11 +8,13 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 export default function ReportCalendar({
   transactionDates,
   activeDateStr,
+  registeredAtStr,
   year,
   month,
 }: {
   transactionDates: number[]
   activeDateStr: string
+  registeredAtStr?: string
   year: number
   month: number
 }) {
@@ -23,6 +25,10 @@ export default function ReportCalendar({
   const safeDateStr = activeDateStr.includes("T") ? activeDateStr : `${activeDateStr}T00:00:00`
   const activeDate = new Date(safeDateStr)
   const today = new Date()
+
+  const registeredAt = registeredAtStr
+    ? new Date(`${registeredAtStr}T00:00:00`)
+    : null
 
   const [viewMonth, setViewMonth] = useState(activeDate.getMonth())
   const [viewYear, setViewYear] = useState(activeDate.getFullYear())
@@ -66,6 +72,7 @@ export default function ReportCalendar({
 
     if (isToday) return "today"
     if (currentDate > today) return "upcoming"
+    if (registeredAt && currentDate < registeredAt) return "before-registration"
     if (hasRecord) return "completed"
     return "missing"
   }
@@ -151,6 +158,7 @@ export default function ReportCalendar({
                   ${status === "completed" ? "bg-green-50 text-green-700 hover:bg-green-100" : ""}
                   ${status === "missing" ? "bg-red-50 text-red-700 hover:bg-red-100" : ""}
                   ${status === "upcoming" ? "text-slate-400 hover:bg-slate-50" : ""}
+                  ${status === "before-registration" ? "text-slate-300 hover:bg-slate-50" : ""}
                 `}
               >
                 <span className="text-xs font-bold">{day}</span>

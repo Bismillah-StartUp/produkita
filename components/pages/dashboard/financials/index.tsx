@@ -8,6 +8,7 @@ import {
   getTransactionDates,
   getFinancialRecords,
 } from "@/servers/finances/finance.actions"
+import { getTenant } from "@/servers/tenants/tenant.actions"
 
 import StatsCards from "@/components/pages/dashboard/financials/partials/stats-cards"
 import AlertBanner from "@/components/pages/dashboard/financials/partials/alert-banner"
@@ -29,12 +30,13 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
 
-  const [summary, prevSummary, chartData, transactionDates, records] = await Promise.all([
+  const [summary, prevSummary, chartData, transactionDates, records, tenant] = await Promise.all([
     getFinancialSummary(user.uuid, year, month),
     getFinancialSummary(user.uuid, prevYear, prevMonth),
     getFinancialChart(user.uuid, year, month),
     getTransactionDates(user.uuid, year, month),
     getFinancialRecords(user.uuid, year, month),
+    getTenant(user.uuid),
   ])
 
   const getChange = (curr: number, prev: number) => {
@@ -81,6 +83,10 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
   const active_date = dateParam ? new Date(`${dateParam}T00:00:00`) : now
   const has_input_selected_date = transactionDates.includes(active_date.getDate())
   const is_today = active_date.toDateString() === now.toDateString()
+  const active_date_str = `${active_date.getFullYear()}-${String(active_date.getMonth() + 1).padStart(2, "0")}-${String(active_date.getDate()).padStart(2, "0")}`
+
+  const registeredAt = new Date(tenant.created_at)
+  const registeredAtStr = `${registeredAt.getFullYear()}-${String(registeredAt.getMonth() + 1).padStart(2, "0")}-${String(registeredAt.getDate()).padStart(2, "0")}`
 
   return (
     <main className="min-h-screen space-y-6 bg-slate-50/50 p-6">
@@ -98,7 +104,8 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
           <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-xl bg-slate-200" />}>
             <ReportCalendar
               transactionDates={transactionDates}
-              activeDateStr={active_date.toISOString().split("T")[0]}
+              activeDateStr={active_date_str}
+              registeredAtStr={registeredAtStr}
               year={year}
               month={month}
             />
