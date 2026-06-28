@@ -95,7 +95,11 @@ export const getInsights = async (userUuid: string) => {
   const soon = new Date()
   soon.setDate(soon.getDate() + 7)
 
-  const [expiringCerts, productsWithoutCerts, productsWithoutQr, totalProducts] =
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const [expiringCerts, productsWithoutCerts, productsWithoutQr, totalProducts, totalFinancialRecords, financialRecordsThisMonth] =
     await Promise.all([
       prisma.certificate.findMany({
         where: {
@@ -120,6 +124,13 @@ export const getInsights = async (userUuid: string) => {
       }),
       prisma.product.count({
         where: { tenant_id: tenant.id, deleted_at: null },
+      }),
+      prisma.financialRecord.count({
+        where: { tenant_id: tenant.id },
+      }),
+      prisma.financialRecord.findMany({
+        where: { tenant_id: tenant.id, transaction_date: { gte: startOfMonth } },
+        select: { transaction_type: true, amount: true },
       }),
     ])
 
@@ -198,12 +209,55 @@ export const getInsights = async (userUuid: string) => {
     })
   }
 
-  if (totalProducts > 0) {
+  if (totalProducts === 0) {
+    insights.push({
+      id: "no-products",
+      message: "Belum ada produk yang didaftarkan. Daftarkan produk pertama Anda.",
+      type: "warning",
+      href: "/dashboard/products/register",
+    })
+  } else {
     insights.push({
       id: "total-products",
       message: `${totalProducts} produk berhasil terdaftar dalam sistem.`,
       type: "success",
     })
+  }
+
+  const financialsHref = "/dashboard/financials"
+
+  if (totalFinancialRecords === 0) {
+    insights.push({
+      id: "no-financial-records",
+      message: "Belum ada catatan keuangan. Mulai catat transaksi UMKM Anda.",
+      type: "warning",
+      href: financialsHref,
+    })
+  } else if (financialRecordsThisMonth.length === 0) {
+    insights.push({
+      id: "no-financial-records-this-month",
+      message: "Belum ada transaksi keuangan yang dicatat bulan ini.",
+      type: "warning",
+      href: financialsHref,
+    })
+  } else {
+    const { income, expense } = financialRecordsThisMonth.reduce(
+      (acc, record) => {
+        if (record.transaction_type === "income") acc.income += record.amount
+        else acc.expense += record.amount
+        return acc
+      },
+      { income: 0, expense: 0 }
+    )
+
+    if (expense > income) {
+      insights.push({
+        id: "financials-deficit",
+        message: "Pengeluaran bulan ini lebih besar dari pemasukan.",
+        type: "warning",
+        href: financialsHref,
+      })
+    }
   }
 
   return insights
