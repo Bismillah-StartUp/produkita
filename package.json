@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
-    "migrate:reset": "prisma migrate reset -y",
+    "migrate:reset": "prisma migrate reset -f",
     "email:dev": "email dev"
   },
   "dependencies": {
