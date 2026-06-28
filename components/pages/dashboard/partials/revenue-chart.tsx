@@ -134,7 +134,7 @@ export function RevenueChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+        <ChartContainer config={chartConfig} className="h-100 w-full">
           <AreaChart
             accessibilityLayer
             data={chartData}

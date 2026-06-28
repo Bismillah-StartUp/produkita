@@ -56,7 +56,7 @@ function InsightRow({ item }: { item: Insight }) {
           {rowContent}
         </button>
         {isOpen && (
-          <div className="flex max-h-52 flex-col gap-2 overflow-y-auto border-t border-blue-100 p-3 pt-2">
+          <div className="flex flex-col gap-2 border-t border-blue-100 p-3 pt-2">
             {item.children!.map((child) =>
               child.href ? (
                 <Link
@@ -119,11 +119,11 @@ export function InsightReminder() {
           {insights.length}
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+      <CardContent className="flex-1 flex flex-col overflow-hidden">
         {insights.length === 0 ? (
           <p className="text-sm text-slate-400">Belum ada insight untuk ditampilkan.</p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="scrollbar-thin flex max-h-100 flex-col gap-3 overflow-y-auto pr-1">
             {insights.map((item) => (
               <InsightRow key={item.id} item={item} />
             ))}
