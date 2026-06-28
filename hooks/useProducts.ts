@@ -6,10 +6,12 @@ import {
   getProductsByTenant,
   submitProduct,
   softDeleteProduct,
-  softDeleteProductImage,    
+  softDeleteProductImage,
   softDeleteServingImage,
   updateProductBasic,
   updateNutrition,
+  updateServing,
+  createCertificate,
   updateCertificate,
   softDeleteCertificate,
 } from "@/servers/products/product.actions"
@@ -143,6 +145,32 @@ export const useProduct = () => {
     }
   ) => handle(() => updateNutrition(productUuid, data))
 
+  const handleUpdateServing = async (
+    productUuid: string,
+    data: {
+      serving_info?: string
+      serving_portion?: string
+      storage_info?: string
+      video_url?: string
+    }
+  ) => handle(() => updateServing(productUuid, data))
+
+  const handleCreateCertificate = async (
+    productUuid: string,
+    data: {
+      type: CertificateType
+      number?: string
+      registered_at?: Date
+      valid_until?: Date
+      lab_name?: string
+      file?: File
+    }
+  ) =>
+    handle(async () => {
+      const buffer = data.file ? Buffer.from(await data.file.arrayBuffer()) : undefined
+      return await createCertificate(productUuid, { ...data, file: buffer })
+    })
+
   const handleUpdateCertificate = async (
     certificateUuid: string,
     data: {
@@ -174,6 +202,8 @@ export const useProduct = () => {
     updateProductBasic: handleUpdateProductBasic,
     softDeleteProductImage: handleSoftDeleteProductImage,
     updateNutrition: handleUpdateNutrition,
+    updateServing: handleUpdateServing,
+    createCertificate: handleCreateCertificate,
     updateCertificate: handleUpdateCertificate,
     softDeleteCertificate: handleSoftDeleteCertificate,
     softDeleteServingImage: handleSoftDeleteServingImage,

@@ -8,6 +8,8 @@ import {
   updateProductBasicController,
   softDeleteProductImageController,
   updateNutritionController,
+  updateServingController,
+  createCertificateController,
   updateCertificateController,
   softDeleteCertificateController,
   softDeleteServingImageController,
@@ -99,6 +101,27 @@ export const updateNutrition = async (
   return await updateNutritionController(productUuid, data)
 }
 
+export const updateServing = async (
+  productUuid: string,
+  data: Parameters<typeof updateServingController>[1]
+) => {
+  return await updateServingController(productUuid, data)
+}
+
+
+export const createCertificate = async (
+  productUuid: string,
+  data: {
+    type: CertificateType
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  return await createCertificateController(productUuid, data)
+}
 
 export const updateCertificate = async (
   certificateUuid: string,

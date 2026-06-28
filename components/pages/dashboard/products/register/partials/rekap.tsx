@@ -25,6 +25,7 @@ interface RekapProps {
   onSubmit?: () => void;
   onEdit?: (step: number) => void;
   isLoading?: boolean;
+  showSubmit?: boolean;
 }
 
 interface SelectedCertData {
@@ -133,6 +134,7 @@ export function Rekap({
   onSubmit,
   onEdit,
   isLoading = false,
+  showSubmit = true,
 }: RekapProps) {
   const hasAllData = productData && nutritionData && legalityData && servingData;
   const [selectedCert, setSelectedCert] = useState<SelectedCertData | null>(null);
@@ -143,7 +145,7 @@ export function Rekap({
 
   return (
     <div className="space-y-4">
-      {hasAllData ? (
+      {showSubmit && (hasAllData ? (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 shrink-0 text-blue-600" />
@@ -164,7 +166,7 @@ export function Rekap({
             </div>
           </div>
         </div>
-      )}
+      ))}
 
       {productData && (
         <RecapSection
@@ -405,24 +407,26 @@ export function Rekap({
         </RecapSection>
       )}
 
-      <div className="flex gap-3 pt-2">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1 py-6 text-sm font-semibold"
-          onClick={() => onEdit?.(4)}
-        >
-          ← Sebelumnya
-        </Button>
-        <Button
-          type="button"
-          disabled={!hasAllData || isLoading}
-          className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onSubmit}
-        >
-          {isLoading ? "Memproses..." : "Daftarkan Produk →"}
-        </Button>
-      </div>
+      {showSubmit && (
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 py-6 text-sm font-semibold"
+            onClick={() => onEdit?.(4)}
+          >
+            ← Sebelumnya
+          </Button>
+          <Button
+            type="button"
+            disabled={!hasAllData || isLoading}
+            className="flex-1 bg-blue-600 py-6 text-base font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onSubmit}
+          >
+            {isLoading ? "Memproses..." : "Daftarkan Produk →"}
+          </Button>
+        </div>
+      )}
 
       {selectedCert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">

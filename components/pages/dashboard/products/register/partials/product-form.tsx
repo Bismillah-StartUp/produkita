@@ -22,6 +22,9 @@ interface ProductInfoFormProps {
   onSubmit?: (data: ProductFormData) => void
   initialData?: Partial<ProductFormData>
   isLoading?: boolean
+  disabled?: boolean
+  formId?: string
+  showFooter?: boolean
 }
 
 const TIPS_FOTO: string[] = [
@@ -44,7 +47,14 @@ const INITIAL_FORM: ProductFormData = {
   productPhotoPreview: [],
 }
 
-export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: ProductInfoFormProps) {
+export function ProductInfoForm({
+  onSubmit,
+  initialData,
+  isLoading = false,
+  disabled = false,
+  formId,
+  showFooter = true,
+}: ProductInfoFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     ...INITIAL_FORM,
     ...initialData,
@@ -57,6 +67,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   const replaceUploadRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    if (disabled) return
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) {
@@ -69,13 +80,14 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   }
 
   const handleToggleJenis = (id: string) => {
+    if (disabled) return
     setFormData((prev) => ({ ...prev, jenis: id }))
   }
 
   if (!formData.jenis) errors.jenis = "Jenis produk wajib dipilih"
 
   const addPhotos = (files: FileList | null) => {
-    if (!files) return
+    if (disabled || !files) return
     const allowed = MAX_PHOTOS - formData.productPhoto.length
     const incoming = Array.from(files).slice(0, allowed)
 
@@ -112,7 +124,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
-    setIsDragging(true)
+    if (!disabled) setIsDragging(true)
   }
   const handleDragLeave = () => setIsDragging(false)
   const handleDrop = (e: React.DragEvent) => {
@@ -122,6 +134,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   }
 
   const openReplacePhoto = (index: number) => {
+    if (disabled) return
     setReplaceSlotIndex(index)
     replaceUploadRef.current?.click()
   }
@@ -129,7 +142,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   const handleReplaceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ""
-    if (!file || replaceSlotIndex === null) return
+    if (disabled || !file || replaceSlotIndex === null) return
     if (file.size > 2 * 1024 * 1024) return
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return
 
@@ -171,7 +184,7 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id={formId} onSubmit={handleSubmit}>
       <div className="rounded-xl border border-gray-200 bg-white">
         <div className="flex gap-0 divide-x divide-gray-200">
           {/* Left — form fields */}
@@ -184,8 +197,9 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                   name="productName"
                   value={formData.productName}
                   onChange={handleChange}
+                  disabled={disabled}
                   placeholder="Contoh: Susu Segar Full Cream 1L"
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                     errors.productName ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                   }`}
                 />
@@ -199,8 +213,9 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                   name="brandName"
                   value={formData.brandName}
                   onChange={handleChange}
+                  disabled={disabled}
                   placeholder="Contoh: Cimory Yogurt"
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                     errors.brandName ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                   }`}
                 />
@@ -216,8 +231,9 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                   name="price"
                   value={formData.price}
                   onChange={handleChange}
+                  disabled={disabled}
                   placeholder="Contoh: 100.000"
-                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                     errors.price ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                   }`}
                 />
@@ -232,8 +248,9 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                     name="weight"
                     value={formData.weight}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="Contoh: 1000"
-                    className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    className={`min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                       errors.weight ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                     }`}
                   />
@@ -241,7 +258,8 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                     name="unit"
                     value={formData.unit}
                     onChange={handleChange}
-                    className="w-24 rounded-lg border border-gray-200 bg-white px-2 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    disabled={disabled}
+                    className="w-24 rounded-lg border border-gray-200 bg-white px-2 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
                   >
                     {SATUAN.produk.map((s: any) => (
                       <option key={s.id} value={s.id}>
@@ -264,7 +282,8 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                       key={opt.id}
                       type="button"
                       onClick={() => handleToggleJenis(opt.id)}
-                      className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition ${
+                      disabled={disabled}
+                      className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
                         active
                           ? "border-blue-600 bg-white text-blue-600"
                           : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
@@ -284,9 +303,10 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                 name="deskripsi"
                 value={formData.deskripsi}
                 onChange={handleChange}
+                disabled={disabled}
                 placeholder="Keripik singkong renyah dengan bumbu balado khas, dibuat dari singkong pilihan."
                 rows={3}
-                className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
               />
             </div>
           </div>
@@ -304,10 +324,10 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={() => mainUploadRef.current?.click()}
-              className={`relative mb-3 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gray-50 py-8 transition ${
-                isDragging ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-400 hover:bg-blue-50"
-              }`}
+              onClick={() => !disabled && mainUploadRef.current?.click()}
+              className={`relative mb-3 flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gray-50 py-8 transition ${
+                disabled ? "cursor-default" : "cursor-pointer"
+              } ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-400 hover:bg-blue-50"}`}
             >
               {formData.productPhotoPreview[0] ? (
                 <div
@@ -318,9 +338,11 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                   className="group relative h-36 w-full overflow-hidden rounded-lg"
                 >
                   <Image src={formData.productPhotoPreview[0]} alt="Foto utama" fill className="object-cover" />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
-                    <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                  </div>
+                  {!disabled && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                      <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
@@ -361,17 +383,21 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
                 return (
                   <div
                     key={slotIndex}
-                    onClick={() => (preview ? openReplacePhoto(slotIndex) : mainUploadRef.current?.click())}
-                    className={`group relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
-                      preview ? "" : "border-gray-200 hover:border-blue-400"
-                    }`}
+                    onClick={() =>
+                      !disabled && (preview ? openReplacePhoto(slotIndex) : mainUploadRef.current?.click())
+                    }
+                    className={`group relative flex aspect-square flex-col items-center justify-center rounded-lg border border-dashed bg-gray-50 transition ${
+                      disabled ? "cursor-default" : "cursor-pointer"
+                    } ${preview ? "" : "border-gray-200 hover:border-blue-400"}`}
                   >
                     {preview ? (
                       <>
                         <Image src={preview} alt={`Foto ${slotIndex + 1}`} fill className="rounded-lg object-cover" />
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-all group-hover:bg-black/40">
-                          <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                        </div>
+                        {!disabled && (
+                          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-all group-hover:bg-black/40">
+                            <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                          </div>
+                        )}
                       </>
                     ) : (
                       <>
@@ -397,23 +423,25 @@ export function ProductInfoForm({ onSubmit, initialData, isLoading = false }: Pr
           </div>
         </div>
 
-        <div className="flex gap-4 border-t border-gray-200 px-8 py-5">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleReset}
-            className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-          >
-            Bersihkan
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            {isLoading ? "Memproses..." : "Selanjutnya →"}
-          </Button>
-        </div>
+        {showFooter && (
+          <div className="flex gap-4 border-t border-gray-200 px-8 py-5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+            >
+              Bersihkan
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {isLoading ? "Memproses..." : "Selanjutnya →"}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   )

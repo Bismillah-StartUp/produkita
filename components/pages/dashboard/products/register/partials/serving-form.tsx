@@ -19,6 +19,9 @@ interface ServingFormProps {
   onPrevious?: () => void;
   initialData?: Partial<ServingFormData>;
   isLoading?: boolean;
+  disabled?: boolean;
+  formId?: string;
+  showFooter?: boolean;
 }
 
 const initialServingData: ServingFormData = {
@@ -37,6 +40,9 @@ export function ServingForm({
   onPrevious,
   initialData,
   isLoading = false,
+  disabled = false,
+  formId,
+  showFooter = true,
 }: ServingFormProps) {
   const [formData, setFormData] = useState<ServingFormData>({
     ...initialServingData,
@@ -54,6 +60,7 @@ export function ServingForm({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    if (disabled) return;
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -79,7 +86,7 @@ export function ServingForm({
   };
 
   const addPhotos = async (files: FileList | null) => {
-    if (!files) return;
+    if (disabled || !files) return;
 
     const remaining = maxphoto - formData.servingPhotos.length;
     if (remaining <= 0) return;
@@ -136,6 +143,7 @@ export function ServingForm({
   };
 
   const openReplacePhoto = (index: number) => {
+    if (disabled) return;
     setReplaceSlotIndex(index);
     replaceUploadRef.current?.click();
   };
@@ -143,7 +151,7 @@ export function ServingForm({
   const handleReplaceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file || replaceSlotIndex === null) return;
+    if (disabled || !file || replaceSlotIndex === null) return;
     if (file.size > 2 * 1024 * 1024) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return;
 
@@ -164,7 +172,7 @@ export function ServingForm({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+    if (!disabled) setIsDragging(true);
   };
   const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e: React.DragEvent) => {
@@ -174,14 +182,14 @@ export function ServingForm({
   };
 
   const textareaCls = (field?: string) =>
-    `w-full resize-none rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+    `w-full resize-none rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
       field && errors[field]
         ? "border-red-400 bg-red-50"
         : "border-gray-200 bg-white"
     }`;
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id={formId} onSubmit={handleSubmit}>
       <div className="rounded-xl border border-gray-200 bg-white p-8">
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-5">
@@ -193,6 +201,7 @@ export function ServingForm({
                 name="servingInfo"
                 value={formData.servingInfo}
                 onChange={handleChange}
+                disabled={disabled}
                 rows={5}
                 placeholder={
                   "Contoh:\nSajikan dalam keadaan segar sebagai camilan atau pelengkap makanan utama.\n" +
@@ -218,6 +227,7 @@ export function ServingForm({
                 name="storageInfo"
                 value={formData.storageInfo}
                 onChange={handleChange}
+                disabled={disabled}
                 rows={5}
                 placeholder="Contoh: Simpan pada suhu ruang yang sejuk dan terhindar dari sinar matahari langsung. Setelah dibuka, simpan di dalam kulkas pada suhu 4–10°C dan habiskan dalam waktu maksimal 7 hari."
                 className={textareaCls()}
@@ -235,6 +245,7 @@ export function ServingForm({
                 name="portionInfo"
                 value={formData.portionInfo}
                 onChange={handleChange}
+                disabled={disabled}
                 rows={2}
                 placeholder="Contoh: 1 kemasan dapat disajikan untuk 2–3 porsi, tergantung kebutuhan dan cara penyajian."
                 className={textareaCls()}
@@ -251,8 +262,9 @@ export function ServingForm({
                 name="videoLink"
                 value={formData.videoLink}
                 onChange={handleChange}
+                disabled={disabled}
                 placeholder="http://youtube......."
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
               />
             </div>
           </div>
@@ -269,10 +281,13 @@ export function ServingForm({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() =>
+                  !disabled &&
                   !formData.servingPhotoPreviews[0] &&
                   mainUploadRef.current?.click()
                 }
-                className={`relative flex min-h-55 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-gray-50 transition ${
+                className={`relative flex min-h-55 w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-gray-50 transition ${
+                  disabled ? "cursor-default" : "cursor-pointer"
+                } ${
                   isDragging
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-blue-400 hover:bg-blue-50"
@@ -292,9 +307,11 @@ export function ServingForm({
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
-                      <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
+                    {!disabled && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                        <Camera size={20} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -331,9 +348,11 @@ export function ServingForm({
                     <div
                       key={slotIdx}
                       onClick={() =>
-                        preview ? openReplacePhoto(slotIdx) : addUploadRef.current?.click()
+                        !disabled && (preview ? openReplacePhoto(slotIdx) : addUploadRef.current?.click())
                       }
-                      className="group relative flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 transition hover:border-blue-400 hover:bg-blue-50"
+                      className={`group relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 transition hover:border-blue-400 hover:bg-blue-50 ${
+                        disabled ? "cursor-default" : "cursor-pointer"
+                      }`}
                     >
                       {preview ? (
                         <>
@@ -343,9 +362,11 @@ export function ServingForm({
                             fill
                             className="object-cover"
                           />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
-                            <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                          </div>
+                          {!disabled && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/40">
+                              <Camera size={14} className="text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                            </div>
+                          )}
                         </>
                       ) : (
                         <div className="flex flex-col items-center gap-1">
@@ -397,23 +418,25 @@ export function ServingForm({
         </div>
 
         {/* ── Footer ── */}
-        <div className="mt-8 flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onPrevious}
-            className="w-1/3 border-blue-600 py-6 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-          >
-            &#8592; Sebelumnya
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-2/3 bg-blue-600 py-6 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
-          </Button>
-        </div>
+        {showFooter && (
+          <div className="mt-8 flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onPrevious}
+              className="w-1/3 border-blue-600 py-6 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+            >
+              &#8592; Sebelumnya
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-2/3 bg-blue-600 py-6 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   );

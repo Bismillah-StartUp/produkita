@@ -39,9 +39,20 @@ interface NutritionFormProps {
   onPrevious?: () => void
   initialData?: Partial<NutritionFormData>
   isLoading?: boolean
+  disabled?: boolean
+  formId?: string
+  showFooter?: boolean
 }
 
-export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = false }: NutritionFormProps) {
+export function NutritionForm({
+  onSubmit,
+  onPrevious,
+  initialData,
+  isLoading = false,
+  disabled = false,
+  formId,
+  showFooter = true,
+}: NutritionFormProps) {
   const getNumericValue = (value: string) => {
     const parsed = Number.parseFloat(value.replace(/[^0-9.,-]/g, "").replace(",", "."))
     return Number.isFinite(parsed) ? parsed : 0
@@ -50,29 +61,32 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
   const getPercentValue = (value: string, dailyValue: number) =>
     roundAKG(percentAKG(getNumericValue(value), dailyValue)).toString()
 
-  const [formData, setFormData] = useState<NutritionFormData>({
-    servingSize: initialData?.servingSize ?? "",
-    calories: initialData?.calories ?? "",
-    totalFat: initialData?.totalFat ?? "",
-    fatDaily: initialData?.fatDaily ?? getPercentValue(initialData?.totalFat ?? "", AKG.fat),
-    saturatedFat: initialData?.saturatedFat ?? "",
-    saturatedFatDaily: initialData?.saturatedFatDaily ?? getPercentValue(initialData?.saturatedFat ?? "", AKG.saturatedFat),
-    carbohydrates: initialData?.carbohydrates ?? "",
-    carbohydratesDaily: initialData?.carbohydratesDaily ?? getPercentValue(initialData?.carbohydrates ?? "", AKG.carbs),
-    protein: initialData?.protein ?? "",
-    proteinDaily: initialData?.proteinDaily ?? getPercentValue(initialData?.protein ?? "", AKG.protein),
-    sodium: initialData?.sodium ?? "",
-    sodiumDaily: initialData?.sodiumDaily ?? getPercentValue(initialData?.sodium ?? "", AKG.sodium),
-    sugar: initialData?.sugar ?? "",
-    sugarDaily: initialData?.sugarDaily ?? getPercentValue(initialData?.sugar ?? "", AKG.sugar),
-    servingsPerPackage: initialData?.servingsPerPackage ?? "",
-    composition: initialData?.composition ?? "",
-    allergens: initialData?.allergens ?? [],
+  const buildFormData = (data?: Partial<NutritionFormData>): NutritionFormData => ({
+    servingSize: data?.servingSize ?? "",
+    calories: data?.calories ?? "",
+    totalFat: data?.totalFat ?? "",
+    fatDaily: data?.fatDaily ?? getPercentValue(data?.totalFat ?? "", AKG.fat),
+    saturatedFat: data?.saturatedFat ?? "",
+    saturatedFatDaily: data?.saturatedFatDaily ?? getPercentValue(data?.saturatedFat ?? "", AKG.saturatedFat),
+    carbohydrates: data?.carbohydrates ?? "",
+    carbohydratesDaily: data?.carbohydratesDaily ?? getPercentValue(data?.carbohydrates ?? "", AKG.carbs),
+    protein: data?.protein ?? "",
+    proteinDaily: data?.proteinDaily ?? getPercentValue(data?.protein ?? "", AKG.protein),
+    sodium: data?.sodium ?? "",
+    sodiumDaily: data?.sodiumDaily ?? getPercentValue(data?.sodium ?? "", AKG.sodium),
+    sugar: data?.sugar ?? "",
+    sugarDaily: data?.sugarDaily ?? getPercentValue(data?.sugar ?? "", AKG.sugar),
+    servingsPerPackage: data?.servingsPerPackage ?? "",
+    composition: data?.composition ?? "",
+    allergens: data?.allergens ?? [],
   })
+
+  const [formData, setFormData] = useState<NutritionFormData>(buildFormData(initialData))
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (disabled) return
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -93,11 +107,13 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
     }
   }
 
-  const handleToggleAlergen = (label: string) =>
+  const handleToggleAlergen = (label: string) => {
+    if (disabled) return
     setFormData((prev) => ({
       ...prev,
       allergens: prev.allergens.includes(label) ? prev.allergens.filter((a) => a !== label) : [...prev.allergens, label],
     }))
+  }
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -117,12 +133,12 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
     if (validateForm() && onSubmit) onSubmit(formData)
   }
   const inputCls = (field: string) =>
-    `min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+    `min-w-0 flex-1 rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
       errors[field] ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
     }`
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id={formId} onSubmit={handleSubmit}>
       <div className="rounded-xl border border-gray-200 bg-white p-8">
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-5">
@@ -136,6 +152,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 name="servingSize"
                 value={formData.servingSize}
                 onChange={handleChange}
+                disabled={disabled}
                 placeholder="Contoh: 30 g"
                 className={`w-full ${inputCls("servingSize")}`}
               />
@@ -152,6 +169,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 name="servingsPerPackage"
                 value={formData.servingsPerPackage}
                 onChange={handleChange}
+                disabled={disabled}
                 placeholder="Contoh: 30 g"
                 className={`w-full ${inputCls("servingsPerPackage")}`}
               />
@@ -170,6 +188,7 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                 name="calories"
                 value={formData.calories}
                 onChange={handleChange}
+                disabled={disabled}
                 placeholder="Contoh: 25 kcal"
                 className={`w-full ${inputCls("calories")}`}
               />
@@ -188,8 +207,9 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     name="saturatedFat"
                     value={formData.saturatedFat}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="0"
-                    className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">g</span>
                 </div>
@@ -211,8 +231,9 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     name="carbohydrates"
                     value={formData.carbohydrates}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="0"
-                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                       errors.carbohydrates ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                     }`}
                   />
@@ -235,8 +256,9 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     name="protein"
                     value={formData.protein}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="0"
-                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                       errors.protein ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                     }`}
                   />
@@ -261,8 +283,9 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     name="sugar"
                     value={formData.sugar}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="0"
-                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                       errors.sugar ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                     }`}
                   />
@@ -285,8 +308,9 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     name="sodium"
                     value={formData.sodium}
                     onChange={handleChange}
+                    disabled={disabled}
                     placeholder="0"
-                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                    className={`w-full rounded-lg border py-2.5 pl-3 pr-8 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 ${
                       errors.sodium ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
                     }`}
                   />
@@ -311,9 +335,10 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
               name="composition"
               value={formData.composition}
               onChange={handleChange}
+              disabled={disabled}
               placeholder="Contoh: Cabai merah, Bawang putih, Garam, Gula, Minyak sayur..."
               rows={3}
-              className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -327,7 +352,8 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
                     key={opt}
                     type="button"
                     onClick={() => handleToggleAlergen(opt)}
-                    className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition ${
+                    disabled={disabled}
+                    className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
                       active
                         ? "border-blue-600 bg-white text-blue-600"
                         : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
@@ -341,23 +367,25 @@ export function NutritionForm({ onSubmit, onPrevious, initialData, isLoading = f
           </div>
         </div>
 
-        <div className="mt-8 flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onPrevious}
-            className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-          >
-            &#8592; Sebelumnya
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
-          </Button>
-        </div>
+        {showFooter && (
+          <div className="mt-8 flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onPrevious}
+              className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+            >
+              &#8592; Sebelumnya
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   )

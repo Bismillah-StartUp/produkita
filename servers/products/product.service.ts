@@ -98,6 +98,87 @@ export const updateNutrition = async (
   return updated
 }
 
+export const updateServing = async (
+  productUuid: string,
+  data: {
+    serving_info?: string
+    serving_portion?: string
+    storage_info?: string
+    video_url?: string
+  }
+) => {
+  const product = await prisma.product.findUnique({ where: { uuid: productUuid, deleted_at: null } })
+  if (!product) throw new Error("Produk tidak ditemukan")
+
+  const updated = await prisma.productServing.update({
+    where: { product_id: product.id },
+    data,
+  })
+
+  await logActivity(product.tenant_id, "product", `Saran penyajian "${product.name}" diperbarui`)
+
+  return updated
+}
+
+export const createCertificate = async (
+  productUuid: string,
+  data: {
+    type: CertificateType
+    number?: string
+    registered_at?: Date
+    valid_until?: Date
+    lab_name?: string
+    file?: Buffer
+  }
+) => {
+  const product = await prisma.product.findUnique({ where: { uuid: productUuid, deleted_at: null } })
+  if (!product) throw new Error("Produk tidak ditemukan")
+
+  const existing = await prisma.certificate.findUnique({
+    where: { product_id_type: { product_id: product.id, type: data.type } },
+  })
+  if (existing && !existing.deleted_at) throw new Error("Produk sudah memiliki sertifikat jenis ini")
+
+  let certificateUrl: string | null = null
+  let certificatePublicId: string | null = null
+
+  if (data.file) {
+    const result = await uploadImage(data.file, "certifications")
+    certificateUrl = result.secure_url
+    certificatePublicId = result.public_id
+  }
+
+  const created = existing
+    ? await prisma.certificate.update({
+        where: { uuid: existing.uuid },
+        data: {
+          number: data.number,
+          registered_at: data.registered_at,
+          valid_until: data.valid_until,
+          lab_name: data.lab_name,
+          certificate_url: certificateUrl,
+          certificate_public_id: certificatePublicId,
+          deleted_at: null,
+        },
+      })
+    : await prisma.certificate.create({
+        data: {
+          product_id: product.id,
+          type: data.type,
+          number: data.number,
+          registered_at: data.registered_at,
+          valid_until: data.valid_until,
+          lab_name: data.lab_name,
+          certificate_url: certificateUrl,
+          certificate_public_id: certificatePublicId,
+        },
+      })
+
+  await logActivity(product.tenant_id, "certificate", `Sertifikat ${data.type.toUpperCase()} "${product.name}" ditambahkan`)
+
+  return created
+}
+
 export const updateCertificate = async (
   certificateUuid: string,
   data: {

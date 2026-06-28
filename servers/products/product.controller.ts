@@ -6,6 +6,8 @@ import {
   updateProductBasic,
   softDeleteProductImage,
   updateNutrition,
+  updateServing,
+  createCertificate,
   updateCertificate,
   softDeleteCertificate,
   softDeleteServingImage,
@@ -120,6 +122,21 @@ export const updateNutritionController = async (
   data: Parameters<typeof updateNutrition>[1]
 ) => {
   return await updateNutrition(productUuid, data)
+}
+
+export const updateServingController = async (
+  productUuid: string,
+  data: Parameters<typeof updateServing>[1]
+) => {
+  return await updateServing(productUuid, data)
+}
+
+export const createCertificateController = async (
+  productUuid: string,
+  data: Parameters<typeof createCertificate>[1]
+) => {
+  if (!data.type) throw new Error("Jenis sertifikat wajib diisi")
+  return await createCertificate(productUuid, data)
 }
 
 export const updateCertificateController = async (
