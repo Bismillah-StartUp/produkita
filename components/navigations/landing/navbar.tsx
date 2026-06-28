@@ -1,20 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { QrCode, ChevronDown, LayoutGrid } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { ChevronDown, LayoutGrid } from "lucide-react";
 
 export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-slate-100">
       <div className="mx-auto flex w-[90%] max-w-400 items-center justify-between px-6 xl:px-8 py-4">
-        {/* Logo */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center justify-center bg-blue-600 text-white rounded-md p-1.5 shadow-sm">
-            <QrCode className="h-5 w-5" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-blue-600">
-            rodukita<span className="text-yellow-400">.</span>
-          </span>
-        </div>
+        <Logo />
 
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8">

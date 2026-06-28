@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/ui/logo";
 
 const menuItems = [
   {
@@ -71,10 +72,7 @@ export const Sidebar = () => {
           className="flex items-center gap-2 hover:opacity-75 transition-opacity"
           title={isOpen ? "Tutup sidebar" : "Buka sidebar"}
         >
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-white font-bold">P</span>
-          </div>
-          {isOpen && <p className="font-bold text-slate-900">Produkita</p>}
+          <Logo showWordmark={isOpen} />
         </button>
       </div>
 

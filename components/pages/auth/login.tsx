@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginForm() {
@@ -31,13 +32,7 @@ export default function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-12 lg:px-16 py-12 bg-white">
       <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="mb-8 flex items-center gap-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">P</span>
-          </div>
-          <span className="font-bold text-xl text-slate-900">Produkita.</span>
-        </div>
+        <Logo className="mb-8" />
 
         {/* Title */}
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Selamat Datang Kembali</h1>

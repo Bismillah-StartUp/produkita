@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Info } from 'lucide-react'
+import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
 import { formatTime } from '@/lib/utils'
 
@@ -78,13 +79,7 @@ export default function OTPForm({ email, token }: OTPFormProps) {
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-12 lg:px-16 py-12 bg-white">
       <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="mb-8 flex items-center gap-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">P</span>
-          </div>
-          <span className="font-bold text-xl text-slate-900">Produkita.</span>
-        </div>
+        <Logo className="mb-8" />
 
         {/* Title */}
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Masukkan Kode OTP</h1>
