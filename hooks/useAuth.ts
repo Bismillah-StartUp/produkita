@@ -15,11 +15,12 @@ export const useAuth = () => {
     setError(null)
     try {
       const result = await login(email, password, rememberMe)
-      if (result) setSession(result)
-      return result
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      setSession(result.data)
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -34,10 +35,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await register(email, password, name, tenantName)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await register(email, password, name, tenantName)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -47,10 +50,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await verifyOtp(email, otp)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await verifyOtp(email, otp)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -73,10 +78,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await updateProfileAction(uuid, data)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await updateProfileAction(uuid, data)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -86,10 +93,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await requestUpdateEmail(uuid, newEmail)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await requestUpdateEmail(uuid, newEmail)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -99,10 +108,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await verifyUpdateEmail(uuid, newEmail, otp)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await verifyUpdateEmail(uuid, newEmail, otp)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
@@ -112,10 +123,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      return await updatePasswordAction(uuid, oldPassword, newPassword)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await updatePasswordAction(uuid, oldPassword, newPassword)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }

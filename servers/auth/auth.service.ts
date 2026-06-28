@@ -166,14 +166,14 @@ export const findUserByEmailExcludeUuid = async (email: string, uuid: string) =>
 
 export const resendOtpService = async (email: string) => {
   const user = await findUserByEmail(email)
-  if (!user) throw new Error("Email tidak ditemukan")
-  if (user.is_verified) throw new Error("Akun sudah terverifikasi")
+  if (!user) return { ok: false as const, error: "Email tidak ditemukan" }
+  if (user.is_verified) return { ok: false as const, error: "Akun sudah terverifikasi" }
 
   const otp = generateOtp()
   await saveOtp(user.id, otp)
   await sendOtpMail(email, otp)
 
-  return { email }
+  return { ok: true as const, data: { email } }
 }
 
 export const loginService = async (
@@ -182,11 +182,11 @@ export const loginService = async (
   rememberMe: boolean = false
 ) => {
   const user = await findUserByEmail(email)
-  if (!user) throw new Error("Email tidak ditemukan")
-  if (!user.is_verified) throw new Error("Akun belum diverifikasi")
+  if (!user) return { ok: false as const, error: "Email tidak ditemukan" }
+  if (!user.is_verified) return { ok: false as const, error: "Akun belum diverifikasi" }
 
   const isValid = await verifyPassword(password, user.password)
-  if (!isValid) throw new Error("Password salah")
+  if (!isValid) return { ok: false as const, error: "Password salah" }
 
   const token = await signToken(
     { uuid: user.uuid, email: user.email, role: user.role, name: user.name },
@@ -194,5 +194,8 @@ export const loginService = async (
   )
   await setAuthCookie(token, rememberMe)
 
-  return { uuid: user.uuid, email: user.email, role: user.role, name: user.name }
+  return {
+    ok: true as const,
+    data: { uuid: user.uuid, email: user.email, role: user.role, name: user.name },
+  }
 }

@@ -63,11 +63,13 @@ export default function OTPForm({ email, token }: OTPFormProps) {
     setResendError('')
     try {
       const { resendOtp } = await import('@/servers/auth/auth.actions')
-      await resendOtp(email)
+      const result = await resendOtp(email)
+      if (!result.ok) {
+        setResendError(result.error)
+        return
+      }
       setTimeLeft(180)
       setOtp(['', '', '', '', '', ''])
-    } catch (err: any) {
-      setResendError(err.message)
     } finally {
       setResendLoading(false)
     }

@@ -31,8 +31,8 @@ export const loginController = async (
   password: string,
   rememberMe: boolean = false
 ) => {
-  if (!email || !password) throw new Error("Email dan password wajib diisi")
-  if (!email.includes("@")) throw new Error("Format email tidak valid")
+  if (!email || !password) return { ok: false as const, error: "Email dan password wajib diisi" }
+  if (!email.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
 
   return await loginService(email, password, rememberMe)
 }
@@ -43,10 +43,10 @@ export const registerController = async (
   name: string,
   tenantName: string
 ) => {
-  if (!email || !password) throw new Error("Email dan password wajib diisi")
-  if (!email.includes("@")) throw new Error("Format email tidak valid")
-  if (password.length < 6) throw new Error("Password minimal 6 karakter")
-  if (!tenantName) throw new Error("Nama UMKM wajib diisi")
+  if (!email || !password) return { ok: false as const, error: "Email dan password wajib diisi" }
+  if (!email.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
+  if (password.length < 6) return { ok: false as const, error: "Password minimal 6 karakter" }
+  if (!tenantName) return { ok: false as const, error: "Nama UMKM wajib diisi" }
 
   const existing = await findUserByEmail(email)
 
@@ -55,7 +55,7 @@ export const registerController = async (
     // update user + tenant dengan data terbaru
     user = await updateUserUnverified(existing.id, password, name, tenantName)
   } else if (existing && existing.is_verified) {
-    throw new Error("Email sudah terdaftar")
+    return { ok: false as const, error: "Email sudah terdaftar" }
   } else {
     user = await createUserWithTenant(email, password, name, tenantName)
   }
@@ -64,22 +64,22 @@ export const registerController = async (
   await saveOtp(user.id, otp)
   await sendOtpMail(email, otp)
 
-  return { email: user.email }
+  return { ok: true as const, data: { email: user.email } }
 }
 
 export const verifyOtpController = async (email: string, otp: string) => {
-  if (!email || !otp) throw new Error("Email dan OTP wajib diisi")
+  if (!email || !otp) return { ok: false as const, error: "Email dan OTP wajib diisi" }
 
   const user = await findUserByEmail(email)
-  if (!user) throw new Error("User tidak ditemukan")
+  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
 
   const validOtp = await findValidOtp(user.id, otp)
-  if (!validOtp) throw new Error("OTP tidak valid atau sudah expired")
+  if (!validOtp) return { ok: false as const, error: "OTP tidak valid atau sudah expired" }
 
   await markOtpUsed(validOtp.id)
   await verifyUser(user.id)
 
-  return { email: user.email }
+  return { ok: true as const, data: { email: user.email } }
 }
 
 export const logoutController = async () => {
@@ -99,58 +99,60 @@ export const getSessionController = async () => {
 
 export const updateProfileController = async (uuid: string, data: { name?: string; phonenumber?: string }) => {
   const user = await findUserByUuid(uuid)
-  if (!user) throw new Error("User tidak ditemukan")
+  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
 
-  return await updateProfile(uuid, data)
+  const updated = await updateProfile(uuid, data)
+  return { ok: true as const, data: updated }
 }
 
 export const requestUpdateEmailController = async (uuid: string, newEmail: string) => {
-  if (!newEmail.includes("@")) throw new Error("Format email tidak valid")
+  if (!newEmail.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
 
   const user = await findUserByUuid(uuid)
-  if (!user) throw new Error("User tidak ditemukan")
+  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
 
   const existing = await findUserByEmailExcludeUuid(newEmail, uuid)
-  if (existing) throw new Error("Email sudah dipakai user lain")
+  if (existing) return { ok: false as const, error: "Email sudah dipakai user lain" }
 
   const otp = generateOtp()
   await saveOtpWithType(user.id, otp, "update_email")
   await sendUpdateEmail(newEmail, otp)
 
-  return { email: newEmail }
+  return { ok: true as const, data: { email: newEmail } }
 }
 
 export const verifyUpdateEmailController = async (uuid: string, newEmail: string, otp: string) => {
-  if (!newEmail.includes("@")) throw new Error("Format email tidak valid")
-  if (!otp) throw new Error("OTP wajib diisi")
+  if (!newEmail.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
+  if (!otp) return { ok: false as const, error: "OTP wajib diisi" }
 
   const user = await findUserByUuid(uuid)
-  if (!user) throw new Error("User tidak ditemukan")
+  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
 
   const validOtp = await findValidOtpWithType(user.id, otp, "update_email")
-  if (!validOtp) throw new Error("OTP tidak valid atau sudah expired")
+  if (!validOtp) return { ok: false as const, error: "OTP tidak valid atau sudah expired" }
 
   await markOtpUsed(validOtp.id)
   await updateEmail(uuid, newEmail)
 
-  return { email: newEmail }
+  return { ok: true as const, data: { email: newEmail } }
 }
 
 export const updatePasswordController = async (uuid: string, oldPassword: string, newPassword: string) => {
-  if (!oldPassword || !newPassword) throw new Error("Password lama dan baru wajib diisi")
-  if (newPassword.length < 6) throw new Error("Password baru minimal 6 karakter")
-  if (oldPassword === newPassword) throw new Error("Password baru tidak boleh sama dengan password lama")
+  if (!oldPassword || !newPassword) return { ok: false as const, error: "Password lama dan baru wajib diisi" }
+  if (newPassword.length < 6) return { ok: false as const, error: "Password baru minimal 6 karakter" }
+  if (oldPassword === newPassword) return { ok: false as const, error: "Password baru tidak boleh sama dengan password lama" }
 
   const user = await findUserByUuid(uuid)
-  if (!user) throw new Error("User tidak ditemukan")
+  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
 
   const isValid = await verifyPassword(oldPassword, user.password)
-  if (!isValid) throw new Error("Password lama salah")
+  if (!isValid) return { ok: false as const, error: "Password lama salah" }
 
-  return await updatePassword(uuid, newPassword)
+  const updated = await updatePassword(uuid, newPassword)
+  return { ok: true as const, data: updated }
 }
 
 export const resendOtpController = async (email: string) => {
-  if (!email) throw new Error("Email wajib diisi")
+  if (!email) return { ok: false as const, error: "Email wajib diisi" }
   return await resendOtpService(email)
 }
