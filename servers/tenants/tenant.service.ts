@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import { uploadImage, deleteImage } from "@/configs/cloudinary/utils"
+import { logActivity } from "@/servers/dashboard/dashboard.service"
 
 export const findTenantByUserUuid = async (userUuid: string) => {
   return await prisma.tenant.findFirst({
@@ -36,10 +37,17 @@ export const updateTenantProfile = async (
     year?: number
   }
 ) => {
-  return await prisma.tenant.update({
+  const tenant = await findTenantByUuid(uuid)
+  if (!tenant) throw new Error("Tenant tidak ditemukan")
+
+  const updated = await prisma.tenant.update({
     where: { uuid },
     data,
   })
+
+  await logActivity(tenant.id, "tenant", "Profil UMKM diperbarui")
+
+  return updated
 }
 
 export const uploadTenantLogo = async (uuid: string, file: string) => {
@@ -53,13 +61,17 @@ export const uploadTenantLogo = async (uuid: string, file: string) => {
   const buffer = Buffer.from(file, "base64")
   const result = await uploadImage(buffer, "tenants")
 
-  return await prisma.tenant.update({
+  const updated = await prisma.tenant.update({
     where: { uuid },
     data: {
       logo_url: result.secure_url,
       logo_public_id: result.public_id,
     },
   })
+
+  await logActivity(tenant.id, "tenant", "Logo perusahaan diunggah")
+
+  return updated
 }
 
 export const uploadTenantPlace = async (uuid: string, file: string) => {
@@ -73,13 +85,17 @@ export const uploadTenantPlace = async (uuid: string, file: string) => {
   const buffer = Buffer.from(file, "base64")
   const result = await uploadImage(buffer, "tenants")
 
-  return await prisma.tenant.update({
+  const updated = await prisma.tenant.update({
     where: { uuid },
     data: {
       place_url: result.secure_url,
       place_public_id: result.public_id,
     },
   })
+
+  await logActivity(tenant.id, "tenant", "Foto tempat / gedung usaha diunggah")
+
+  return updated
 }
 
 export const deleteTenantLogo = async (uuid: string) => {
@@ -89,13 +105,17 @@ export const deleteTenantLogo = async (uuid: string) => {
 
   await deleteImage(tenant.logo_public_id)
 
-  return await prisma.tenant.update({
+  const updated = await prisma.tenant.update({
     where: { uuid },
     data: {
       logo_url: null,
       logo_public_id: null,
     },
   })
+
+  await logActivity(tenant.id, "tenant", "Logo perusahaan dihapus")
+
+  return updated
 }
 
 export const deleteTenantPlace = async (uuid: string) => {
@@ -105,13 +125,17 @@ export const deleteTenantPlace = async (uuid: string) => {
 
   await deleteImage(tenant.place_public_id)
 
-  return await prisma.tenant.update({
+  const updated = await prisma.tenant.update({
     where: { uuid },
     data: {
       place_url: null,
       place_public_id: null,
     },
   })
+
+  await logActivity(tenant.id, "tenant", "Foto tempat / gedung usaha dihapus")
+
+  return updated
 }
 
 export const getTenantEmail = async (userUuid: string) => {

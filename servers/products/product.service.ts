@@ -88,10 +88,14 @@ export const updateNutrition = async (
   const product = await prisma.product.findUnique({ where: { uuid: productUuid, deleted_at: null } })
   if (!product) throw new Error("Produk tidak ditemukan")
 
-  return await prisma.nutritionInfo.update({
+  const updated = await prisma.nutritionInfo.update({
     where: { product_id: product.id },
     data,
   })
+
+  await logActivity(product.tenant_id, "product", `Informasi nilai gizi "${product.name}" diperbarui`)
+
+  return updated
 }
 
 export const updateCertificate = async (
@@ -145,36 +149,65 @@ export const updateCertificate = async (
 }
 
 export const softDeleteCertificate = async (certificateUuid: string) => {
-  const cert = await prisma.certificate.findUnique({ where: { uuid: certificateUuid } })
+  const cert = await prisma.certificate.findUnique({
+    where: { uuid: certificateUuid },
+    include: { product: { select: { name: true, tenant_id: true } } },
+  })
   if (!cert) throw new Error("Sertifikat tidak ditemukan")
   if (cert.deleted_at) throw new Error("Sertifikat sudah dihapus")
 
-  return await prisma.certificate.update({
+  const deleted = await prisma.certificate.update({
     where: { uuid: certificateUuid },
     data: { deleted_at: new Date() },
   })
+
+  await logActivity(
+    cert.product.tenant_id,
+    "certificate",
+    `Sertifikat ${cert.type.toUpperCase()} "${cert.product.name}" dihapus`
+  )
+
+  return deleted
 }
 
 export const softDeleteServingImage = async (imageUuid: string) => {
-  const image = await prisma.productServingImage.findUnique({ where: { uuid: imageUuid } })
+  const image = await prisma.productServingImage.findUnique({
+    where: { uuid: imageUuid },
+    include: { serving: { include: { product: { select: { name: true, tenant_id: true } } } } },
+  })
   if (!image) throw new Error("Foto tidak ditemukan")
   if (image.deleted_at) throw new Error("Foto sudah dihapus")
 
-  return await prisma.productServingImage.update({
+  const deleted = await prisma.productServingImage.update({
     where: { uuid: imageUuid },
     data: { deleted_at: new Date() },
   })
+
+  await logActivity(
+    image.serving.product.tenant_id,
+    "product",
+    `Foto penyajian "${image.serving.product.name}" dihapus`
+  )
+
+  return deleted
 }
 
 export const softDeleteProductImage = async (imageUuid: string) => {
-  const image = await prisma.productImage.findUnique({ where: { uuid: imageUuid } })
+  const image = await prisma.productImage.findUnique({
+    where: { uuid: imageUuid },
+    include: { product: { select: { name: true, tenant_id: true } } },
+  })
   if (!image) throw new Error("Foto tidak ditemukan")
   if (image.deleted_at) throw new Error("Foto sudah dihapus")
 
-  return await prisma.productImage.update({
+  const deleted = await prisma.productImage.update({
     where: { uuid: imageUuid },
     data: { deleted_at: new Date() },
   })
+
+  await logActivity(image.product.tenant_id, "product", `Foto produk "${image.product.name}" dihapus`)
+
+  return deleted
 }
 
 export const softDeleteProduct = async (uuid: string) => {
@@ -230,6 +263,8 @@ export const softDeleteProduct = async (uuid: string) => {
   ]
 
   await Promise.allSettled(publicIdsToDelete.map((publicId) => deleteImage(publicId)))
+
+  await logActivity(product.tenant_id, "product", `Produk "${product.name}" dihapus`)
 
   return updatedProduct
 }

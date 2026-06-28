@@ -115,7 +115,7 @@ export const updateHpp = async (
   const existing = await findHppByUuid(uuid, tenantUuid)
   if (!existing) throw new Error("Kalkulasi tidak ditemukan")
 
-  return await prisma.hppCalculation.update({
+  const updated = await prisma.hppCalculation.update({
     where: { uuid },
     data: {
       product_name: data.product_name,
@@ -135,11 +135,19 @@ export const updateHpp = async (
     },
     include: { items: true },
   })
+
+  await logActivity(existing.tenant_id, "hpp", `Kalkulasi HPP "${updated.product_name}" diperbarui`)
+
+  return updated
 }
 
 export const deleteHpp = async (uuid: string, tenantUuid: string) => {
   const existing = await findHppByUuid(uuid, tenantUuid)
   if (!existing) throw new Error("Kalkulasi tidak ditemukan")
 
-  return await prisma.hppCalculation.delete({ where: { uuid } })
+  const deleted = await prisma.hppCalculation.delete({ where: { uuid } })
+
+  await logActivity(existing.tenant_id, "hpp", `Kalkulasi HPP "${existing.product_name}" dihapus`)
+
+  return deleted
 }

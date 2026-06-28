@@ -201,10 +201,14 @@ export const updateFinancialRecord = async (
   })
   if (!record) throw new Error("Transaksi tidak ditemukan")
 
-  return await prisma.financialRecord.update({
+  const updated = await prisma.financialRecord.update({
     where: { cuid },
     data,
   })
+
+  await logActivity(record.tenant_id, "finance", `Laporan "${updated.product_name}" diperbarui`)
+
+  return updated
 }
 
 
@@ -214,7 +218,11 @@ export const deleteFinancialRecord = async (cuid: string, tenantUuid: string) =>
   })
   if (!record) throw new Error("Transaksi tidak ditemukan")
 
-  return await prisma.financialRecord.delete({ where: { cuid } })
+  const deleted = await prisma.financialRecord.delete({ where: { cuid } })
+
+  await logActivity(record.tenant_id, "finance", `Laporan "${record.product_name}" dihapus`)
+
+  return deleted
 }
 
 export const getFinancialRecordsForExport = async (
