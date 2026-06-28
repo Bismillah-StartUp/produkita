@@ -38,6 +38,25 @@ pnpm dev
 
 Buka [http://localhost:3000](http://localhost:3000) di browser.
 
+## Menjalankan dengan Docker
+
+Pastikan Docker dan Docker Compose sudah terinstall, lalu salin `.env.example` ke `.env` dan isi konfigurasinya (minimal `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`).
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Service yang dijalankan:
+- `app`: Next.js (standalone build) di [http://localhost:3000](http://localhost:3000)
+- `db`: PostgreSQL, data tersimpan di volume `db_data`
+
+Image production tidak menyertakan Prisma CLI (devDependency), jadi jalankan migrasi dari host setelah `db` siap, dengan `DATABASE_URL` mengarah ke `localhost:<DATABASE_PORT>`:
+
+```bash
+pnpm exec prisma migrate deploy
+```
+
 ## Adding Components
 
 Untuk menambah komponen UI, jalankan:
