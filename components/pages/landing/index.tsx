@@ -1,6 +1,15 @@
-"use client"
+"use client";
 
-import { CTA, Testimonials, Features, Partners, Hero } from "./partials"
+import {
+  CTA,
+  Testimonials,
+  Features,
+  Partners,
+  Hero,
+  HowItWorks,
+  Pricing,
+  FAQ,
+} from "./partials";
 
 export const Landing = () => {
   return (
@@ -8,8 +17,11 @@ export const Landing = () => {
       <Hero />
       <Partners />
       <Features />
+      <HowItWorks />
       <Testimonials />
+      <Pricing />
+      <FAQ />
       <CTA />
     </div>
-  )
-}
+  );
+};

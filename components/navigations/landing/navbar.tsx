@@ -1,41 +1,72 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Shield } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { QrCode, ChevronDown, LayoutGrid } from "lucide-react";
 
 export const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2">
-          <Shield className="h-6 w-6 text-blue-600" />
-          <span className="text-xl font-bold text-gray-900">EntreCertivy</span>
+    <nav className="sticky top-0 z-40 bg-white border-b border-slate-100">
+      <div className="mx-auto flex w-[90%] max-w-400 items-center justify-between px-6 xl:px-8 py-4">
+        {/* Logo */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center bg-blue-600 text-white rounded-md p-1.5 shadow-sm">
+            <QrCode className="h-5 w-5" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-blue-600">
+            rodukita<span className="text-yellow-400">.</span>
+          </span>
         </div>
 
-        <div className="hidden items-center gap-8 md:flex">
+        {/* Navigation */}
+        <div className="hidden md:flex items-center gap-8">
           <Link
-            href="#features"
-            className="text-gray-600 transition hover:text-gray-900"
+            href="#beranda"
+            className="text-sm font-semibold text-blue-600 border-b-2 border-blue-600 pb-1 -mb-0.75"
+          >
+            Beranda
+          </Link>
+          <Link
+            href="#tentang-kami"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+          >
+            Tentang Kami
+          </Link>
+          <Link
+            href="#fitur"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             Fitur
           </Link>
           <Link
-            href="#clients"
-            className="text-gray-600 transition hover:text-gray-900"
+            href="#cara-kerja"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
-            Klien
+            Cara kerja
           </Link>
           <Link
-            href="#pricing"
-            className="text-gray-600 transition hover:text-gray-900"
+            href="#harga"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             Harga
           </Link>
         </div>
 
-        <Link href="/dashboard">
-          <Button>Dashboard</Button>
-        </Link>
+        {/* Right Section */}
+        <div className="flex items-center gap-4">
+          <button className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50 transition-colors bg-white shadow-xs">
+            <span className="text-base leading-none">🇮🇩</span>
+            <span className="text-sm font-medium text-slate-700">ID</span>
+            <ChevronDown className="h-4 w-4 text-slate-400" />
+          </button>
+
+          {/* CTA Button */}
+          <Link href="/dashboard">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 rounded-md">
+              <LayoutGrid className="h-4 w-4" />
+              Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
     </nav>
-  )
-}
+  );
+};
