@@ -1,9 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { ChevronDown, LayoutGrid } from "lucide-react";
+import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { ChevronDown, LayoutGrid, LogIn } from "lucide-react";
 
 export const Navbar = () => {
+  const uuid = useAuthStore((state) => state.uuid);
+  const isLoggedIn = Boolean(uuid);
+
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-slate-100">
       <div className="mx-auto flex w-[90%] max-w-400 items-center justify-between px-6 xl:px-8 py-4">
@@ -52,10 +58,19 @@ export const Navbar = () => {
           </button>
 
           {/* CTA Button */}
-          <Link href="/dashboard">
+          <Link href={isLoggedIn ? "/dashboard" : "/login"}>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center gap-2 rounded-md">
-              <LayoutGrid className="h-4 w-4" />
-              Dashboard
+              {isLoggedIn ? (
+                <>
+                  <LayoutGrid className="h-4 w-4" />
+                  Dashboard
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </>
+              )}
             </Button>
           </Link>
         </div>
