@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
+import { toast } from 'sonner'
 import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
 import { formatTime } from '@/lib/utils'
@@ -19,7 +20,6 @@ export default function OTPForm({ email, token }: OTPFormProps) {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timeLeft, setTimeLeft] = useState(180)
   const [resendLoading, setResendLoading] = useState(false)
-  const [resendError, setResendError] = useState('')
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -27,6 +27,10 @@ export default function OTPForm({ email, token }: OTPFormProps) {
       return () => clearTimeout(timer)
     }
   }, [timeLeft])
+
+  useEffect(() => {
+    if (error) toast.error('Verifikasi gagal', { description: error })
+  }, [error])
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
@@ -55,20 +59,21 @@ export default function OTPForm({ email, token }: OTPFormProps) {
   const handleSubmitOtp = async (fullOtp: string) => {
     const result = await verifyOtp(email, fullOtp)
     if (result) {
+      toast.success('Verifikasi berhasil', { description: 'Akun Anda telah aktif. Silakan masuk.' })
       router.push('/login')
     }
   }
 
   const handleResend = async () => {
     setResendLoading(true)
-    setResendError('')
     try {
       const { resendOtp } = await import('@/servers/auth/auth.actions')
       const result = await resendOtp(email)
       if (!result.ok) {
-        setResendError(result.error)
+        toast.error('Gagal mengirim ulang kode', { description: result.error })
         return
       }
+      toast.success('Kode terkirim', { description: 'Kode OTP baru telah dikirim ke email Anda.' })
       setTimeLeft(180)
       setOtp(['', '', '', '', '', ''])
     } finally {
@@ -111,14 +116,6 @@ export default function OTPForm({ email, token }: OTPFormProps) {
               <span className="font-bold text-blue-600">{formatTime(timeLeft)}</span>
             </p>
           </div>
-
-          {/* Error */}
-          {(error || resendError) && (
-            <div className="flex gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600">{error || resendError}</p>
-            </div>
-          )}
 
           {/* Info */}
           <div className="flex gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">

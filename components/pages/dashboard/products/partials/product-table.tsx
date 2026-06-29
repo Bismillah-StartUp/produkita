@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, Trash2, QrCode } from "lucide-react"
+import { toast } from "sonner"
 import { CertBadge } from "./cert-badge"
 import { QrCodeModal } from "./qr-code-modal"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
@@ -47,9 +48,12 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
     if (!confirm("Yakin ingin menghapus produk ini?")) return
     const result = await softDeleteProduct(productUuid)
     if (result) {
+      toast.success("Produk berhasil dihapus")
       const updated = products.filter((p) => p.uuid !== productUuid)
       setProducts(updated)
       onTotalChange(updated.length)
+    } else {
+      toast.error("Gagal menghapus produk")
     }
   }
 

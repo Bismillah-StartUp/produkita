@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Building2, CheckCircle, Pencil, X, Check, Camera } from "lucide-react"
+import { toast } from "sonner"
 import Image from "next/image"
 import ProfilePartial from "./partials/profile"
 import ContactPartial from "./partials/contact"
@@ -114,7 +115,10 @@ export default function TenantsPage() {
         pendingPlace ? uploadPlace(uuid, pendingPlace) : Promise.resolve(null),
       ])
 
-      if (!result) return
+      if (!result) {
+        toast.error("Gagal menyimpan profil UMKM")
+        return
+      }
 
       if (logoResult) {
         setLogoUrl(logoResult.logo_url ?? null)
@@ -130,6 +134,7 @@ export default function TenantsPage() {
 
       setSavedData({ ...tempData })
       setIsEditing(false)
+      toast.success("Profil UMKM berhasil diperbarui")
     } finally {
       setIsSaving(false)
     }

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
@@ -18,11 +19,16 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
 
+  useEffect(() => {
+    if (error) toast.error('Gagal masuk', { description: error })
+  }, [error])
+
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault()
 
     const result = await login(email, password)
     if (result) {
+      toast.success('Berhasil masuk', { description: 'Selamat datang kembali.' })
       const redirect = searchParams.get('redirect')
       const destination = redirect?.startsWith('/dashboard') ? redirect : '/dashboard'
       router.push(destination)
@@ -37,13 +43,6 @@ export default function LoginForm() {
         {/* Title */}
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Selamat Datang Kembali</h1>
         <p className="text-slate-600 mb-8">Masuk untuk mengelola produk & keuangan Anda.</p>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-            {error}
-          </div>
-        )}
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">

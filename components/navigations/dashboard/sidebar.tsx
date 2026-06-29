@@ -11,6 +11,7 @@ import {
   Info,
   LogOut,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
@@ -56,6 +57,7 @@ export const Sidebar = () => {
 
   const handleLogout = async () => {
     await logout()
+    toast.success("Berhasil keluar", { description: "Sampai jumpa kembali." })
     router.push("/login")
   }
 

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Download, Pencil, Trash2, Plus } from "lucide-react"
+import { toast } from "sonner"
 import { formatIDR } from "@/lib/format-currency"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -34,9 +35,10 @@ export default function RecentTransactions({
     setDeletingId(id)
     try {
       await deleteFinancialRecord(id, userUuid)
+      toast.success("Transaksi berhasil dihapus")
       router.refresh()
     } catch {
-      alert("Gagal menghapus transaksi")
+      toast.error("Gagal menghapus transaksi")
     } finally {
       setDeletingId(null)
     }
@@ -44,27 +46,28 @@ export default function RecentTransactions({
 
   const handleExport = async () => {
     setExportLoading(true)
-    try {
-      const now = new Date()
-      const buffer = await exportFinancialRecords(
-        userUuid,
-        now.getFullYear(),
-        now.getMonth() + 1
-      )
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `laporan-keuangan-${now.getFullYear()}-${now.getMonth() + 1}.xlsx`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch {
-      alert("Gagal mengunduh laporan")
-    } finally {
-      setExportLoading(false)
-    }
+    const now = new Date()
+
+    toast.promise(
+      (async () => {
+        const buffer = await exportFinancialRecords(userUuid, now.getFullYear(), now.getMonth() + 1)
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `laporan-keuangan-${now.getFullYear()}-${now.getMonth() + 1}.xlsx`
+        a.click()
+        URL.revokeObjectURL(url)
+      })(),
+      {
+        loading: "Menyiapkan laporan...",
+        success: "Laporan berhasil diunduh",
+        error: "Gagal mengunduh laporan",
+        finally: () => setExportLoading(false),
+      }
+    )
   }
 
   return (

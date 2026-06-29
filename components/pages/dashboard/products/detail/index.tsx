@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, X, Check, QrCode } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useProduct } from "@/hooks/useProducts"
 import { AKG, percentAKG, roundAKG } from "@/lib/nutrition"
@@ -82,6 +83,7 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
     updateServing,
     createCertificate,
     loading,
+    error,
   } = useProduct()
 
   const [product, setProduct] = useState<any>(null)
@@ -107,6 +109,10 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
     }
     fetchProduct()
   }, [uuid])
+
+  useEffect(() => {
+    if (error) toast.error("Gagal menyimpan perubahan", { description: error })
+  }, [error])
 
   // ── mapping product -> form data ──
   const productFormData: Partial<ProductFormData> | undefined = product
@@ -207,6 +213,7 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       description: data.deskripsi,
     })
     if (result) {
+      toast.success("Informasi produk diperbarui")
       setProduct((prev: any) => ({ ...prev, ...result }))
       setIsEditingBasic(false)
     }
@@ -227,6 +234,7 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       allergens: data.allergens,
     })
     if (result) {
+      toast.success("Informasi nutrisi & gizi diperbarui")
       setProduct((prev: any) => ({ ...prev, nutrition_info: result }))
       setIsEditingNutrition(false)
     }
@@ -240,6 +248,7 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       video_url: data.videoLink,
     })
     if (result) {
+      toast.success("Saran penyajian diperbarui")
       setProduct((prev: any) => ({ ...prev, serving: { ...prev.serving, ...result } }))
       setIsEditingServing(false)
     }
@@ -293,15 +302,20 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
     ]
 
     const updatedCertificates = [...(product.certificates ?? [])]
+    let addedCount = 0
 
     for (const task of tasks) {
       if (!task.shouldSave || task.existing) continue
       const result = await createCertificate(uuid, { type: task.type, ...task.payload })
-      if (result) updatedCertificates.push(result)
+      if (result) {
+        updatedCertificates.push(result)
+        addedCount++
+      }
     }
 
     setProduct((prev: any) => ({ ...prev, certificates: updatedCertificates }))
     setIsEditingLegality(false)
+    toast.success(addedCount > 0 ? `${addedCount} sertifikat baru ditambahkan` : "Sertifikat diperbarui")
   }
 
   if (isFetching) {

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
@@ -21,15 +22,20 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
+  useEffect(() => {
+    if (error) toast.error('Gagal mendaftar', { description: error })
+  }, [error])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password !== confirmPassword) {
-      alert('Password tidak cocok!')
+      toast.warning('Kata sandi tidak cocok', { description: 'Pastikan konfirmasi kata sandi sama dengan kata sandi.' })
       return
     }
 
     const result = await register(email, password, nama, umkm)
     if (result) {
+      toast.success('Pendaftaran berhasil', { description: 'Kode OTP telah dikirim ke email Anda.' })
       const token = await generateOtpToken(email)
       // encode token agar aman di URL
       router.push(`/otp/${encodeURIComponent(token)}`)
@@ -44,13 +50,6 @@ export default function RegisterForm() {
         {/* Title */}
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Daftarkan UMKM Anda</h1>
         <p className="text-slate-600 mb-8">Bergabunglah dengan platform untuk mengelola produk & keuangan Anda.</p>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-            {error}
-          </div>
-        )}
 
         {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-5">

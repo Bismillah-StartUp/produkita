@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { AlertCircle, Check, Info } from "lucide-react"
+import { Check, Info } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   ProductFormData,
@@ -45,6 +46,10 @@ export function RegistryPage() {
   const [legalityData, setLegalityData] = useState<LegalityFormData | undefined>()
   const [servingData, setServingData] = useState<ServingFormData | undefined>()
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    if (error) toast.error("Gagal mendaftarkan produk", { description: error })
+  }, [error])
 
   const handleSubmitProduct = (data: ProductFormData) => {
     setProductData(data)
@@ -157,7 +162,10 @@ export function RegistryPage() {
       },
     })
 
-    if (result) setSuccess(true)
+    if (result) {
+      toast.success("Produk berhasil didaftarkan", { description: "QR Code dan barcode telah dikirim ke email Anda." })
+      setSuccess(true)
+    }
   }
 
   const isStepAccessible = (stepId: number) => {
@@ -262,19 +270,6 @@ export function RegistryPage() {
           </div>
         </div>
       </div>
-
-      {/* Error */}
-      {error && (
-        <div className="w-full px-4 pb-2 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-            <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
-            <div>
-              <p className="font-semibold text-red-900">Terjadi Kesalahan</p>
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="w-full px-4 pb-12 sm:px-6 lg:px-8">
         {currentStep === 1 && (

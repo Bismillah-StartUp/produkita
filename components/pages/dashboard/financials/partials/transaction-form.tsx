@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Save, X } from "lucide-react"
+import { toast } from "sonner"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
 import { createFinancialRecord, updateFinancialRecord } from "@/servers/finances/finance.actions"
 import { TransactionType } from "@prisma/client"
@@ -20,7 +21,6 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
   const router = useRouter()
   const { uuid } = useAuthStore()
   const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
 
   const getLocalDateString = () => {
     const date = new Date()
@@ -46,7 +46,6 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
     e.preventDefault()
     if (!uuid) return
     setLoading(true)
-    setError(null)
 
     try {
       if (initialData?.cuid) {
@@ -57,6 +56,7 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
           transaction_date: new Date(formData.transaction_date),
           notes: formData.notes,
         })
+        toast.success("Laporan berhasil diperbarui")
       } else {
         await createFinancialRecord(uuid, {
           product_name: formData.product_name,
@@ -65,11 +65,12 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
           transaction_date: new Date(formData.transaction_date),
           notes: formData.notes,
         })
+        toast.success("Laporan berhasil ditambahkan")
       }
       router.push("/dashboard/financials")
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      toast.error("Gagal menyimpan laporan", { description: err.message })
     } finally {
       setLoading(false)
     }
@@ -90,12 +91,6 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
           <X className="h-5 w-5" />
         </button>
       </div>
-
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
-          {error}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="grid gap-6">
         <div className="grid gap-2.5">

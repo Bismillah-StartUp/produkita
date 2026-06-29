@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useHppCalculator } from "@/hooks/useHppCalculator"
 import { useAuthStore } from "@/servers/stores/useAuthStore"
 import MethodSelector from "./partials/method-selector"
@@ -8,14 +9,22 @@ import CostSection from "./partials/cost-section"
 import MarginSelector from "./partials/margin-selector"
 import SummaryResult from "./partials/summary-result"
 import { Save } from "lucide-react"
+import { toast } from "sonner"
 
 export default function CalculatorsPage() {
   const { uuid } = useAuthStore()
   const { state, setters, actions, summary, loading, error, createHpp } = useHppCalculator()
 
+  useEffect(() => {
+    if (error) toast.error("Gagal menyimpan kalkulasi HPP", { description: error })
+  }, [error])
+
   const handleSave = async () => {
     if (!uuid) return
-    await createHpp(uuid)
+    const result = await createHpp(uuid)
+    if (result) {
+      toast.success("Kalkulasi HPP berhasil disimpan")
+    }
   }
 
   return (
@@ -50,13 +59,6 @@ export default function CalculatorsPage() {
         margin_percentage={state.margin_percentage}
         summary={summary}
       />
-
-      {/* Tombol Simpan */}
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
 
       <div className="flex justify-end">
         <button
