@@ -1,33 +1,36 @@
 "use client"
 
 import { useRef, useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { IToogle } from "../../types/product.i"
 
-function TogglePill({checked, onChange, color}: IToogle) {
+function TogglePill({ checked, onChange, color, disabled = false }: IToogle) {
   const activeCls: Record<string, string> = {
     blue: "bg-blue-600 text-white",
     purple: "bg-purple-500 text-white",
     green: "bg-green-500 text-white",
     orange: "bg-orange-400 text-white",
   }
-  
+
   const active = activeCls[color]
   const inactive = "bg-white text-gray-500"
 
   return (
-    <div className="flex gap-0.5 rounded-full border border-gray-200 bg-gray-100 p-0.5">
+    <div className={`flex gap-0.5 rounded-full border border-gray-200 bg-gray-100 p-0.5 ${disabled ? "opacity-60" : ""}`}>
       <button
         type="button"
         onClick={() => onChange(false)}
-        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${!checked ? active : inactive}`}
+        disabled={disabled}
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all disabled:cursor-not-allowed ${!checked ? active : inactive}`}
       >
         Tidak
       </button>
       <button
         type="button"
         onClick={() => onChange(true)}
-        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${checked ? active : inactive}`}
+        disabled={disabled}
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition-all disabled:cursor-not-allowed ${checked ? active : inactive}`}
       >
         Punya
       </button>
@@ -38,15 +41,18 @@ function TogglePill({checked, onChange, color}: IToogle) {
 function UploadArea({
   color,
   fileName,
+  filePreview,
   onUpload,
   disabled = false,
 }: {
   color: "blue" | "purple" | "green" | "orange"
   fileName?: string
+  filePreview?: string
   onUpload: (preview: string, name: string) => void
   disabled?: boolean
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isImagePreview = !!filePreview && !filePreview.startsWith("data:application/pdf")
 
   const ringCls: Record<string, string> = {
     blue: "bg-blue-500",
@@ -87,21 +93,27 @@ function UploadArea({
         disabled ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-60" : `cursor-pointer ${borderCls[color]}`
       }`}
     >
-      <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-          disabled ? "bg-gray-300" : ringCls[color]
-        }`}
-      >
-        {fileName ? (
-          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        ) : (
-          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16" />
-          </svg>
-        )}
-      </div>
+      {isImagePreview ? (
+        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-white shadow-sm">
+          <Image src={filePreview!} alt={fileName ?? "Sertifikat"} fill className="object-cover" />
+        </div>
+      ) : (
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+            disabled ? "bg-gray-300" : ringCls[color]
+          }`}
+        >
+          {fileName ? (
+            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M4 20h16" />
+            </svg>
+          )}
+        </div>
+      )}
       <div className="overflow-hidden">
         <p className={`truncate text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>
           {fileName || "Upload File"}
@@ -208,9 +220,23 @@ interface LegalityFormProps {
   onPrevious?: () => void
   initialData?: Partial<LegalityFormData>
   isLoading?: boolean
+  disabled?: boolean
+  formId?: string
+  showFooter?: boolean
+  /** Jenis sertifikat yang sudah tersimpan di database — togglenya terkunci (tidak bisa dimatikan), field hanya bisa diubah saat `disabled=false`. */
+  lockedTypes?: ("bpom" | "pirt" | "halal" | "coa")[]
 }
 
-export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = false }: LegalityFormProps) {
+export function LegalityForm({
+  onSubmit,
+  onPrevious,
+  initialData,
+  isLoading = false,
+  disabled = false,
+  formId,
+  showFooter = true,
+  lockedTypes = [],
+}: LegalityFormProps) {
   const initialHasBpom = initialData?.hasBpom ?? Boolean(initialData?.bpomNumber)
   const initialHasPirt = initialData?.hasPirt ?? Boolean(initialData?.pirtNumber)
   const initialHasHalal = initialData?.hasHalal ?? Boolean(initialData?.halalCertificateNumber)
@@ -252,6 +278,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (disabled) return
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) {
@@ -272,6 +299,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
   }
 
   const toggleSection = (section: "bpom" | "pirt" | "halal" | "coa", checked: boolean) => {
+    if (disabled || lockedTypes.includes(section)) return
     if (section === "bpom") {
       setHasBpom(checked)
       setFormData((prev) => ({
@@ -357,8 +385,18 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
     if (validateForm() && onSubmit) onSubmit({ ...formData, hasBpom, hasPirt, hasHalal, hasCoa })
   }
 
+  const bpomLocked = lockedTypes.includes("bpom")
+  const pirtLocked = lockedTypes.includes("pirt")
+  const halalLocked = lockedTypes.includes("halal")
+  const coaLocked = lockedTypes.includes("coa")
+
+  const bpomFieldsDisabled = !hasBpom || disabled
+  const pirtFieldsDisabled = !hasPirt || disabled
+  const halalFieldsDisabled = !hasHalal || disabled
+  const coaFieldsDisabled = !hasCoa || disabled
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form id={formId} onSubmit={handleSubmit}>
       <div className="space-y-4">
         <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
           <svg className="h-4 w-4 shrink-0 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
@@ -390,7 +428,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <p className="text-xs text-gray-500">Produk memiliki izin edar BPOM</p>
               </div>
             </div>
-            <TogglePill checked={hasBpom} onChange={(v) => toggleSection("bpom", v)} color="blue" />
+            <TogglePill checked={hasBpom} onChange={(v) => toggleSection("bpom", v)} color="blue" disabled={disabled || bpomLocked} />
           </div>
 
           <div className="grid grid-cols-4 gap-4 bg-white px-6 py-5">
@@ -403,7 +441,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               placeholder="Contoh: MD 1234567890"
               error={errors.bpomNumber}
               required={hasBpom}
-              disabled={!hasBpom}
+              disabled={bpomFieldsDisabled}
             />
             <Field
               label="Tanggal Registrasi"
@@ -414,7 +452,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               type="date"
               error={errors.bpomRegistrationDate}
               required={hasBpom}
-              disabled={!hasBpom}
+              disabled={bpomFieldsDisabled}
             />
             <Field
               label="Berlaku Hingga"
@@ -425,7 +463,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               type="date"
               error={errors.bpomValidUntil}
               required={hasBpom}
-              disabled={!hasBpom}
+              disabled={bpomFieldsDisabled}
             />
             <div>
               <p
@@ -437,10 +475,11 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               <UploadArea
                 color="blue"
                 fileName={formData.bpomFileName}
+                filePreview={formData.bpomFilePreview}
                 onUpload={(preview, name) =>
                   setFormData((prev) => ({ ...prev, bpomFilePreview: preview, bpomFileName: name }))
                 }
-                disabled={!hasBpom}
+                disabled={bpomFieldsDisabled}
               />
             </div>
           </div>
@@ -460,7 +499,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <p className="text-xs text-gray-500">Produk memiliki izin PIRT.</p>
               </div>
             </div>
-            <TogglePill checked={hasPirt} onChange={(v) => toggleSection("pirt", v)} color="purple" />
+            <TogglePill checked={hasPirt} onChange={(v) => toggleSection("pirt", v)} color="purple" disabled={disabled || pirtLocked} />
           </div>
 
           <div className="grid grid-cols-4 gap-4 bg-white px-6 py-5">
@@ -473,7 +512,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               placeholder="Contoh: 1234567890"
               error={errors.pirtNumber}
               required={hasPirt}
-              disabled={!hasPirt}
+              disabled={pirtFieldsDisabled}
             />
             <Field
               label="Tanggal Registrasi"
@@ -484,7 +523,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               type="date"
               error={errors.pirtRegistrationDate}
               required={hasPirt}
-              disabled={!hasPirt}
+              disabled={pirtFieldsDisabled}
             />
             <Field
               label="Berlaku Hingga"
@@ -495,7 +534,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               type="date"
               error={errors.pirtValidUntil}
               required={hasPirt}
-              disabled={!hasPirt}
+              disabled={pirtFieldsDisabled}
             />
             <div>
               <p
@@ -507,10 +546,11 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
               <UploadArea
                 color="purple"
                 fileName={formData.pirtFileName}
+                filePreview={formData.pirtFilePreview}
                 onUpload={(preview, name) =>
                   setFormData((prev) => ({ ...prev, pirtFilePreview: preview, pirtFileName: name }))
                 }
-                disabled={!hasPirt}
+                disabled={pirtFieldsDisabled}
               />
             </div>
           </div>
@@ -537,7 +577,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <p className="text-xs text-gray-500">Produk memiliki sertifikat halal.</p>
               </div>
             </div>
-            <TogglePill checked={hasHalal} onChange={(v) => toggleSection("halal", v)} color="green" />
+            <TogglePill checked={hasHalal} onChange={(v) => toggleSection("halal", v)} color="green" disabled={disabled || halalLocked} />
           </div>
 
           <div className="space-y-4 bg-white px-6 py-5">
@@ -551,7 +591,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 placeholder="Contoh: ID1234567890"
                 error={errors.halalCertificateNumber}
                 required={hasHalal}
-                disabled={!hasHalal}
+                disabled={halalFieldsDisabled}
               />
               <div>
                 <label
@@ -568,7 +608,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                   value={formData.halalCertifiedBy}
                   onChange={handleChange}
                   placeholder="Contoh: BPJPH"
-                  disabled={!hasHalal}
+                  disabled={halalFieldsDisabled}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition ${
                     !hasHalal
                       ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400 placeholder-gray-300"
@@ -593,7 +633,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 type="date"
                 error={errors.halalIssuanceDate}
                 required={hasHalal}
-                disabled={!hasHalal}
+                disabled={halalFieldsDisabled}
               />
               <Field
                 label="Berlaku Hingga"
@@ -604,7 +644,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 type="date"
                 error={errors.halalValidUntil}
                 required={hasHalal}
-                disabled={!hasHalal}
+                disabled={halalFieldsDisabled}
               />
               <div>
                 <p
@@ -618,10 +658,11 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <UploadArea
                   color="green"
                   fileName={formData.halalFileName}
+                  filePreview={formData.halalFilePreview}
                   onUpload={(preview, name) =>
                     setFormData((prev) => ({ ...prev, halalFilePreview: preview, halalFileName: name }))
                   }
-                  disabled={!hasHalal}
+                  disabled={halalFieldsDisabled}
                 />
               </div>
             </div>
@@ -642,7 +683,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <p className="text-xs text-gray-500">Produk memiliki sertifikat hasil uji laboratorium.</p>
               </div>
             </div>
-            <TogglePill checked={hasCoa} onChange={(v) => toggleSection("coa", v)} color="orange" />
+            <TogglePill checked={hasCoa} onChange={(v) => toggleSection("coa", v)} color="orange" disabled={disabled || coaLocked} />
           </div>
 
           <div className="space-y-4 bg-white px-6 py-5">
@@ -656,7 +697,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 placeholder="Contoh: 1234567890"
                 error={errors.coaNumber}
                 required={hasCoa}
-                disabled={!hasCoa}
+                disabled={coaFieldsDisabled}
               />
               <Field
                 label="Nama Laboratorium"
@@ -667,7 +708,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 placeholder="Contoh: Lab Kesehatan Daerah"
                 error={errors.coaLaboratoryName}
                 required={hasCoa}
-                disabled={!hasCoa}
+                disabled={coaFieldsDisabled}
               />
             </div>
 
@@ -681,7 +722,7 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 type="date"
                 error={errors.coaTestDate}
                 required={hasCoa}
-                disabled={!hasCoa}
+                disabled={coaFieldsDisabled}
               />
               <div>
                 <p
@@ -693,33 +734,36 @@ export function LegalityForm({ onSubmit, onPrevious, initialData, isLoading = fa
                 <UploadArea
                   color="orange"
                   fileName={formData.coaFileName}
+                  filePreview={formData.coaFilePreview}
                   onUpload={(preview, name) =>
                     setFormData((prev) => ({ ...prev, coaFilePreview: preview, coaFileName: name }))
                   }
-                  disabled={!hasCoa}
+                  disabled={coaFieldsDisabled}
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-4 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onPrevious}
-            className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
-          >
-            &#8592; Sebelumnya
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
-          </Button>
-        </div>
+        {showFooter && (
+          <div className="flex gap-4 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onPrevious}
+              className="flex-1 border-blue-600 py-5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+            >
+              &#8592; Sebelumnya
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-2 bg-blue-600 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {isLoading ? "Memproses..." : "Selanjutnya \u2192"}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   )

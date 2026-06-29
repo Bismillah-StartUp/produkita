@@ -13,12 +13,12 @@ import {
   NutritionFormData,
   ServingForm,
   ServingFormData,
-  Rekap,
+  LegalityForm,
   LegalityFormData,
+  Rekap,
 } from "../register/partials"
-import { DetailCertificates } from "./partials/detail-certificates"
 import { QrCodeModal } from "../partials/qr-code-modal"
-import { WeightUnits, ProductCategory } from "@prisma/client"
+import { WeightUnits, ProductCategory, CertificateType } from "@prisma/client"
 
 interface ProductDetailPageProps {
   uuid: string
@@ -75,7 +75,14 @@ function EditActions({ onCancel, formId, loading }: { onCancel: () => void; form
 
 export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
   const router = useRouter()
-  const { getProduct, updateProductBasic, updateNutrition, updateServing, loading } = useProduct()
+  const {
+    getProduct,
+    updateProductBasic,
+    updateNutrition,
+    updateServing,
+    createCertificate,
+    loading,
+  } = useProduct()
 
   const [product, setProduct] = useState<any>(null)
   const [isFetching, setIsFetching] = useState(true)
@@ -86,6 +93,8 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
   const [basicEditSession, setBasicEditSession] = useState(0)
   const [isEditingNutrition, setIsEditingNutrition] = useState(false)
   const [nutritionEditSession, setNutritionEditSession] = useState(0)
+  const [isEditingLegality, setIsEditingLegality] = useState(false)
+  const [legalityEditSession, setLegalityEditSession] = useState(0)
   const [isEditingServing, setIsEditingServing] = useState(false)
   const [servingEditSession, setServingEditSession] = useState(0)
 
@@ -151,6 +160,7 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
   const legalityFormData: LegalityFormData | undefined = product
     ? (() => {
         const findCert = (type: string) => product.certificates?.find((c: any) => c.type === type)
+        const fileNameFromUrl = (url?: string | null) => (url ? decodeURIComponent(url.split("/").pop() ?? "Sertifikat") : undefined)
         const bpom = findCert("bpom")
         const pirt = findCert("pirt")
         const halal = findCert("halal")
@@ -163,16 +173,24 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
           bpomNumber: bpom?.number ?? "",
           bpomRegistrationDate: bpom?.registered_at ? new Date(bpom.registered_at).toISOString().split("T")[0] : "",
           bpomValidUntil: bpom?.valid_until ? new Date(bpom.valid_until).toISOString().split("T")[0] : "",
+          bpomFilePreview: bpom?.certificate_url ?? "",
+          bpomFileName: fileNameFromUrl(bpom?.certificate_url),
           pirtNumber: pirt?.number ?? "",
           pirtRegistrationDate: pirt?.registered_at ? new Date(pirt.registered_at).toISOString().split("T")[0] : "",
           pirtValidUntil: pirt?.valid_until ? new Date(pirt.valid_until).toISOString().split("T")[0] : "",
+          pirtFilePreview: pirt?.certificate_url ?? "",
+          pirtFileName: fileNameFromUrl(pirt?.certificate_url),
           halalCertificateNumber: halal?.number ?? "",
           halalCertifiedBy: halal?.lab_name ?? "",
           halalIssuanceDate: halal?.registered_at ? new Date(halal.registered_at).toISOString().split("T")[0] : "",
           halalValidUntil: halal?.valid_until ? new Date(halal.valid_until).toISOString().split("T")[0] : "",
+          halalFilePreview: halal?.certificate_url ?? "",
+          halalFileName: fileNameFromUrl(halal?.certificate_url),
           coaNumber: coa?.number ?? "",
           coaLaboratoryName: coa?.lab_name ?? "",
           coaTestDate: coa?.registered_at ? new Date(coa.registered_at).toISOString().split("T")[0] : "",
+          coaFilePreview: coa?.certificate_url ?? "",
+          coaFileName: fileNameFromUrl(coa?.certificate_url),
         }
       })()
     : undefined
@@ -225,6 +243,65 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       setProduct((prev: any) => ({ ...prev, serving: { ...prev.serving, ...result } }))
       setIsEditingServing(false)
     }
+  }
+
+  const saveLegality = async (data: LegalityFormData) => {
+    const findCert = (type: CertificateType) => product.certificates?.find((c: any) => c.type === type)
+
+    const tasks: { type: CertificateType; existing: any; payload: { number?: string; registered_at?: Date; valid_until?: Date; lab_name?: string }; shouldSave: boolean }[] = [
+      {
+        type: "bpom",
+        existing: findCert("bpom"),
+        payload: {
+          number: data.bpomNumber,
+          registered_at: data.bpomRegistrationDate ? new Date(data.bpomRegistrationDate) : undefined,
+          valid_until: data.bpomValidUntil ? new Date(data.bpomValidUntil) : undefined,
+        },
+        shouldSave: data.hasBpom,
+      },
+      {
+        type: "pirt",
+        existing: findCert("pirt"),
+        payload: {
+          number: data.pirtNumber,
+          registered_at: data.pirtRegistrationDate ? new Date(data.pirtRegistrationDate) : undefined,
+          valid_until: data.pirtValidUntil ? new Date(data.pirtValidUntil) : undefined,
+        },
+        shouldSave: data.hasPirt,
+      },
+      {
+        type: "halal",
+        existing: findCert("halal"),
+        payload: {
+          number: data.halalCertificateNumber,
+          lab_name: data.halalCertifiedBy,
+          registered_at: data.halalIssuanceDate ? new Date(data.halalIssuanceDate) : undefined,
+          valid_until: data.halalValidUntil ? new Date(data.halalValidUntil) : undefined,
+        },
+        shouldSave: data.hasHalal,
+      },
+      {
+        type: "coa",
+        existing: findCert("coa"),
+        payload: {
+          number: data.coaNumber,
+          lab_name: data.coaLaboratoryName,
+          registered_at: data.coaTestDate ? new Date(data.coaTestDate) : undefined,
+        },
+        shouldSave: data.hasCoa,
+      },
+    ]
+
+    const updatedCertificates = [...(product.certificates ?? [])]
+
+    for (const task of tasks) {
+      if (!task.shouldSave || task.existing) continue
+      const result = await createCertificate(uuid, { type: task.type, ...task.payload })
+      if (result) updatedCertificates.push(result)
+    }
+
+    setProduct((prev: any) => ({ ...prev, certificates: updatedCertificates }))
+    setIsEditingLegality(false)
   }
 
   if (isFetching) {
@@ -385,11 +462,32 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
         )}
 
         {currentStep === 3 && (
-          <DetailCertificates
-            productUuid={uuid}
-            certificates={product.certificates ?? []}
-            onCertificatesChange={(certificates) => setProduct((prev: any) => ({ ...prev, certificates }))}
-          />
+          <div>
+            <div className="mb-3 flex items-center justify-end">
+              {isEditingLegality ? (
+                <EditActions
+                  onCancel={() => {
+                    setIsEditingLegality(false)
+                    setLegalityEditSession((s) => s + 1)
+                  }}
+                  formId="product-legality-form"
+                  loading={loading}
+                />
+              ) : (
+                <EditTrigger onClick={() => setIsEditingLegality(true)} />
+              )}
+            </div>
+            <LegalityForm
+              key={`legality-${legalityEditSession}`}
+              formId="product-legality-form"
+              initialData={legalityFormData}
+              lockedTypes={(product.certificates ?? []).map((c: any) => c.type)}
+              disabled={!isEditingLegality}
+              showFooter={false}
+              isLoading={loading}
+              onSubmit={saveLegality}
+            />
+          </div>
         )}
 
         {currentStep === 4 && product.serving && (

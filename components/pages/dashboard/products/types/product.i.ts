@@ -17,4 +17,5 @@ export interface IToogle {
   checked: boolean
   onChange: (v: boolean) => void
   color: "blue" | "purple" | "green" | "orange"
+  disabled?: boolean
 }
