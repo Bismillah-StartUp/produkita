@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 const SocialIcon = ({ children }: { children: React.ReactNode }) => (
   <a
@@ -17,12 +17,7 @@ export function Footer() {
         <div className="mb-16 grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                <Shield className="h-5 w-5" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-blue-600">
-                Produkita.
-              </span>
+              <Logo/>
             </div>
             <p className="text-sm leading-relaxed text-slate-500 max-w-xs">
               Satu platform untuk mengelola produk, sertifikasi, dan keuangan
