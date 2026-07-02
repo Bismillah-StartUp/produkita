@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const STEPS_DATA = [
   {
@@ -73,13 +74,11 @@ const STEPS_DATA = [
 export const Steps = () => {
   const [activeStep, setActiveStep] = useState(1);
 
-  // Autoplay functionality: slide every 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveStep((prev) => (prev === 4 ? 1 : prev + 1));
     }, 5000);
 
-    // Cleanup the interval on unmount or when activeStep changes
     return () => clearInterval(timer);
   }, [activeStep]);
 
@@ -93,10 +92,10 @@ export const Steps = () => {
 
   return (
     <section className="bg-white pt-24 pb-20 md:pt-32 md:pb-28 relative overflow-hidden">
-      <div className="absolute top-1/4 left-0 w-1/2 h-[500px] bg-blue-50/80 blur-[120px] pointer-events-none -translate-x-1/3" />
-      <div className="absolute top-1/4 right-0 w-1/2 h-[500px] bg-amber-50/80 blur-[120px] pointer-events-none translate-x-1/3" />
+      <div className="absolute top-1/4 left-0 w-1/2 h-125 bg-blue-50/80 blur-[120px] pointer-events-none -translate-x-1/3" />
+      <div className="absolute top-1/4 right-0 w-1/2 h-125 bg-amber-50/80 blur-[120px] pointer-events-none translate-x-1/3" />
 
-      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8 relative z-10">
+      <div className="mx-auto w-[90%] max-w-400 px-6 lg:px-8 relative z-10">
         <div className="text-center mx-auto mb-16">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-600 uppercase border border-blue-100/50 mb-6">
             <Sparkles className="h-3 w-3 fill-blue-600" />
@@ -172,7 +171,6 @@ export const Steps = () => {
             style={{ transform: `translateX(-${(activeStep - 1) * 25}%)` }}
           >
             {STEPS_DATA.map((step) => {
-              const ContentIcon = step.icon;
               return (
                 <div
                   key={step.id}
@@ -235,7 +233,7 @@ export const Steps = () => {
                   </div>
 
                   <div className="w-full">
-                    <div className="bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-200 overflow-hidden aspect-4/3 flex flex-col">
+                    <div className="bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-200 overflow-hidden flex flex-col">
                       <div className="bg-slate-100 px-4 py-3 flex items-center border-b border-slate-200">
                         <div className="flex gap-2">
                           <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -247,14 +245,14 @@ export const Steps = () => {
                           produkita.id/dashboard
                         </div>
                       </div>
-                      <div className="flex-1 bg-slate-50 p-6 flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
-                          <ContentIcon className="h-8 w-8 text-blue-600" />
-                        </div>
-                        <p className="text-slate-400 font-medium text-sm">
-                          [ Ilustrasi Desain UI: Langkah {step.id} ]<br />
-                          Gambar akan diganti nanti
-                        </p>
+                      <div className="w-full bg-slate-50 relative flex overflow-hidden">
+                        <Image
+                          src={`/assets/landing/steps-${step.id}.png`}
+                          alt={`Ilustrasi Langkah ${step.id}: ${step.title}`}
+                          width={1200}
+                          height={900}
+                          className="w-full h-auto block"
+                        />
                       </div>
                     </div>
                   </div>

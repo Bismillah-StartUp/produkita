@@ -13,7 +13,7 @@ const SocialIcon = ({ children }: { children: React.ReactNode }) => (
 export function Footer() {
   return (
     <footer className="bg-slate-50 pt-20 pb-10">
-      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8">
+      <div className="mx-auto w-[90%] max-w-400px-6 lg:px-8">
         <div className="mb-16 grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2">

@@ -5,7 +5,10 @@ import {
   QrCode,
   TrendingUp,
   FileText,
-  CheckCircle,
+  CheckSquare,
+  Circle,
+  BarChart3,
+  Coins,
 } from "lucide-react";
 
 export const HowItWorks = () => {
@@ -44,7 +47,7 @@ export const HowItWorks = () => {
       id="cara-kerja"
       className="bg-white py-20 md:py-28 relative overflow-hidden"
     >
-      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8">
+      <div className="mx-auto w-[90%] max-w-400 px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <div className="space-y-8 lg:pr-10">
             <div>
@@ -71,47 +74,161 @@ export const HowItWorks = () => {
               Lihat Selengkapnya <ArrowRight className="h-4 w-4" />
             </a>
 
-            <div className="mt-16 relative w-full max-w-sm hidden md:block">
-              <div className="absolute inset-0 bg-blue-400/10 blur-[80px] rounded-full" />
+            <div className="mt-16 relative w-full max-w-md mx-auto hidden md:block">
+              <div className="absolute inset-0 bg-blue-400/20 blur-[80px] rounded-full" />
 
-              <div className="relative bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-5 transform -rotate-2 hover:rotate-0 transition-transform duration-500 z-10">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-100/80 p-2 rounded-xl">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="relative z-10 w-full flex justify-center">
+                <div className="relative w-full z-10 bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-6 flex flex-col gap-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">
+                        Grafik Keuangan
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        6 bulan terakhir
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg">
+                      <TrendingUp className="h-3 w-3" />
+                      <span className="text-[11px] font-bold">28%</span>
+                    </div>
+                  </div>
+
+                  <div className="h-32 w-full flex items-end justify-between gap-2 px-1 mt-4">
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-600 rounded-t-sm h-[60%]"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Jan
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-100 rounded-t-sm h-[45%]"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Feb
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-600 rounded-t-sm h-[55%]"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Mar
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-600 rounded-t-sm h-[85%] shadow-sm shadow-blue-600/20"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Apr
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-600 rounded-t-sm h-[65%]"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Mei
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-end gap-2 flex-1 h-full">
+                      <div className="w-full bg-blue-100 rounded-t-sm h-[50%]"></div>
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Jun
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="w-full h-px bg-slate-100"></div>
+
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <p className="text-[13px] font-bold text-blue-600">
+                        Rp 28.6Jt
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        Pemasukan
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900">
-                        QR Code Dibuat
+                      <p className="text-[13px] font-bold text-red-500">
+                        Rp 15Jt
                       </p>
-                      <p className="text-[11px] text-slate-500 font-medium">
-                        Susu Segar Premium
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        Pengeluaran
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-green-600">
+                        24 aktif
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        Produk
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg text-[10px] font-bold text-blue-600">
-                    <TrendingUp className="h-3 w-3" /> 28%
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold">
+                      <span className="text-slate-500">Target Bulan Ini</span>
+                      <span className="text-blue-600">85%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-600 rounded-full w-[85%]"></div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="h-28 w-full flex items-end justify-between gap-2 px-2">
-                  <div className="w-full bg-blue-100 rounded-t-sm h-[30%]"></div>
-                  <div className="w-full bg-blue-200 rounded-t-sm h-[45%]"></div>
-                  <div className="w-full bg-blue-600 rounded-t-sm h-[80%] shadow-sm shadow-blue-600/30"></div>
-                  <div className="w-full bg-blue-400 rounded-t-sm h-[60%]"></div>
-                  <div className="w-full bg-blue-300 rounded-t-sm h-[50%]"></div>
+                <div className="absolute -left-12 md:-left-16 -top-8 z-20 animate-float bg-white/95 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-3 flex items-center gap-3">
+                  <div className="bg-green-100/80 p-2 rounded-lg">
+                    <CheckSquare className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="pr-2">
+                    <p className="text-[13px] font-bold text-slate-900 leading-tight">
+                      QR Code Dibuat
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                      Susu Segar Premium
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="absolute -bottom-8 -left-8 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-lg p-4 flex items-center gap-4 transform rotate-3 z-20">
-                <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                  <div className="h-5 w-5 bg-yellow-500 rounded-sm rotate-45" />
+                <div
+                  className="absolute -right-4 md:-right-15 -top-4 z-20 animate-float bg-white/95 backdrop-blur-sm rounded-full border border-slate-200/60 shadow-lg px-4 py-1.5 flex items-center gap-2"
+                  style={{ animationDelay: "1s" }}
+                >
+                  <Circle className="h-2 w-2 text-green-500 fill-green-500 animate-pulse" />
+                  <span className="text-[11px] font-bold text-green-600">
+                    Live
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">+Rp 2.4Jt</p>
-                  <p className="text-[10px] text-slate-500">
-                    Pemasukan hari ini
-                  </p>
+
+                <div
+                  className="absolute -right-12 md:-right-38 top-1/3 z-20 animate-float bg-white/95 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-3 flex items-center gap-3"
+                  style={{ animationDelay: "2s" }}
+                >
+                  <div className="bg-blue-50 p-2 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="pr-4">
+                    <p className="text-[13px] font-bold text-blue-600 leading-tight">
+                      12.540 Scan
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                      Bulan ini
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className="absolute -left-10 md:-left-12 -bottom-6 z-20 animate-float bg-white/95 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-3 flex items-center gap-3"
+                  style={{ animationDelay: "1.5s" }}
+                >
+                  <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center">
+                    <Coins className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div className="pr-4">
+                    <p className="text-[14px] font-bold text-amber-600 leading-tight">
+                      +Rp 2.4Jt
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                      Pemasukan hari ini
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

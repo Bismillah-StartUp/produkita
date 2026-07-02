@@ -21,7 +21,7 @@ export const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-slate-100">
-      <div className="mx-auto flex w-[90%] max-w-[1600px] items-center justify-between px-6 lg:px-8 py-4">
+      <div className="mx-auto flex w-[90%] max-w-400 items-center justify-between px-6 lg:px-8 py-4">
         <Logo />
 
         {/* Navigation */}

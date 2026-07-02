@@ -64,7 +64,7 @@ const FEATURES = [
 export const Features = () => {
   return (
     <section id="features" className="bg-slate-50/30 py-20 md:py-28">
-      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8">
+      <div className="mx-auto w-[90%] max-w-400 px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-600 uppercase border border-blue-100/50">
