@@ -1,0 +1,12 @@
+import { NavbarLanding, FooterLanding } from "@/components/navigations";
+import { LandingPricing } from "@/components/pages/landing";
+
+export default function PricingPage() {
+  return (
+    <div className="w-full bg-linear-to-b from-slate-50 to-white">
+      <NavbarLanding />
+      <LandingPricing />
+      <FooterLanding />
+    </div>
+  );
+}
