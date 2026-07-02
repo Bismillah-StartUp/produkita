@@ -159,8 +159,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-blue-200/50 pt-8 flex items-center justify-between">
           <p className="text-[13px] text-slate-500">
-            © 2026 Produkita oleh Trunodjoyo Madura. Dibuat untuk UMKM
-            Indonesia.
+            © 2026 Produkita oleh Trunodjoyo Madura. Dibuat untuk UMKM Indonesia.
           </p>
         </div>
       </div>
