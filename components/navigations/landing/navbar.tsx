@@ -29,19 +29,28 @@ export const Navbar = () => {
           <Link href="/" className={getLinkClass("/")}>
             Beranda
           </Link>
-          <Link href="/landing/about" className={getLinkClass("/about")}>
+          <Link
+            href="/landing/about"
+            className={getLinkClass("/landing/about")}
+          >
             Tentang Kami
           </Link>
-          <Link href="/landing/features" className={getLinkClass("/features")}>
+          <Link
+            href="/landing/features"
+            className={getLinkClass("/landing/features")}
+          >
             Fitur
           </Link>
           <Link
             href="/landing/how-it-works"
-            className={getLinkClass("/how-it-works")}
+            className={getLinkClass("/landing/how-it-works")}
           >
             Cara kerja
           </Link>
-          <Link href="/landing/pricing" className={getLinkClass("/pricing")}>
+          <Link
+            href="/landing/pricing"
+            className={getLinkClass("/landing/pricing")}
+          >
             Harga
           </Link>
         </div>
