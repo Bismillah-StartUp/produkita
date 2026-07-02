@@ -68,7 +68,6 @@ export const CTA = () => {
                     </div>
                   </div>
 
-                  {/* List Items */}
                   <div className="bg-white border border-blue-100 rounded-xl p-3 shadow-sm flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-blue-100 shrink-0" />
                     <div className="space-y-1 w-full">

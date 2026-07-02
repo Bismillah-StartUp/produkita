@@ -71,7 +71,7 @@ export const Partners = () => {
 
   return (
     <section className="bg-white py-16 md:py-24 border-b border-slate-50">
-      <div className="mx-auto w-[90%] max-w-400 px-6">
+      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8">
         <div className="flex flex-col items-center text-center mb-12">
           <div className="inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-600 mb-6 uppercase border border-blue-100/50">
             <Sparkles className="h-3 w-3 fill-blue-600" />

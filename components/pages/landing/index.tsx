@@ -1,27 +1,13 @@
-"use client";
+import { LandingHome as Landing } from "./home";
+import { LandingAbout } from "./about";
+import { LandingFeatures } from "./features";
+import { LandingHowItWorks } from "./how-it-works";
+import { LandingPricing } from "./pricing";
 
-import {
-  CTA,
-  Testimonials,
-  Features,
-  Partners,
-  Hero,
-  HowItWorks,
-  Pricing,
-  FAQ,
-} from "./partials";
-
-export const Landing = () => {
-  return (
-    <div className="w-full bg-linear-to-b from-slate-50 to-white">
-      <Hero />
-      <Partners />
-      <Features />
-      <HowItWorks />
-      <Testimonials />
-      <Pricing />
-      <FAQ />
-      <CTA />
-    </div>
-  );
+export {
+  Landing,
+  LandingAbout,
+  LandingFeatures,
+  LandingHowItWorks,
+  LandingPricing,
 };

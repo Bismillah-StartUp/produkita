@@ -4,47 +4,41 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { usePathname } from "next/navigation";
 import { ChevronDown, LayoutGrid, LogIn } from "lucide-react";
 
 export const Navbar = () => {
   const uuid = useAuthStore((state) => state.uuid);
   const isLoggedIn = Boolean(uuid);
+  const pathname = usePathname();
+
+  const getLinkClass = (path: string) => {
+    const isActive = pathname === path;
+    return isActive
+      ? "text-sm font-semibold text-blue-600 border-b-2 border-blue-600 pb-1 -mb-0.75"
+      : "text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors";
+  };
 
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-slate-100">
-      <div className="mx-auto flex w-[90%] max-w-400 items-center justify-between px-6 xl:px-8 py-4">
+      <div className="mx-auto flex w-[90%] max-w-[1600px] items-center justify-between px-6 lg:px-8 py-4">
         <Logo />
 
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="#beranda"
-            className="text-sm font-semibold text-blue-600 border-b-2 border-blue-600 pb-1 -mb-0.75"
-          >
+          <Link href="/" className={getLinkClass("/")}>
             Beranda
           </Link>
-          <Link
-            href="#tentang-kami"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
+          <Link href="/about" className={getLinkClass("/about")}>
             Tentang Kami
           </Link>
-          <Link
-            href="#fitur"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
+          <Link href="/features" className={getLinkClass("/features")}>
             Fitur
           </Link>
-          <Link
-            href="#cara-kerja"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
+          <Link href="/how-it-works" className={getLinkClass("/how-it-works")}>
             Cara kerja
           </Link>
-          <Link
-            href="#harga"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
+          <Link href="/pricing" className={getLinkClass("/pricing")}>
             Harga
           </Link>
         </div>

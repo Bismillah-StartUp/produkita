@@ -69,7 +69,6 @@ export const Testimonials = () => {
       className="bg-linear-to-b from-white to-blue-50/40 py-20 md:py-28 overflow-hidden"
     >
       <div className="mx-auto w-[90%] max-w-400 px-6 lg:px-10">
-        {/* Header Area */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-600 uppercase border border-blue-100/50">
@@ -117,7 +116,6 @@ export const Testimonials = () => {
                   key={i}
                   className="flex flex-col gap-10 shrink-0 w-87.5 md:w-100 snap-center"
                 >
-                  {/* Card */}
                   <div
                     onClick={() => scrollTo(i)}
                     className={`cursor-pointer rounded-2xl p-8 transition-all duration-500 ${
@@ -126,7 +124,6 @@ export const Testimonials = () => {
                         : "bg-white/80 border border-slate-200/50 shadow-sm scale-95 opacity-70 hover:opacity-100 hover:bg-white"
                     }`}
                   >
-                    {/* Stars */}
                     <div className="flex items-center gap-1 mb-6">
                       {[...Array(testimonial.rating)].map((_, idx) => (
                         <Star
@@ -136,21 +133,12 @@ export const Testimonials = () => {
                       ))}
                     </div>
 
-                    {/* Text */}
                     <p className="text-slate-600 leading-relaxed mb-8 h-24">
                       {testimonial.description}
                     </p>
 
-                    {/* Profile */}
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden">
-                        {/* <Image
-                          src={`https://api.dicebear.com/7.x/notionists/svg?seed=${testimonial.name}`}
-                          alt={testimonial.name}
-                          width={48}
-                          height={48}
-                          className="w-full h-full object-cover"
-                        /> */}
                       </div>
                       <div>
                         <p className="text-sm font-bold text-slate-900">
@@ -163,7 +151,6 @@ export const Testimonials = () => {
                     </div>
                   </div>
 
-                  {/* Line */}
                   <div
                     className={`h-0.5 w-full rounded-full transition-colors duration-500 ${
                       isActive ? "bg-blue-600" : "bg-slate-200"

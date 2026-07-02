@@ -44,7 +44,7 @@ export const HowItWorks = () => {
       id="cara-kerja"
       className="bg-white py-20 md:py-28 relative overflow-hidden"
     >
-      <div className="mx-auto max-w-350 px-6 lg:px-10">
+      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <div className="space-y-8 lg:pr-10">
             <div>

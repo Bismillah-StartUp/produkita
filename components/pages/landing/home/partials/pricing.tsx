@@ -4,7 +4,6 @@ export const Pricing = () => {
   return (
     <section id="harga" className="bg-slate-50/50 py-20 md:py-32 relative">
       <div className="mx-auto w-[90%] max-w-400 px-6 lg:px-10 relative z-10">
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1 text-[11px] font-bold tracking-widest text-blue-600 uppercase border border-blue-100/50 mb-6">
             <Sparkles className="h-3 w-3 fill-blue-600" />
@@ -18,7 +17,6 @@ export const Pricing = () => {
           </p>
         </div>
 
-        {/*Cards */}
         <div className="grid lg:grid-cols-3 gap-8 w-full mx-auto items-stretch">
           <div className="bg-white rounded-3xl p-8 lg:p-10 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 flex flex-col">
             <h3 className="text-xl font-bold text-slate-900 mb-2">Basic</h3>

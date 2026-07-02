@@ -5,7 +5,7 @@ import { ArrowRight, Play, Sparkles, Image as ImageIcon } from "lucide-react";
 export const Hero = () => {
   return (
     <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24 bg-linear-to-b from-white via-white to-blue-50/50">
-      <div className="mx-auto w-[90%] max-w-400 px-6 text-center">
+      <div className="mx-auto w-[90%] max-w-[1600px] px-6 lg:px-8 text-center">
         <div className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-50/80 px-4 py-1.5 text-xs font-semibold text-blue-600 mb-8 border border-blue-100/50 shadow-xs">
           <Sparkles className="h-3.5 w-3.5 fill-blue-600 text-blue-600" />
           Solusi Digital Produk UMKM Indonesia
