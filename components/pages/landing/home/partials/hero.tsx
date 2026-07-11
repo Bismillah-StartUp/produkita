@@ -42,7 +42,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-20">
           <Link href="/dashboard">
             <Button
               size="lg"
@@ -62,80 +62,19 @@ export const Hero = () => {
           </Button>
         </div>
 
-        <style>{`
-          @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-          }
-          .animate-float {
-            animation: float 6s ease-in-out infinite;
-          }
-          .animate-float-delayed {
-            animation: float 8s ease-in-out infinite;
-            animation-delay: 3s;
-          }
-        `}</style>
+        <div className="mt-8 md:mt-12 -mb-24 md:-mb-32 relative mx-auto w-full max-w-5xl">
+          <div className="absolute inset-0 top-[10%] bottom-[10%] bg-blue-400/10 blur-[120px] rounded-full" />
 
-        <div className="mt-16 md:mt-24 relative mx-auto w-full max-w-5xl">
-          <div className="absolute inset-0 -top-10 bg-blue-400/10 blur-[100px] rounded-full" />
-
-          <div className="relative">
-            <div className="absolute -left-6 md:-left-43 top-[20%] md:top-[28%] z-20 w-40 md:w-72 animate-float hidden sm:block">
-              <Image
-                src="/assets/landing/qr.png"
-                alt="QR Code"
-                width={300}
-                height={300}
-                className="w-full h-auto drop-shadow-2xl"
-              />
-            </div>
-
-            <div className="absolute left-8 md:left-[15%] -bottom-13 md:-bottom-5 z-30 w-72 md:w-116 animate-float-delayed hidden sm:block">
-              <Image
-                src="/assets/landing/produk.png"
-                alt="Produk Unggulan"
-                width={700}
-                height={400}
-                className="w-full h-auto drop-shadow-2xl"
-              />
-            </div>
-
-            <div
-              className="absolute -right-6 md:-right-13 top-[35%] md:top-[24%] z-20 w-52 md:w-89 animate-float hidden sm:block"
-              style={{ animationDelay: "1.5s" }}
-            >
-              <Image
-                src="/assets/landing/inshigt.png"
-                alt="Insights"
-                width={400}
-                height={300}
-                className="w-full h-auto drop-shadow-2xl"
-              />
-            </div>
-
-            <div className="relative rounded-xl md:rounded-2xl border border-slate-200/60 bg-white shadow-2xl overflow-hidden ring-1 ring-slate-900/5 z-10">
-              <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/50 px-4 py-3">
-                <div className="h-3 w-3 rounded-full bg-red-400 shadow-sm" />
-                <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-sm" />
-                <div className="h-3 w-3 rounded-full bg-green-400 shadow-sm" />
-                <div className="mx-auto flex h-6 w-full max-w-xs items-center justify-center rounded-md bg-white border border-slate-200/60 text-[10px] text-slate-400 shadow-xs">
-                  app.produkita.id/dashboard
-                </div>
-                <div className="w-10" />
-              </div>
-
-              <div className="relative w-full bg-slate-50">
-                <Image
-                  src="/assets/landing/Dashboard.png"
-                  alt="Dashboard Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-cover object-top"
-                  priority
-                />
-              </div>
-            </div>
+          <div className="relative z-10">
+            <Image
+              src="/assets/landing/dashboard.png"
+              alt="ProdukIta Preview"
+              width={1600}
+              height={1000}
+              className="w-full h-auto drop-shadow-2xl object-contain transform scale-[1.4] -translate-y-1 -translate-x-8 md:scale-[1.7] md:-translate-y-1.5 md:-translate-x-12 lg:scale-[2.0] lg:-translate-y-2 lg:-translate-x-18"
+              priority
+              unoptimized={true}
+            />
           </div>
         </div>
       </div>
