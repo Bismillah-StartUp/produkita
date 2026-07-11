@@ -1,21 +1,21 @@
-import "server-only"
+import "server-only";
 
-import { sendMail } from "@/lib/mailer"
+import { sendMail } from "@/lib/mailer";
 
 interface EmailProps {
-  email: string
-  productName: string
-  companyName: string
-  licenseCode: string
-  licensePageUrl: string
-  barcodeDataUrl: string
-  qrCodeDataUrl: string
+  email: string;
+  productName: string;
+  companyName: string;
+  licenseCode: string;
+  licensePageUrl: string;
+  barcodeDataUrl: string;
+  qrCodeDataUrl: string;
 }
 
 const dataUrlToBuffer = (dataUrl: string) => {
-  const base64Content = dataUrl.split(",")[1]
-  return Buffer.from(base64Content || "", "base64")
-}
+  const base64Content = dataUrl.split(",")[1];
+  return Buffer.from(base64Content || "", "base64");
+};
 
 const escapeHtml = (value: string) =>
   value
@@ -23,61 +23,157 @@ const escapeHtml = (value: string) =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
+    .replaceAll("'", "&#39;");
 
 const buildBarcodeEmailHtml = ({
   productName,
   companyName,
   licenseCode,
   licensePageUrl,
-}: Pick<EmailProps, "productName" | "companyName" | "licenseCode" | "licensePageUrl">) => {
-  const safeProductName = escapeHtml(productName)
-  const safeCompanyName = escapeHtml(companyName)
-  const safeLicenseCode = escapeHtml(licenseCode)
-  const safeLicensePageUrl = escapeHtml(licensePageUrl)
+}: Pick<
+  EmailProps,
+  "productName" | "companyName" | "licenseCode" | "licensePageUrl"
+>) => {
+  const safeProductName = escapeHtml(productName);
+  const safeLicenseCode = escapeHtml(licenseCode);
+  const safeLicensePageUrl = escapeHtml(licensePageUrl);
+  const shortUrl = safeLicensePageUrl.replace(/^https?:\/\//, "");
 
   return `
-    <div style="background-color:#f3f4f6;padding:24px 0">
-      <div style="max-width:640px;margin:0 auto;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;font-family:Arial,sans-serif">
-        <div style="padding:32px;background-color:#0f172a;color:#ffffff">
-          <p style="margin:0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.8">
-            Barcode & QR Code
-          </p>
-          <h1 style="margin:8px 0 0;font-size:28px;line-height:1.2">
-            ${safeProductName}
-          </h1>
-          <p style="margin:12px 0 0;font-size:14px;line-height:1.6;opacity:0.9">
-            Barcode dan QR code lisensi untuk ${safeCompanyName} sudah tersedia.
-          </p>
-        </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode & QR Code - ProdukIta</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9fafb; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card -->
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
 
-        <div style="padding:32px">
-          <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#334155">
-            Gunakan kode lisensi berikut untuk membuka halaman verifikasi produk.
-          </p>
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #1d4ed8; padding: 32px 40px; text-align: left;">
+              <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td valign="middle">
+                    <div style="background-color: #ffffff; width: 44px; height: 44px; border-radius: 12px; text-align: center; margin-right: 16px; display: inline-block;">
+                      <img src="https://img.icons8.com/ios-filled/50/1d4ed8/shopping-bag.png" alt="Logo" style="width: 24px; height: 24px; margin-top: 10px;" />
+                    </div>
+                  </td>
+                  <td valign="middle">
+                    <span style="color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; line-height: 44px;">
+                      ProdukIta
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-          <div style="margin-bottom:24px;padding:16px;border-radius:12px;background-color:#f8fafc;border:1px solid #e2e8f0">
-            <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b">
-              License Code
-            </div>
-            <div style="margin-top:8px;font-size:24px;font-weight:700;letter-spacing:0.12em;color:#0f172a">
-              ${safeLicenseCode}
-            </div>
-            <div style="margin-top:8px;font-size:13px;color:#475569">
-              Buka halaman lisensi di <a href="${safeLicensePageUrl}" style="color:#2563eb;text-decoration:none">${safeLicensePageUrl}</a>
-            </div>
-          </div>
+          <!-- Title & Badge -->
+          <tr>
+            <td style="padding: 40px 40px 24px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="left" valign="middle">
+                    <h1 style="margin: 0; color: #111827; font-size: 24px; font-weight: 800;">
+                      ${safeProductName}
+                    </h1>
+                  </td>
+                  <td align="right" valign="middle">
+                    <div style="background-color: #eff6ff; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      <span style="color: #1d4ed8; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">
+                        <img src="https://img.icons8.com/ios-glyphs/30/1d4ed8/checked--v1.png" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px; margin-top: -2px;" />
+                        LISENSI AKTIF
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 16px 0 0; color: #4b5563; font-size: 15px; line-height: 24px;">
+                Barcode & QR code lisensi produk kamu sudah tersedia.
+              </p>
+            </td>
+          </tr>
 
-          <div style="margin-top:24px">
-            <a href="${safeLicensePageUrl}" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700">
-              Buka Halaman Lisensi
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  `.trim()
-}
+          <!-- Divider -->
+          <tr>
+            <td style="padding: 0 40px;">
+              <div style="border-top: 1px solid #f1f5f9;"></div>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px 40px 40px;">
+              <p style="margin: 0 0 24px; color: #64748b; font-size: 15px; line-height: 24px;">
+                Gunakan kode lisensi berikut untuk mengakses halaman verifikasi produk kamu.
+              </p>
+
+              <!-- License Code Box -->
+              <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                LICENSE CODE
+              </p>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border: 1px solid #bfdbfe; border-radius: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td align="left" style="padding: 24px 32px;">
+                    <p style="margin: 0; color: #0f172a; font-size: 32px; font-weight: 800; letter-spacing: 4px;">
+                      ${safeLicenseCode}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Link & Button -->
+              <p style="margin: 0 0 24px; color: #94a3b8; font-size: 16px;">
+                Buka halaman lisensi di <a href="${safeLicensePageUrl}" style="color: #1d4ed8; text-decoration: none;">${shortUrl}</a>
+              </p>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="background-color: #1d4ed8; border-radius: 8px;">
+                    <a href="${safeLicensePageUrl}" style="display: block; padding: 16px; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700;">
+                      Buka Halaman Lisensi &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Warning text -->
+              <p style="margin: 32px 0 0; color: #94a3b8; font-size: 14px; line-height: 22px;">
+                Tidak merasa melakukan pembelian ini? Segera hubungi<br/>
+                <a href="mailto:support@produkita.id" style="color: #1d4ed8; text-decoration: none; font-weight: 600;">support@produkita.id</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 0 40px 32px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #f1f5f9; padding-top: 32px;">
+                <tr>
+                  <td align="left" style="color: #cbd5e1; font-size: 13px;">
+                    Email otomatis, jangan dibalas.
+                  </td>
+                  <td align="right" style="color: #cbd5e1; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} ProdukIta
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+};
 
 export const sendBarcodeEmail = async ({
   email,
@@ -93,7 +189,7 @@ export const sendBarcodeEmail = async ({
     companyName,
     licenseCode,
     licensePageUrl,
-  })
+  });
 
   const attachments = [
     {
@@ -108,7 +204,7 @@ export const sendBarcodeEmail = async ({
       contentType: "image/png",
       contentId: "qr-code-image",
     },
-  ]
+  ];
 
   return await sendMail({
     to: email,
@@ -116,5 +212,5 @@ export const sendBarcodeEmail = async ({
     html: emailContent,
     text: `Barcode dan QR Code untuk ${productName} sudah tersedia. Buka halaman lisensi di ${licensePageUrl}.`,
     attachments,
-  })
-}
+  });
+};
