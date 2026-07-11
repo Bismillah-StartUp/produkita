@@ -54,7 +54,6 @@ const buildBarcodeEmailHtml = ({
         <!-- Main Card -->
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
 
-          <!-- Header -->
           <tr>
             <td style="background-color: #1d4ed8; padding: 32px 40px; text-align: left;">
               <table border="0" cellpadding="0" cellspacing="0">
@@ -74,7 +73,6 @@ const buildBarcodeEmailHtml = ({
             </td>
           </tr>
 
-          <!-- Title & Badge -->
           <tr>
             <td style="padding: 40px 40px 24px;">
               <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -100,21 +98,18 @@ const buildBarcodeEmailHtml = ({
             </td>
           </tr>
 
-          <!-- Divider -->
           <tr>
             <td style="padding: 0 40px;">
               <div style="border-top: 1px solid #f1f5f9;"></div>
             </td>
           </tr>
 
-          <!-- Content -->
           <tr>
             <td style="padding: 32px 40px 40px;">
               <p style="margin: 0 0 24px; color: #64748b; font-size: 15px; line-height: 24px;">
                 Gunakan kode lisensi berikut untuk mengakses halaman verifikasi produk kamu.
               </p>
 
-              <!-- License Code Box -->
               <p style="margin: 0 0 12px; color: #94a3b8; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
                 LICENSE CODE
               </p>
@@ -128,7 +123,6 @@ const buildBarcodeEmailHtml = ({
                 </tr>
               </table>
 
-              <!-- Link & Button -->
               <p style="margin: 0 0 24px; color: #94a3b8; font-size: 16px;">
                 Buka halaman lisensi di <a href="${safeLicensePageUrl}" style="color: #1d4ed8; text-decoration: none;">${shortUrl}</a>
               </p>
@@ -143,7 +137,6 @@ const buildBarcodeEmailHtml = ({
                 </tr>
               </table>
 
-              <!-- Warning text -->
               <p style="margin: 32px 0 0; color: #94a3b8; font-size: 14px; line-height: 22px;">
                 Tidak merasa melakukan pembelian ini? Segera hubungi<br/>
                 <a href="mailto:support@produkita.id" style="color: #1d4ed8; text-decoration: none; font-weight: 600;">support@produkita.id</a>
@@ -151,7 +144,6 @@ const buildBarcodeEmailHtml = ({
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
             <td style="padding: 0 40px 32px;">
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #f1f5f9; padding-top: 32px;">
