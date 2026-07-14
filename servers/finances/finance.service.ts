@@ -41,21 +41,7 @@ export const getFinanceByUUID = async (cuid: string, tenantUuid: string) => {
   })
 }
 
-export const getFinancialSummary = async (tenantUuid: string, year: number, month: number) => {
-  const startDate = new Date(year, month - 1, 1)
-  const endDate = new Date(year, month, 0, 23, 59, 59)
-
-  const records = await prisma.financialRecord.findMany({
-    where: {
-      tenant: { uuid: tenantUuid },
-      transaction_date: { gte: startDate, lte: endDate },
-    },
-    select: {
-      transaction_type: true,
-      amount: true,
-    },
-  })
-
+const summarizeRecords = (records: { transaction_type: TransactionType; amount: number }[]) => {
   const totalIncome = records
     .filter((r) => r.transaction_type === "income")
     .reduce((sum, r) => sum + r.amount, 0)
@@ -73,6 +59,50 @@ export const getFinancialSummary = async (tenantUuid: string, year: number, mont
     netProfit,
     profitMargin: Math.round(profitMargin * 10) / 10,
   }
+}
+
+const buildChart = (
+  records: { transaction_type: TransactionType; amount: number; transaction_date: Date }[],
+  year: number,
+  month: number
+) => {
+  const grouped: Record<number, { income: number; expense: number }> = {}
+
+  for (const record of records) {
+    const day = new Date(record.transaction_date).getDate()
+    if (!grouped[day]) grouped[day] = { income: 0, expense: 0 }
+
+    if (record.transaction_type === "income") {
+      grouped[day].income += record.amount
+    } else {
+      grouped[day].expense += record.amount
+    }
+  }
+
+  const daysInMonth = new Date(year, month, 0).getDate()
+  return Array.from({ length: daysInMonth }, (_, i) => ({
+    day: i + 1,
+    income: grouped[i + 1]?.income ?? 0,
+    expense: grouped[i + 1]?.expense ?? 0,
+  }))
+}
+
+export const getFinancialSummary = async (tenantUuid: string, year: number, month: number) => {
+  const startDate = new Date(year, month - 1, 1)
+  const endDate = new Date(year, month, 0, 23, 59, 59)
+
+  const records = await prisma.financialRecord.findMany({
+    where: {
+      tenant: { uuid: tenantUuid },
+      transaction_date: { gte: startDate, lte: endDate },
+    },
+    select: {
+      transaction_type: true,
+      amount: true,
+    },
+  })
+
+  return summarizeRecords(records)
 }
 
 export const getTransactionDatesInMonth = async (
@@ -111,7 +141,7 @@ export const getFinancialRecords = async (
     },
     select: {
       id: true,
-      cuid: true, 
+      cuid: true,
       product_name: true,
       transaction_type: true,
       amount: true,
@@ -146,27 +176,60 @@ export const getFinancialChart = async (
     orderBy: { transaction_date: "asc" },
   })
 
-  // group by date
-  const grouped: Record<number, { income: number; expense: number }> = {}
+  return buildChart(records, year, month)
+}
 
-  for (const record of records) {
-    const day = new Date(record.transaction_date).getDate()
-    if (!grouped[day]) grouped[day] = { income: 0, expense: 0 }
+export const getFinancialDashboard = async (
+  tenantUuid: string,
+  year: number,
+  month: number,
+  prevYear: number,
+  prevMonth: number
+) => {
+  const startDate = new Date(year, month - 1, 1)
+  const endDate = new Date(year, month, 0, 23, 59, 59)
+  const prevStartDate = new Date(prevYear, prevMonth - 1, 1)
+  const prevEndDate = new Date(prevYear, prevMonth, 0, 23, 59, 59)
 
-    if (record.transaction_type === "income") {
-      grouped[day].income += record.amount
-    } else {
-      grouped[day].expense += record.amount
-    }
+  const [records, prevRecords] = await Promise.all([
+    prisma.financialRecord.findMany({
+      where: {
+        tenant: { uuid: tenantUuid },
+        transaction_date: { gte: startDate, lte: endDate },
+      },
+      select: {
+        id: true,
+        cuid: true,
+        product_name: true,
+        transaction_type: true,
+        amount: true,
+        transaction_date: true,
+        notes: true,
+        product: {
+          select: { uuid: true, name: true },
+        },
+      },
+      orderBy: { transaction_date: "desc" },
+    }),
+    prisma.financialRecord.findMany({
+      where: {
+        tenant: { uuid: tenantUuid },
+        transaction_date: { gte: prevStartDate, lte: prevEndDate },
+      },
+      select: {
+        transaction_type: true,
+        amount: true,
+      },
+    }),
+  ])
+
+  return {
+    summary: summarizeRecords(records),
+    prevSummary: summarizeRecords(prevRecords),
+    chartData: buildChart(records, year, month),
+    transactionDates: [...new Set(records.map((r) => new Date(r.transaction_date).getDate()))],
+    records,
   }
-
-  // return array per day
-  const daysInMonth = new Date(year, month, 0).getDate()
-  return Array.from({ length: daysInMonth }, (_, i) => ({
-    day: i + 1,
-    income: grouped[i + 1]?.income ?? 0,
-    expense: grouped[i + 1]?.expense ?? 0,
-  }))
 }
 
 export const getTenantProducts = async (tenantUuid: string) => {

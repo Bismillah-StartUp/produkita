@@ -4,6 +4,7 @@ import {
   getTransactionDatesInMonth,
   getFinancialRecords,
   getFinancialChart,
+  getFinancialDashboard,
   getTenantProducts,
   updateFinancialRecord,
   deleteFinancialRecord,
@@ -67,6 +68,16 @@ export const getFinancialChartController = async (
   month: number
 ) => {
   return await getFinancialChart(tenantUuid, year, month)
+}
+
+export const getFinancialDashboardController = async (
+  tenantUuid: string,
+  year: number,
+  month: number,
+  prevYear: number,
+  prevMonth: number
+) => {
+  return await getFinancialDashboard(tenantUuid, year, month, prevYear, prevMonth)
 }
 
 export const getTenantProductsController = async (tenantUuid: string) => {

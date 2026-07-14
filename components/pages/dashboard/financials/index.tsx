@@ -2,12 +2,7 @@ import { Suspense } from "react"
 import { TrendingUp, TrendingDown, Wallet, Percent } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getAuthCookie, verifyToken } from "@/servers/auth/auth.token"
-import {
-  getFinancialSummary,
-  getFinancialChart,
-  getTransactionDates,
-  getFinancialRecords,
-} from "@/servers/finances/finance.actions"
+import { getFinancialDashboard } from "@/servers/finances/finance.actions"
 import { getTenant } from "@/servers/tenants/tenant.actions"
 
 import StatsCards from "@/components/pages/dashboard/financials/partials/stats-cards"
@@ -30,12 +25,8 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
 
-  const [summary, prevSummary, chartData, transactionDates, records, tenant] = await Promise.all([
-    getFinancialSummary(user.uuid, year, month),
-    getFinancialSummary(user.uuid, prevYear, prevMonth),
-    getFinancialChart(user.uuid, year, month),
-    getTransactionDates(user.uuid, year, month),
-    getFinancialRecords(user.uuid, year, month),
+  const [{ summary, prevSummary, chartData, transactionDates, records }, tenant] = await Promise.all([
+    getFinancialDashboard(user.uuid, year, month, prevYear, prevMonth),
     getTenant(user.uuid),
   ])
 
