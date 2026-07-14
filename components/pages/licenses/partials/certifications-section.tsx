@@ -202,14 +202,20 @@ export default function CertificationsSection({
                   </div>
                   <div>
                     <p className="text-[9px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider mb-0.5 lg:mb-1">
-                      BERLAKU HINGGA
+                      {cert.type === "COA" ? "TANGGAL PENGUJIAN" : "BERLAKU HINGGA"}
                     </p>
                     <p className="text-[11px] lg:text-base font-bold text-slate-900">
-                      {cert.validUntil
-                        ? format(new Date(cert.validUntil), "d MMMM yyyy", {
-                            locale: idLocale,
-                          })
-                        : "-"}
+                      {cert.type === "COA"
+                        ? cert.issueDate
+                          ? format(new Date(cert.issueDate), "d MMMM yyyy", {
+                              locale: idLocale,
+                            })
+                          : "-"
+                        : cert.validUntil
+                          ? format(new Date(cert.validUntil), "d MMMM yyyy", {
+                              locale: idLocale,
+                            })
+                          : "-"}
                     </p>
                   </div>
                 </div>
