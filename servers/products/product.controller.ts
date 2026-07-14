@@ -4,9 +4,11 @@ import {
   submitProduct,
   softDeleteProduct,
   updateProductBasic,
+  updateProductImages,
   softDeleteProductImage,
   updateNutrition,
   updateServing,
+  updateServingImages,
   createCertificate,
   updateCertificate,
   softDeleteCertificate,
@@ -113,6 +115,13 @@ export const updateProductBasicController = async (
   return await updateProductBasic(uuid, data)
 }
 
+export const updateProductImagesController = async (
+  uuid: string,
+  changes: { index: number; file: string }[]
+) => {
+  return await updateProductImages(uuid, changes)
+}
+
 export const softDeleteProductImageController = async (imageUuid: string) => {
   return await softDeleteProductImage(imageUuid)
 }
@@ -122,6 +131,13 @@ export const updateNutritionController = async (
   data: Parameters<typeof updateNutrition>[1]
 ) => {
   return await updateNutrition(productUuid, data)
+}
+
+export const updateServingImagesController = async (
+  productUuid: string,
+  changes: { index: number; file: string }[]
+) => {
+  return await updateServingImages(productUuid, changes)
 }
 
 export const updateServingController = async (

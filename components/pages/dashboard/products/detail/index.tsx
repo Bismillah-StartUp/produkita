@@ -79,8 +79,10 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
   const {
     getProduct,
     updateProductBasic,
+    updateProductImages,
     updateNutrition,
     updateServing,
+    updateServingImages,
     createCertificate,
     loading,
     error,
@@ -212,11 +214,21 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       type: data.jenis as ProductCategory,
       description: data.deskripsi,
     })
-    if (result) {
-      toast.success("Informasi produk diperbarui")
-      setProduct((prev: any) => ({ ...prev, ...result }))
-      setIsEditingBasic(false)
+    if (!result) return
+
+    let updatedImages = product.images
+
+    const changedPhotos = data.productPhoto
+      .map((file, index) => ({ index, file }))
+      .filter((c): c is { index: number; file: File } => c.file instanceof File)
+    if (changedPhotos.length > 0) {
+      const imagesResult = await updateProductImages(uuid, changedPhotos)
+      if (imagesResult) updatedImages = imagesResult.images
     }
+
+    toast.success("Informasi produk diperbarui")
+    setProduct((prev: any) => ({ ...prev, ...result, images: updatedImages }))
+    setIsEditingBasic(false)
   }
 
   const saveNutrition = async (data: NutritionFormData) => {
@@ -247,11 +259,24 @@ export function ProductDetailPage({ uuid }: ProductDetailPageProps) {
       serving_portion: data.portionInfo,
       video_url: data.videoLink,
     })
-    if (result) {
-      toast.success("Saran penyajian diperbarui")
-      setProduct((prev: any) => ({ ...prev, serving: { ...prev.serving, ...result } }))
-      setIsEditingServing(false)
+    if (!result) return
+
+    let updatedImages = product.serving?.images
+
+    const changedPhotos = data.servingPhotos
+      .map((file, index) => ({ index, file }))
+      .filter((c): c is { index: number; file: File } => c.file instanceof File)
+    if (changedPhotos.length > 0) {
+      const imagesResult = await updateServingImages(uuid, changedPhotos)
+      if (imagesResult) updatedImages = imagesResult.images
     }
+
+    toast.success("Saran penyajian diperbarui")
+    setProduct((prev: any) => ({
+      ...prev,
+      serving: { ...prev.serving, ...result, images: updatedImages },
+    }))
+    setIsEditingServing(false)
   }
 
   const saveLegality = async (data: LegalityFormData) => {

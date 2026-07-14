@@ -69,6 +69,57 @@ export const updateProductBasic = async (
   return updated
 }
 
+export const updateProductImages = async (
+  uuid: string,
+  changes: { index: number; file: string }[]
+) => {
+  const product = await prisma.product.findUnique({
+    where: { uuid, deleted_at: null },
+    include: { images: { where: { deleted_at: null }, orderBy: { created_at: "asc" } } },
+  })
+  if (!product) throw new Error("Produk tidak ditemukan")
+  if (changes.length === 0) throw new Error("Tidak ada foto yang diubah")
+
+  const uploaded = await Promise.all(changes.map((c) => uploadImage(c.file, "products")))
+
+  const replacedImages = changes.map((c, i) => ({
+    old: product.images[c.index] as (typeof product.images)[number] | undefined,
+    uploaded: uploaded[i],
+  }))
+
+  const updated = await prisma.$transaction(async (tx) => {
+    for (const { old, uploaded: result } of replacedImages) {
+      if (old) {
+        await tx.productImage.update({
+          where: { id: old.id },
+          data: { deleted_at: new Date() },
+        })
+      }
+      await tx.productImage.create({
+        data: {
+          product_id: product.id,
+          url: result.secure_url,
+          public_id: result.public_id,
+        },
+      })
+    }
+
+    return tx.product.findUniqueOrThrow({
+      where: { uuid },
+      include: { images: { where: { deleted_at: null }, orderBy: { created_at: "asc" } } },
+    })
+  })
+
+  const oldPublicIds = replacedImages
+    .map((r) => r.old?.public_id)
+    .filter((id): id is string => !!id)
+  await Promise.allSettled(oldPublicIds.map((publicId) => deleteImage(publicId)))
+
+  await logActivity(product.tenant_id, "product", `Foto produk "${product.name}" diperbarui`)
+
+  return updated
+}
+
 export const updateNutrition = async (
   productUuid: string,
   data: {
@@ -94,6 +145,64 @@ export const updateNutrition = async (
   })
 
   await logActivity(product.tenant_id, "product", `Informasi nilai gizi "${product.name}" diperbarui`)
+
+  return updated
+}
+
+export const updateServingImages = async (
+  productUuid: string,
+  changes: { index: number; file: string }[]
+) => {
+  const product = await prisma.product.findUnique({
+    where: { uuid: productUuid, deleted_at: null },
+    include: {
+      serving: {
+        include: { images: { where: { deleted_at: null }, orderBy: { created_at: "asc" } } },
+      },
+    },
+  })
+  if (!product) throw new Error("Produk tidak ditemukan")
+  if (!product.serving) throw new Error("Saran penyajian tidak ditemukan")
+  if (changes.length === 0) throw new Error("Tidak ada foto yang diubah")
+
+  const serving = product.serving
+
+  const uploaded = await Promise.all(changes.map((c) => uploadImage(c.file, "products")))
+
+  const replacedImages = changes.map((c, i) => ({
+    old: serving.images[c.index] as (typeof serving.images)[number] | undefined,
+    uploaded: uploaded[i],
+  }))
+
+  const updated = await prisma.$transaction(async (tx) => {
+    for (const { old, uploaded: result } of replacedImages) {
+      if (old) {
+        await tx.productServingImage.update({
+          where: { id: old.id },
+          data: { deleted_at: new Date() },
+        })
+      }
+      await tx.productServingImage.create({
+        data: {
+          serving_id: serving.id,
+          url: result.secure_url,
+          public_id: result.public_id,
+        },
+      })
+    }
+
+    return tx.productServing.findUniqueOrThrow({
+      where: { id: serving.id },
+      include: { images: { where: { deleted_at: null }, orderBy: { created_at: "asc" } } },
+    })
+  })
+
+  const oldPublicIds = replacedImages
+    .map((r) => r.old?.public_id)
+    .filter((id): id is string => !!id)
+  await Promise.allSettled(oldPublicIds.map((publicId) => deleteImage(publicId)))
+
+  await logActivity(product.tenant_id, "product", `Foto penyajian "${product.name}" diperbarui`)
 
   return updated
 }

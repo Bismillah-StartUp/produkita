@@ -88,7 +88,8 @@ export function ServingForm({
   const addPhotos = async (files: FileList | null) => {
     if (disabled || !files) return;
 
-    const remaining = maxphoto - formData.servingPhotos.length;
+    const filledSlots = formData.servingPhotoPreviews.filter(Boolean).length;
+    const remaining = maxphoto - filledSlots;
     if (remaining <= 0) return;
 
     const selectedFiles = Array.from(files).slice(0, remaining);
@@ -125,11 +126,18 @@ export function ServingForm({
       ),
     );
 
-    setFormData((prev) => ({
-      ...prev,
-      servingPhotos: [...prev.servingPhotos, ...validFiles],
-      servingPhotoPreviews: [...prev.servingPhotoPreviews, ...newPreviews],
-    }));
+    setFormData((prev) => {
+      const servingPhotos = [...prev.servingPhotos];
+      const servingPhotoPreviews = [...prev.servingPhotoPreviews];
+      let cursor = 0;
+      validFiles.forEach((f, i) => {
+        while (servingPhotoPreviews[cursor]) cursor++;
+        servingPhotos[cursor] = f;
+        servingPhotoPreviews[cursor] = newPreviews[i];
+        cursor++;
+      });
+      return { ...prev, servingPhotos, servingPhotoPreviews };
+    });
   };
 
   const handleMainUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

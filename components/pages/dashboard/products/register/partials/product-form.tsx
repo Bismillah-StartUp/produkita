@@ -88,7 +88,8 @@ export function ProductInfoForm({
 
   const addPhotos = (files: FileList | null) => {
     if (disabled || !files) return
-    const allowed = MAX_PHOTOS - formData.productPhoto.length
+    const filledSlots = formData.productPhotoPreview.filter(Boolean).length
+    const allowed = MAX_PHOTOS - filledSlots
     const incoming = Array.from(files).slice(0, allowed)
 
     const validFiles = incoming.filter((f) => {
@@ -106,11 +107,18 @@ export function ProductInfoForm({
         newPreviews.push(reader.result as string)
         loaded++
         if (loaded === validFiles.length) {
-          setFormData((prev) => ({
-            ...prev,
-            productPhoto: [...prev.productPhoto, ...validFiles],
-            productPhotoPreview: [...prev.productPhotoPreview, ...newPreviews],
-          }))
+          setFormData((prev) => {
+            const productPhoto = [...prev.productPhoto]
+            const productPhotoPreview = [...prev.productPhotoPreview]
+            let cursor = 0
+            validFiles.forEach((f, i) => {
+              while (productPhotoPreview[cursor]) cursor++
+              productPhoto[cursor] = f
+              productPhotoPreview[cursor] = newPreviews[i]
+              cursor++
+            })
+            return { ...prev, productPhoto, productPhotoPreview }
+          })
         }
       }
       reader.readAsDataURL(file)
@@ -163,7 +171,7 @@ export function ProductInfoForm({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-    if (formData.productPhoto.length === 0) newErrors.productPhoto = "Foto produk wajib diunggah"
+    if (formData.productPhotoPreview.filter(Boolean).length === 0) newErrors.productPhoto = "Foto produk wajib diunggah"
     if (!formData.productName.trim()) newErrors.productName = "Nama produk wajib diisi"
     if (!formData.brandName.trim()) newErrors.brandName = "Nama brand wajib diisi"
     if (!formData.price.trim()) newErrors.price = "Harga wajib diisi"
@@ -316,7 +324,7 @@ export function ProductInfoForm({
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-800">Foto Produk</span>
               <span className="text-sm font-medium text-blue-600">
-                {formData.productPhoto.length}/{MAX_PHOTOS} Foto
+                {formData.productPhotoPreview.filter(Boolean).length}/{MAX_PHOTOS} Foto
               </span>
             </div>
 

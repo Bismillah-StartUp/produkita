@@ -9,8 +9,10 @@ import {
   softDeleteProductImage,
   softDeleteServingImage,
   updateProductBasic,
+  updateProductImages,
   updateNutrition,
   updateServing,
+  updateServingImages,
   createCertificate,
   updateCertificate,
   softDeleteCertificate,
@@ -125,6 +127,17 @@ export const useProduct = () => {
     }
   ) => handle(() => updateProductBasic(uuid, data))
 
+  const handleUpdateProductImages = async (
+    uuid: string,
+    changes: { index: number; file: File }[]
+  ) =>
+    handle(async () => {
+      const encoded = await Promise.all(
+        changes.map(async (c) => ({ index: c.index, file: await toBase64(c.file) }))
+      )
+      return await updateProductImages(uuid, encoded)
+    })
+
   const handleSoftDeleteProductImage = async (imageUuid: string) =>
     handle(() => softDeleteProductImage(imageUuid))
 
@@ -154,6 +167,17 @@ export const useProduct = () => {
       video_url?: string
     }
   ) => handle(() => updateServing(productUuid, data))
+
+  const handleUpdateServingImages = async (
+    productUuid: string,
+    changes: { index: number; file: File }[]
+  ) =>
+    handle(async () => {
+      const encoded = await Promise.all(
+        changes.map(async (c) => ({ index: c.index, file: await toBase64(c.file) }))
+      )
+      return await updateServingImages(productUuid, encoded)
+    })
 
   const handleCreateCertificate = async (
     productUuid: string,
@@ -200,9 +224,11 @@ export const useProduct = () => {
     softDeleteProduct: handleSoftDeleteProduct,
     submitProduct: handleSubmitProduct,
     updateProductBasic: handleUpdateProductBasic,
+    updateProductImages: handleUpdateProductImages,
     softDeleteProductImage: handleSoftDeleteProductImage,
     updateNutrition: handleUpdateNutrition,
     updateServing: handleUpdateServing,
+    updateServingImages: handleUpdateServingImages,
     createCertificate: handleCreateCertificate,
     updateCertificate: handleUpdateCertificate,
     softDeleteCertificate: handleSoftDeleteCertificate,
