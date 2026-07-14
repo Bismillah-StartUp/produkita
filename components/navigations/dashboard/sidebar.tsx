@@ -68,13 +68,13 @@ export const Sidebar = () => {
       }`}
     >
       {/* Logo */}
-      <div className="border-b border-slate-200 px-6 py-4 flex items-center h-15">
+      <div className="border-b border-slate-200 px-6 py-4 flex items-center h-15 overflow-hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 hover:opacity-75 transition-opacity"
           title={isOpen ? "Tutup sidebar" : "Buka sidebar"}
         >
-          <Logo showWordmark={isOpen} />
+          {isOpen && <Logo />}
         </button>
       </div>
 

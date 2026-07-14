@@ -1,39 +1,17 @@
-import { QrCode } from "lucide-react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 interface LogoProps {
-  showWordmark?: boolean
   className?: string
   iconClassName?: string
-  wordmarkClassName?: string
 }
 
-export function Logo({
-  showWordmark = true,
-  className,
-  iconClassName,
-  wordmarkClassName,
-}: LogoProps) {
+export function Logo({ className, iconClassName }: LogoProps) {
   return (
-    <div className={cn("flex items-center gap-1.5", className)}>
-      <div
-        className={cn(
-          "flex items-center justify-center bg-blue-600 text-white rounded-md p-1.5 shadow-sm",
-          iconClassName
-        )}
-      >
-        <QrCode className="h-5 w-5" />
+    <div className={cn("flex items-center", className)}>
+      <div className={cn("relative h-8 w-32 shrink-0", iconClassName)}>
+        <Image src="/icons/logo.png" alt="Produkita" fill className="object-contain object-left" />
       </div>
-      {showWordmark && (
-        <span
-          className={cn(
-            "text-xl font-bold tracking-tight text-blue-600",
-            wordmarkClassName
-          )}
-        >
-          Produkita<span className="text-yellow-400">.</span>
-        </span>
-      )}
     </div>
   )
 }
