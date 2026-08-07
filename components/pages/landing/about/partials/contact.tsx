@@ -32,7 +32,7 @@ export const Contact = () => {
                     Email
                   </p>
                   <p className="font-semibold text-slate-900">
-                    hello@produkita.id
+                    achmadnur.zn@gmail.com
                   </p>
                 </div>
               </div>
@@ -46,7 +46,7 @@ export const Contact = () => {
                     WhatsApp
                   </p>
                   <p className="font-semibold text-slate-900">
-                    +62 812-3456-7890
+                    +62 852-5732-5537
                   </p>
                 </div>
               </div>
@@ -60,7 +60,7 @@ export const Contact = () => {
                     Lokasi
                   </p>
                   <p className="font-semibold text-slate-900">
-                    Jakarta Selatan, Indonesia
+                    Jawa Timur, Indonesia
                   </p>
                 </div>
               </div>
