@@ -67,7 +67,7 @@ export const Hero = () => {
 
           <div className="relative z-10">
             <Image
-              src="/assets/landing/dashboard.png"
+              src="/assets/landing/dashboard.webp"
               alt="ProdukIta Preview"
               width={1600}
               height={1000}

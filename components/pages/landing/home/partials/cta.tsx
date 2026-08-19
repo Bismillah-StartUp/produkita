@@ -37,7 +37,7 @@ export const CTA = () => {
 
             <div className="relative w-full hidden md:block">
               <Image
-                src="/assets/landing/cta-mockup-phones.png"
+                src="/assets/landing/cta-mockup-phones.webp"
                 alt="Mockup Aplikasi Produkita"
                 width={800}
                 height={800}

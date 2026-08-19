@@ -47,7 +47,7 @@ export const Benefits = () => {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[110%] bg-blue-600/5 rounded-full blur-3xl -z-10" />
 
               <Image
-                src="/assets/landing/benefits-mockup.png"
+                src="/assets/landing/benefits-mockup.webp"
                 alt="Manajemen Bisnis UMKM"
                 width={1600}
                 height={1600}
