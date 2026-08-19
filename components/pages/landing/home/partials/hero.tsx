@@ -67,7 +67,7 @@ export const Hero = () => {
 
           <div className="relative z-10">
             <Image
-              src="/assets/landing/dashboard.webp"
+              src="/assets/landing/dashboard.png"
               alt="ProdukIta Preview"
               width={1600}
               height={1000}
@@ -75,6 +75,16 @@ export const Hero = () => {
               priority
               unoptimized={true}
             />
+            <div className="absolute left-[-4%] sm:left-[-4%] md:left-[-12%] lg:left-[-20%] top-[32%] sm:top-[32%] w-[26%] max-w-[260px] z-20 transform scale-[1.2] md:scale-[1.4] lg:scale-[1.6] -translate-x-8 md:-translate-x-12 lg:-translate-x-18 hover:scale-[1.65] transition-all duration-300 drop-shadow-2xl pointer-events-auto">
+              <Image
+                src="/assets/landing/qr-scan.png"
+                alt="Scan QR Code Card"
+                width={400}
+                height={500}
+                className="w-full h-auto object-contain"
+                unoptimized={true}
+              />
+            </div>
           </div>
         </div>
       </div>
