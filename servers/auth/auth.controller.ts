@@ -1,29 +1,24 @@
-import { sendOtpMail, sendUpdateEmail } from "@/lib/emails/sendingOtp"
+import { sendUpdateEmail } from "@/lib/emails/sendingOtp"
 import {
-  findUserByEmail,
-  updateUserUnverified,
   verifyPassword,
-  verifyUser,
-  generateOtp,
-  saveOtp,
-  findValidOtp,
-  markOtpUsed,
   findUserByUuid,
   updateProfile,
   findUserByEmailExcludeUuid,
   saveOtpWithType,
   findValidOtpWithType,
+  markOtpUsed,
   updateEmail,
   updatePassword,
-  createUserWithTenant,
-  resendOtpService,
-  loginService,
+  generateOtp,
 } from "./auth.service"
+
+import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "./auth.api"
 
 import {
   getAuthCookie,
   removeAuthCookie,
   verifyToken,
+  setAuthCookie,
 } from "./auth.token"
 
 export const loginController = async (
@@ -31,10 +26,13 @@ export const loginController = async (
   password: string,
   rememberMe: boolean = false
 ) => {
-  if (!email || !password) return { ok: false as const, error: "Email dan password wajib diisi" }
-  if (!email.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
+  const res = await loginApi(email, password, rememberMe)
+  if (!res.success || !res.data) return { ok: false as const, error: res.error ?? "Gagal login" }
 
-  return await loginService(email, password, rememberMe)
+  await setAuthCookie(res.data.token, rememberMe)
+
+  const { uuid, email: userEmail, role, name } = res.data.user
+  return { ok: true as const, data: { uuid, email: userEmail, role, name } }
 }
 
 export const registerController = async (
@@ -43,43 +41,17 @@ export const registerController = async (
   name: string,
   tenantName: string
 ) => {
-  if (!email || !password) return { ok: false as const, error: "Email dan password wajib diisi" }
-  if (!email.includes("@")) return { ok: false as const, error: "Format email tidak valid" }
-  if (password.length < 6) return { ok: false as const, error: "Password minimal 6 karakter" }
-  if (!tenantName) return { ok: false as const, error: "Nama UMKM wajib diisi" }
+  const res = await registerApi(email, password, name, tenantName)
+  if (!res.success || !res.data) return { ok: false as const, error: res.error ?? "Gagal mendaftar" }
 
-  const existing = await findUserByEmail(email)
-
-  let user
-  if (existing && !existing.is_verified) {
-    // update user + tenant dengan data terbaru
-    user = await updateUserUnverified(existing.id, password, name, tenantName)
-  } else if (existing && existing.is_verified) {
-    return { ok: false as const, error: "Email sudah terdaftar" }
-  } else {
-    user = await createUserWithTenant(email, password, name, tenantName)
-  }
-
-  const otp = generateOtp()
-  await saveOtp(user.id, otp)
-  await sendOtpMail(email, otp)
-
-  return { ok: true as const, data: { email: user.email } }
+  return { ok: true as const, data: { email: res.data.email } }
 }
 
 export const verifyOtpController = async (email: string, otp: string) => {
-  if (!email || !otp) return { ok: false as const, error: "Email dan OTP wajib diisi" }
+  const res = await verifyOtpApi(email, otp)
+  if (!res.success || !res.data) return { ok: false as const, error: res.error ?? "Verifikasi OTP gagal" }
 
-  const user = await findUserByEmail(email)
-  if (!user) return { ok: false as const, error: "User tidak ditemukan" }
-
-  const validOtp = await findValidOtp(user.id, otp)
-  if (!validOtp) return { ok: false as const, error: "OTP tidak valid atau sudah expired" }
-
-  await markOtpUsed(validOtp.id)
-  await verifyUser(user.id)
-
-  return { ok: true as const, data: { email: user.email } }
+  return { ok: true as const, data: { email: res.data.email } }
 }
 
 export const logoutController = async () => {
@@ -153,6 +125,8 @@ export const updatePasswordController = async (uuid: string, oldPassword: string
 }
 
 export const resendOtpController = async (email: string) => {
-  if (!email) return { ok: false as const, error: "Email wajib diisi" }
-  return await resendOtpService(email)
+  const res = await resendOtpApi(email)
+  if (!res.success || !res.data) return { ok: false as const, error: res.error ?? "Gagal mengirim ulang OTP" }
+
+  return { ok: true as const, data: { email: res.data.email } }
 }
