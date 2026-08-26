@@ -1,6 +1,6 @@
 import OTPForm from '@/components/pages/auth/otp'
 import AuthSideImage from '@/components/pages/auth/partials/side-image'
-import { verifyOtpToken } from '@/servers/auth/auth.actions'
+import { verifyOtpNavigationToken as verifyOtpToken } from '@/lib/auth/token'
 import { redirect } from 'next/navigation'
 
 interface OTPPageProps {

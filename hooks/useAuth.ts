@@ -1,8 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { login, register, verifyOtp, logout, getSession, updateProfileAction, requestUpdateEmail, verifyUpdateEmail, updatePasswordAction } from "@/servers/auth/auth.actions"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
+
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
+
+async function apiCall<T>(path: string, method: string, body?: unknown): Promise<ApiResult<T>> {
+  const res = await fetch(path, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const json = await res.json()
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: json.error ?? "Terjadi kesalahan" }
+  }
+  return { ok: true, data: json.data }
+}
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false)
@@ -14,7 +28,11 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await login(email, password, rememberMe)
+      const result = await apiCall<{ uuid: string; email: string; role: string; name: string | null }>(
+        "/api/auth/login",
+        "POST",
+        { email, password, rememberMe }
+      )
       if (!result.ok) {
         setError(result.error)
         return null
@@ -35,7 +53,12 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await register(email, password, name, tenantName)
+      const result = await apiCall<{ email: string }>("/api/auth/register", "POST", {
+        email,
+        password,
+        name,
+        tenantName,
+      })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -50,7 +73,22 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await verifyOtp(email, otp)
+      const result = await apiCall<{ email: string }>("/api/auth/verify-otp", "POST", { email, otp })
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResendOtp = async (email: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await apiCall<{ email: string }>("/api/auth/resend-otp", "POST", { email })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -65,7 +103,7 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      await logout()
+      await fetch("/api/auth/logout", { method: "POST" })
       clearSession()
     } catch (err: any) {
       setError(err.message)
@@ -74,11 +112,17 @@ export const useAuth = () => {
     }
   }
 
+  const getSession = async () => {
+    const res = await fetch("/api/auth/session")
+    const json = await res.json()
+    return json.session
+  }
+
   const handleUpdateProfile = async (uuid: string, data: { name?: string; phonenumber?: string }) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await updateProfileAction(uuid, data)
+      const result = await apiCall("/api/auth/profile", "PATCH", { uuid, ...data })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -93,7 +137,7 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await requestUpdateEmail(uuid, newEmail)
+      const result = await apiCall<{ email: string }>("/api/auth/email/request", "POST", { uuid, newEmail })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -108,7 +152,7 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await verifyUpdateEmail(uuid, newEmail, otp)
+      const result = await apiCall<{ email: string }>("/api/auth/email/verify", "POST", { uuid, newEmail, otp })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -123,7 +167,7 @@ export const useAuth = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await updatePasswordAction(uuid, oldPassword, newPassword)
+      const result = await apiCall("/api/auth/password", "PATCH", { uuid, oldPassword, newPassword })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -140,6 +184,7 @@ export const useAuth = () => {
     login: handleLogin,
     register: handleRegister,
     verifyOtp: handleVerifyOtp,
+    resendOtp: handleResendOtp,
     logout: handleLogout,
     getSession,
     updateProfile: handleUpdateProfile,

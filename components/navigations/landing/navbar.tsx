@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { usePathname } from "next/navigation";
 import { ChevronDown, LayoutGrid, LogIn } from "lucide-react";
 

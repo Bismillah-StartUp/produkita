@@ -2,7 +2,7 @@ import { sendOtpMail } from "@/lib/emails/sendingOtp"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
-import { setAuthCookie, signToken } from "./auth.token"
+import { setAuthCookie, signToken } from "./token"
 
 export const generateOtp = () => {
   return crypto.randomInt(100000, 999999).toString()

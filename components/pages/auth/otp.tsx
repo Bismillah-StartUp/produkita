@@ -15,7 +15,7 @@ interface OTPFormProps {
 
 export default function OTPForm({ email, token }: OTPFormProps) {
   const router = useRouter()
-  const { verifyOtp, loading, error } = useAuth()
+  const { verifyOtp, resendOtp, loading, error } = useAuth()
 
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timeLeft, setTimeLeft] = useState(180)
@@ -29,7 +29,7 @@ export default function OTPForm({ email, token }: OTPFormProps) {
   }, [timeLeft])
 
   useEffect(() => {
-    if (error) toast.error('Verifikasi gagal', { description: error })
+    if (error) toast.error('Gagal', { description: error })
   }, [error])
 
   const handleOtpChange = (index: number, value: string) => {
@@ -67,12 +67,8 @@ export default function OTPForm({ email, token }: OTPFormProps) {
   const handleResend = async () => {
     setResendLoading(true)
     try {
-      const { resendOtp } = await import('@/servers/auth/auth.actions')
       const result = await resendOtp(email)
-      if (!result.ok) {
-        toast.error('Gagal mengirim ulang kode', { description: result.error })
-        return
-      }
+      if (!result) return
       toast.success('Kode terkirim', { description: 'Kode OTP baru telah dikirim ke email Anda.' })
       setTimeLeft(180)
       setOtp(['', '', '', '', '', ''])

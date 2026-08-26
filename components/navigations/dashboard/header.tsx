@@ -11,7 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { useAuthStore } from '@/servers/stores/useAuthStore'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',

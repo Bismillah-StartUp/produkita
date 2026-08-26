@@ -7,7 +7,7 @@ import Image from "next/image"
 import ProfilePartial from "./partials/profile"
 import ContactPartial from "./partials/contact"
 import PhotosPartial from "./partials/photos"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import { useTenant } from "@/hooks/useTenants"
 import { emptyData, TenantData } from "./types/tenants.i"
 

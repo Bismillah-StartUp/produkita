@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { TrendingUp, TrendingDown, Wallet, Percent } from "lucide-react"
 import { redirect } from "next/navigation"
-import { getAuthCookie, verifyToken } from "@/servers/auth/auth.token"
+import { getAuthCookie, verifyToken } from "@/lib/auth/token"
 import { getFinancialDashboard } from "@/servers/finances/finance.actions"
 import { getTenant } from "@/servers/tenants/tenant.actions"
 

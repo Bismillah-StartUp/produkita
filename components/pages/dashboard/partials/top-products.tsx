@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import { useDashboard } from "@/hooks/useDashboard"
 
 interface TopProduct {

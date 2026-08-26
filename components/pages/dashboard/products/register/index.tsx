@@ -17,7 +17,7 @@ import {
   Rekap,
 } from "./partials"
 import { useProduct } from "@/hooks/useProducts"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import { getTenantEmail } from "@/servers/tenants/tenant.actions"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
 

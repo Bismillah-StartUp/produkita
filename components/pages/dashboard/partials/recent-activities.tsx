@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import { useDashboard } from "@/hooks/useDashboard"
 
 interface Activity {

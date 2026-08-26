@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useHppCalculator } from "@/hooks/useHppCalculator"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import MethodSelector from "./partials/method-selector"
 import ProductInfo from "./partials/product-info"
 import CostSection from "./partials/cost-section"

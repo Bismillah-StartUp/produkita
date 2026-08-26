@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
-import { generateOtpToken } from '@/servers/auth/auth.actions'
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -36,9 +35,14 @@ export default function RegisterForm() {
     const result = await register(email, password, nama, umkm)
     if (result) {
       toast.success('Pendaftaran berhasil', { description: 'Kode OTP telah dikirim ke email Anda.' })
-      const token = await generateOtpToken(email)
+      const res = await fetch('/api/auth/otp-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const { data } = await res.json()
       // encode token agar aman di URL
-      router.push(`/otp/${encodeURIComponent(token)}`)
+      router.push(`/otp/${encodeURIComponent(data.token)}`)
     }
   }
 

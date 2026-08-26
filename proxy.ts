@@ -1,4 +1,4 @@
-import { middleware } from "@/servers/middlewares/authMiddleware"
+import { middleware } from "@/lib/auth/middleware"
 
 export const proxy = middleware
 

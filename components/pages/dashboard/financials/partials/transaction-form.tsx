@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
-import { useAuthStore } from "@/servers/stores/useAuthStore"
+import { useAuthStore } from "@/stores/useAuthStore"
 import { createFinancialRecord, updateFinancialRecord } from "@/servers/finances/finance.actions"
 import { TransactionType } from "@prisma/client"
 

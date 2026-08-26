@@ -1,5 +1,5 @@
 import { TransactionForm } from "@/components/pages/dashboard/financials/partials/transaction-form"
-import { getAuthCookie, verifyToken } from "@/servers/auth/auth.token"
+import { getAuthCookie, verifyToken } from "@/lib/auth/token"
 import { getFinanceByUUID } from "@/servers/finances/finance.service"
 import { redirect } from "next/navigation"
 

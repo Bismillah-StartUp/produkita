@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { formatCompactIDR, formatIDR } from "@/lib/format-currency";
-import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useDashboard } from "@/hooks/useDashboard";
 
 const chartConfig = {

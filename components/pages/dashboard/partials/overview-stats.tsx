@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Package, Eye, ArrowUpRight } from "lucide-react";
-import { useAuthStore } from "@/servers/stores/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export function OverviewStats() {
