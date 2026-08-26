@@ -99,22 +99,6 @@ const generateEmailTemplate = (
   `;
 };
 
-export const sendOtpMail = async (email: string, otp: string) => {
-  const expiredMinutes = process.env.OTP_EXPIRED_MINUTES ?? 3;
-
-  await sendMail({
-    to: email,
-    subject: "Kode OTP Verifikasi Akun - Produkita",
-    text: `Kode OTP kamu adalah: ${otp}. Berlaku selama ${expiredMinutes} menit.`,
-    html: generateEmailTemplate(
-      "Verifikasi Akun",
-      "Gunakan kode di bawah ini untuk verifikasi akun Produkita kamu.",
-      otp,
-      expiredMinutes,
-    ),
-  });
-};
-
 export const sendUpdateEmail = async (email: string, otp: string) => {
   const expiredMinutes = process.env.OTP_EXPIRED_MINUTES ?? 3;
 
