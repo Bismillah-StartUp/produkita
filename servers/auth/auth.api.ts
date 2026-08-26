@@ -7,9 +7,10 @@ type ApiEnvelope<T> = {
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL!
 const BACKEND_API_KEY = process.env.BACKEND_API_KEY!
+const API_VERSION = "v1"
 
 async function callAuthApi<T>(path: string, body: unknown): Promise<ApiEnvelope<T>> {
-  const res = await fetch(`${BACKEND_API_URL}/auth${path}`, {
+  const res = await fetch(`${BACKEND_API_URL}/${API_VERSION}/auth${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
