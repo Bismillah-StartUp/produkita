@@ -1,94 +1,118 @@
 "use client"
 
 import { useState } from "react"
-import {
-  getTenant,
-  updateTenant,
-  uploadTenantLogo,
-  uploadTenantPlace,
-  deleteTenantLogo,
-  deleteTenantPlace,
-} from "@/servers/tenants/tenant.actions"
+import type { TenantApiData } from "@/lib/tenant/api"
+
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
+
+async function apiCall<T>(path: string, method: string, body?: unknown): Promise<ApiResult<T>> {
+  const res = await fetch(path, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const json = await res.json()
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: json.error ?? "Terjadi kesalahan" }
+  }
+  return { ok: true, data: json.data }
+}
+
+const fileToBase64 = async (file: File) => {
+  return Buffer.from(await file.arrayBuffer()).toString("base64")
+}
 
 export const useTenant = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleGetTenant = async (userUuid: string) => {
+  const handleGetTenant = async () => {
     setLoading(true)
     setError(null)
     try {
-      return await getTenant(userUuid)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await apiCall<TenantApiData>("/api/tenants/me", "GET")
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUpdateTenant = async (userUuid: string, data: Parameters<typeof updateTenant>[1]) => {
+  const handleUpdateTenant = async (data: Record<string, unknown>) => {
     setLoading(true)
     setError(null)
     try {
-      return await updateTenant(userUuid, data)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await apiCall<TenantApiData>("/api/tenants/me", "PUT", data)
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUploadLogo = async (userUuid: string, file: File) => {
+  const handleUploadLogo = async (file: File) => {
     setLoading(true)
     setError(null)
     try {
-      const base64 = Buffer.from(await file.arrayBuffer()).toString("base64")
-      return await uploadTenantLogo(userUuid, base64)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const base64 = await fileToBase64(file)
+      const result = await apiCall<TenantApiData>("/api/tenants/me/logo", "POST", { file: base64 })
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUploadPlace = async (userUuid: string, file: File) => {
+  const handleUploadPlace = async (file: File) => {
     setLoading(true)
     setError(null)
     try {
-      const base64 = Buffer.from(await file.arrayBuffer()).toString("base64")
-      return await uploadTenantPlace(userUuid, base64)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const base64 = await fileToBase64(file)
+      const result = await apiCall<TenantApiData>("/api/tenants/me/place", "POST", { file: base64 })
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDeleteLogo = async (userUuid: string) => {
+  const handleDeleteLogo = async () => {
     setLoading(true)
     setError(null)
     try {
-      return await deleteTenantLogo(userUuid)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await apiCall<TenantApiData>("/api/tenants/me/logo", "DELETE")
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDeletePlace = async (userUuid: string) => {
+  const handleDeletePlace = async () => {
     setLoading(true)
     setError(null)
     try {
-      return await deleteTenantPlace(userUuid)
-    } catch (err: any) {
-      setError(err.message)
-      return null
+      const result = await apiCall<TenantApiData>("/api/tenants/me/place", "DELETE")
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } finally {
       setLoading(false)
     }

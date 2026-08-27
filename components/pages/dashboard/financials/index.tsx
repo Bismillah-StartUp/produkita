@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Wallet, Percent } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getAuthCookie, verifyToken } from "@/lib/auth/token"
 import { getFinancialDashboard } from "@/servers/finances/finance.actions"
-import { getTenant } from "@/servers/tenants/tenant.actions"
+import { getTenantApi } from "@/lib/tenant/api"
 
 import StatsCards from "@/components/pages/dashboard/financials/partials/stats-cards"
 import AlertBanner from "@/components/pages/dashboard/financials/partials/alert-banner"
@@ -25,10 +25,13 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
 
-  const [{ summary, prevSummary, chartData, transactionDates, records }, tenant] = await Promise.all([
+  const [{ summary, prevSummary, chartData, transactionDates, records }, tenantRes] = await Promise.all([
     getFinancialDashboard(user.uuid, year, month, prevYear, prevMonth),
-    getTenant(user.uuid),
+    getTenantApi(token),
   ])
+
+  if (!tenantRes.success || !tenantRes.data) redirect("/login")
+  const tenant = tenantRes.data
 
   const getChange = (curr: number, prev: number) => {
     if (prev === 0) return curr > 0 ? "+100.0%" : "0.0%"

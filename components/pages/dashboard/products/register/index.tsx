@@ -18,7 +18,6 @@ import {
 } from "./partials"
 import { useProduct } from "@/hooks/useProducts"
 import { useAuthStore } from "@/stores/useAuthStore"
-import { getTenantEmail } from "@/servers/tenants/tenant.actions"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
 
 const STEPS = [
@@ -76,10 +75,11 @@ export function RegistryPage() {
 
     let tenantEmail = userEmail ?? ""
     try {
-      const fetchedEmail = await getTenantEmail(uuid)
-      if (fetchedEmail) tenantEmail = fetchedEmail
+      const res = await fetch("/api/tenants/me/email")
+      const json = await res.json()
+      if (json.ok && json.data?.email) tenantEmail = json.data.email
     } catch {
-      // fallback ke email user 
+      // fallback ke email user
     }
 
     // mapping jenis ke ProductCategory

@@ -34,7 +34,7 @@ export default function TenantsPage() {
 
     const fetchTenant = async () => {
       setIsFetching(true)
-      const result = await getTenant(uuid)
+      const result = await getTenant()
       if (!result) {
         setIsFetching(false)
         return
@@ -59,7 +59,7 @@ export default function TenantsPage() {
         email: result.email ?? "",
         website: result.website ?? "",
         foundedYear: result.year?.toString() ?? "",
-        productCount: result._count.products.toString(),
+        productCount: (result.products_count ?? 0).toString(),
         latitude: result.latitude ?? null,
         longitude: result.longitude ?? null,
       }
@@ -94,7 +94,7 @@ export default function TenantsPage() {
 
     try {
       const [result, logoResult, placeResult] = await Promise.all([
-        updateTenant(uuid, {
+        updateTenant({
           name: tempData.companyName,
           trade_name: tempData.tradeName,
           business_field: tempData.businessField,
@@ -111,8 +111,8 @@ export default function TenantsPage() {
           latitude: tempData.latitude ?? undefined,
           longitude: tempData.longitude ?? undefined,
         }),
-        pendingLogo ? uploadLogo(uuid, pendingLogo) : Promise.resolve(null),
-        pendingPlace ? uploadPlace(uuid, pendingPlace) : Promise.resolve(null),
+        pendingLogo ? uploadLogo(pendingLogo) : Promise.resolve(null),
+        pendingPlace ? uploadPlace(pendingPlace) : Promise.resolve(null),
       ])
 
       if (!result) {
