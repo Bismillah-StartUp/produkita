@@ -18,7 +18,7 @@ import {
 } from "./partials"
 import { useProduct } from "@/hooks/useProducts"
 import { useAuthStore } from "@/stores/useAuthStore"
-import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
+import { CertificateType, ProductCategory, WeightUnits } from "@/lib/enums"
 
 const STEPS = [
   { id: 1, label: "Dasar Produk UMKM" },

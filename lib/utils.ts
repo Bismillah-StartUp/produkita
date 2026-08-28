@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { ProductCategory } from "@prisma/client"
+import { ProductCategory } from "@/lib/enums"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

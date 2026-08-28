@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { TransactionType } from "@prisma/client"
+import { TransactionType } from "@/lib/enums"
 import type {
   FinancialRecordData,
   FinancialSummaryData,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { HppMethod, HppCategory } from "@prisma/client"
+import { HppMethod, HppCategory } from "@/lib/enums"
 import type { HppCalculationData } from "@/lib/hpp/api"
 
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }

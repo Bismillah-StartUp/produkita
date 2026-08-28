@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
+import { CertificateType, ProductCategory, WeightUnits } from "@/lib/enums"
 import { toBase64 } from "@/lib/utils"
 import type {
   ProductData,

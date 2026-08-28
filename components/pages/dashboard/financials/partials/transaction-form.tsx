@@ -10,7 +10,7 @@ import { Save, X } from "lucide-react"
 import { toast } from "sonner"
 import { useAuthStore } from "@/stores/useAuthStore"
 import { useFinance } from "@/hooks/useFinance"
-import { TransactionType } from "@prisma/client"
+import { TransactionType } from "@/lib/enums"
 
 interface TransactionFormProps {
   initialData?: any

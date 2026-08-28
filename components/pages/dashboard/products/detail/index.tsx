@@ -19,7 +19,7 @@ import {
   Rekap,
 } from "../register/partials"
 import { QrCodeModal } from "../partials/qr-code-modal"
-import { WeightUnits, ProductCategory, CertificateType } from "@prisma/client"
+import { WeightUnits, ProductCategory, CertificateType } from "@/lib/enums"
 
 interface ProductDetailPageProps {
   uuid: string

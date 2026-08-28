@@ -7,7 +7,7 @@ import NutritionFacts from "./partials/nutrition-facts";
 import ServingInfo from "./partials/serving-info";
 import CompanyInfo from "./partials/company-info";
 import { useLicenceContext } from "@/app/licenses/[code]/layout";
-import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client";
+import { CertificateType, ProductCategory, WeightUnits } from "@/lib/enums";
 
 interface ProductData {
   uuid: string;
