@@ -1,33 +1,17 @@
 import { NextResponse } from "next/server"
-import {
-  findUserByUuid,
-  findValidOtpWithType,
-  markOtpUsed,
-  updateEmail,
-} from "@/lib/auth/service"
+import { getAuthCookie } from "@/lib/auth/token"
+import { verifyUpdateEmailApi } from "@/lib/auth/api"
 
 export async function POST(request: Request) {
-  const { uuid, newEmail, otp } = await request.json()
+  const token = await getAuthCookie()
+  if (!token) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 })
 
-  if (!newEmail.includes("@")) {
-    return NextResponse.json({ ok: false, error: "Format email tidak valid" }, { status: 400 })
-  }
-  if (!otp) {
-    return NextResponse.json({ ok: false, error: "OTP wajib diisi" }, { status: 400 })
-  }
+  const { newEmail, otp } = await request.json()
 
-  const user = await findUserByUuid(uuid)
-  if (!user) {
-    return NextResponse.json({ ok: false, error: "User tidak ditemukan" }, { status: 404 })
+  const res = await verifyUpdateEmailApi(token, newEmail, otp)
+  if (!res.success || !res.data) {
+    return NextResponse.json({ ok: false, error: res.error ?? "Gagal memverifikasi OTP" }, { status: 400 })
   }
 
-  const validOtp = await findValidOtpWithType(user.id, otp, "update_email")
-  if (!validOtp) {
-    return NextResponse.json({ ok: false, error: "OTP tidak valid atau sudah expired" }, { status: 400 })
-  }
-
-  await markOtpUsed(validOtp.id)
-  await updateEmail(uuid, newEmail)
-
-  return NextResponse.json({ ok: true, data: { email: newEmail } })
+  return NextResponse.json({ ok: true, data: res.data })
 }

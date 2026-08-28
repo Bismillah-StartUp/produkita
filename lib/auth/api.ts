@@ -23,6 +23,21 @@ async function callAuthApi<T>(path: string, body: unknown): Promise<ApiEnvelope<
   return (await res.json()) as ApiEnvelope<T>
 }
 
+async function callAuthApiWithToken<T>(path: string, token: string, method: string, body?: unknown): Promise<ApiEnvelope<T>> {
+  const res = await fetch(`${BACKEND_API_URL}/${API_VERSION}/auth${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": BACKEND_API_KEY,
+      Authorization: `Bearer ${token}`,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+  })
+
+  return (await res.json()) as ApiEnvelope<T>
+}
+
 export const registerApi = (email: string, password: string, name: string, tenantName: string) => {
   return callAuthApi<{ email: string }>("/register", {
     email,
@@ -49,4 +64,20 @@ export const verifyOtpApi = (email: string, otp: string) => {
 
 export const resendOtpApi = (email: string) => {
   return callAuthApi<{ email: string }>("/resend-otp", { email })
+}
+
+export const updateProfileApi = (token: string, data: { name?: string; phonenumber?: string }) => {
+  return callAuthApiWithToken("/profile", token, "PUT", data)
+}
+
+export const requestUpdateEmailApi = (token: string, newEmail: string) => {
+  return callAuthApiWithToken<{ email: string }>("/update-email/request", token, "POST", { new_email: newEmail })
+}
+
+export const verifyUpdateEmailApi = (token: string, newEmail: string, otp: string) => {
+  return callAuthApiWithToken<{ email: string }>("/update-email/verify", token, "POST", { new_email: newEmail, otp })
+}
+
+export const updatePasswordApi = (token: string, oldPassword: string, newPassword: string) => {
+  return callAuthApiWithToken("/password", token, "PUT", { old_password: oldPassword, new_password: newPassword })
 }

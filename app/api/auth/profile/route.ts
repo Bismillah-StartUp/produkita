@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server"
-import { findUserByUuid, updateProfile } from "@/lib/auth/service"
+import { getAuthCookie } from "@/lib/auth/token"
+import { updateProfileApi } from "@/lib/auth/api"
 
-export async function PATCH(request: Request) {
-  const { uuid, name, phonenumber } = await request.json()
+export async function PUT(request: Request) {
+  const token = await getAuthCookie()
+  if (!token) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 })
 
-  const user = await findUserByUuid(uuid)
-  if (!user) {
-    return NextResponse.json({ ok: false, error: "User tidak ditemukan" }, { status: 404 })
+  const { name, phonenumber } = await request.json()
+
+  const res = await updateProfileApi(token, { name, phonenumber })
+  if (!res.success || !res.data) {
+    return NextResponse.json({ ok: false, error: res.error ?? "Gagal memperbarui profil" }, { status: 400 })
   }
 
-  const updated = await updateProfile(uuid, { name, phonenumber })
-  return NextResponse.json({ ok: true, data: updated })
+  return NextResponse.json({ ok: true, data: res.data })
 }

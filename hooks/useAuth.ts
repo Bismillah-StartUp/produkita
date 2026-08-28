@@ -118,11 +118,11 @@ export const useAuth = () => {
     return json.session
   }
 
-  const handleUpdateProfile = async (uuid: string, data: { name?: string; phonenumber?: string }) => {
+  const handleUpdateProfile = async (data: { name?: string; phonenumber?: string }) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await apiCall("/api/auth/profile", "PATCH", { uuid, ...data })
+      const result = await apiCall("/api/auth/profile", "PUT", data)
       if (!result.ok) {
         setError(result.error)
         return null
@@ -133,11 +133,11 @@ export const useAuth = () => {
     }
   }
 
-  const handleRequestUpdateEmail = async (uuid: string, newEmail: string) => {
+  const handleRequestUpdateEmail = async (newEmail: string) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await apiCall<{ email: string }>("/api/auth/email/request", "POST", { uuid, newEmail })
+      const result = await apiCall<{ email: string }>("/api/auth/email/request", "POST", { newEmail })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -148,11 +148,11 @@ export const useAuth = () => {
     }
   }
 
-  const handleVerifyUpdateEmail = async (uuid: string, newEmail: string, otp: string) => {
+  const handleVerifyUpdateEmail = async (newEmail: string, otp: string) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await apiCall<{ email: string }>("/api/auth/email/verify", "POST", { uuid, newEmail, otp })
+      const result = await apiCall<{ email: string }>("/api/auth/email/verify", "POST", { newEmail, otp })
       if (!result.ok) {
         setError(result.error)
         return null
@@ -163,11 +163,11 @@ export const useAuth = () => {
     }
   }
 
-  const handleUpdatePassword = async (uuid: string, oldPassword: string, newPassword: string) => {
+  const handleUpdatePassword = async (oldPassword: string, newPassword: string) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await apiCall("/api/auth/password", "PATCH", { uuid, oldPassword, newPassword })
+      const result = await apiCall("/api/auth/password", "PUT", { oldPassword, newPassword })
       if (!result.ok) {
         setError(result.error)
         return null
