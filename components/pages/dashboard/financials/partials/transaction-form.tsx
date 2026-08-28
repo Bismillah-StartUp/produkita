@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
 import { useAuthStore } from "@/stores/useAuthStore"
-import { createFinancialRecord, updateFinancialRecord } from "@/servers/finances/finance.actions"
+import { useFinance } from "@/hooks/useFinance"
 import { TransactionType } from "@prisma/client"
 
 interface TransactionFormProps {
@@ -20,6 +20,7 @@ interface TransactionFormProps {
 export function TransactionForm({ initialData, className }: TransactionFormProps) {
   const router = useRouter()
   const { uuid } = useAuthStore()
+  const { createFinancialRecord, updateFinancialRecord } = useFinance()
   const [loading, setLoading] = React.useState(false)
 
   const getLocalDateString = () => {
@@ -48,29 +49,34 @@ export function TransactionForm({ initialData, className }: TransactionFormProps
     setLoading(true)
 
     try {
+      let result
       if (initialData?.cuid) {
-        await updateFinancialRecord(initialData.cuid, uuid, {
+        result = await updateFinancialRecord(initialData.cuid, {
           product_name: formData.product_name,
           transaction_type: formData.transaction_type,
           amount: Number(formData.amount),
           transaction_date: new Date(formData.transaction_date),
           notes: formData.notes,
         })
-        toast.success("Laporan berhasil diperbarui")
+        if (result) toast.success("Laporan berhasil diperbarui")
       } else {
-        await createFinancialRecord(uuid, {
+        result = await createFinancialRecord({
           product_name: formData.product_name,
           transaction_type: formData.transaction_type,
           amount: Number(formData.amount),
           transaction_date: new Date(formData.transaction_date),
           notes: formData.notes,
         })
-        toast.success("Laporan berhasil ditambahkan")
+        if (result) toast.success("Laporan berhasil ditambahkan")
       }
+
+      if (!result) {
+        toast.error("Gagal menyimpan laporan")
+        return
+      }
+
       router.push("/dashboard/financials")
       router.refresh()
-    } catch (err: any) {
-      toast.error("Gagal menyimpan laporan", { description: err.message })
     } finally {
       setLoading(false)
     }

@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { TrendingUp, TrendingDown, Wallet, Percent } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getAuthCookie, verifyToken } from "@/lib/auth/token"
-import { getFinancialDashboard } from "@/servers/finances/finance.actions"
+import { dashboardFinanceApi } from "@/lib/finance/api"
 import { getTenantApi } from "@/lib/tenant/api"
 
 import StatsCards from "@/components/pages/dashboard/financials/partials/stats-cards"
@@ -25,10 +25,13 @@ export default async function FinancialsPage({ dateParam }: { dateParam?: string
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
 
-  const [{ summary, prevSummary, chartData, transactionDates, records }, tenantRes] = await Promise.all([
-    getFinancialDashboard(user.uuid, year, month, prevYear, prevMonth),
+  const [dashboardRes, tenantRes] = await Promise.all([
+    dashboardFinanceApi(token, year, month, prevYear, prevMonth),
     getTenantApi(token),
   ])
+
+  if (!dashboardRes.success || !dashboardRes.data) redirect("/login")
+  const { summary, prevSummary, chartData, transactionDates, records } = dashboardRes.data
 
   if (!tenantRes.success || !tenantRes.data) redirect("/login")
   const tenant = tenantRes.data

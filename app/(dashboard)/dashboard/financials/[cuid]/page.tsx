@@ -1,6 +1,6 @@
 import { TransactionForm } from "@/components/pages/dashboard/financials/partials/transaction-form"
-import { getAuthCookie, verifyToken } from "@/lib/auth/token"
-import { getFinanceByUUID } from "@/servers/finances/finance.service"
+import { getAuthCookie } from "@/lib/auth/token"
+import { getFinanceApi } from "@/lib/finance/api"
 import { redirect } from "next/navigation"
 
 interface PageProps {
@@ -12,13 +12,13 @@ export default async function TransactionPage({ params }: PageProps) {
 
   const token = await getAuthCookie()
   if (!token) redirect("/auth/login")
-  const user = await verifyToken(token)
 
   let initialData = null
 
   if (cuid !== "records") {
-    initialData = await getFinanceByUUID(cuid, user.uuid)
-    if (!initialData) redirect("/dashboard/financials")
+    const res = await getFinanceApi(token, cuid)
+    if (!res.success || !res.data) redirect("/dashboard/financials")
+    initialData = res.data
   }
 
   return (

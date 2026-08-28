@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { formatIDR } from "@/lib/format-currency"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { deleteFinancialRecord, exportFinancialRecords } from "@/servers/finances/finance.actions"
+import { useFinance } from "@/hooks/useFinance"
 
 export default function RecentTransactions({
   records,
@@ -21,6 +21,7 @@ export default function RecentTransactions({
   userUuid: string
 }) {
   const router = useRouter()
+  const { deleteFinancialRecord, exportFinancialRecords } = useFinance()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [exportLoading, setExportLoading] = useState(false)
 
@@ -34,11 +35,13 @@ export default function RecentTransactions({
     if (!confirm("Yakin ingin menghapus transaksi ini?")) return
     setDeletingId(id)
     try {
-      await deleteFinancialRecord(id, userUuid)
+      const result = await deleteFinancialRecord(id)
+      if (!result) {
+        toast.error("Gagal menghapus transaksi")
+        return
+      }
       toast.success("Transaksi berhasil dihapus")
       router.refresh()
-    } catch {
-      toast.error("Gagal menghapus transaksi")
     } finally {
       setDeletingId(null)
     }
@@ -50,16 +53,8 @@ export default function RecentTransactions({
 
     toast.promise(
       (async () => {
-        const buffer = await exportFinancialRecords(userUuid, now.getFullYear(), now.getMonth() + 1)
-        const blob = new Blob([buffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `laporan-keuangan-${now.getFullYear()}-${now.getMonth() + 1}.xlsx`
-        a.click()
-        URL.revokeObjectURL(url)
+        const result = await exportFinancialRecords(now.getFullYear(), now.getMonth() + 1)
+        if (!result) throw new Error("Gagal mengunduh laporan")
       })(),
       {
         loading: "Menyiapkan laporan...",
