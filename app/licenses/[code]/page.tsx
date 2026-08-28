@@ -1,12 +1,12 @@
 import { LicenceLayout } from "@/components/pages/licenses";
 import {
-  getProductInfo,
-  getProductNutrition,
-  getProductCertificates,
-  getProductServing,
-  getProductCompany,
-} from "@/servers/licenses/license.actions";
-import { recordProductView } from "@/servers/dashboard/dashboard.actions";
+  getProductInfoApi,
+  getProductNutritionApi,
+  getProductCertificatesApi,
+  getProductServingApi,
+  getProductCompanyApi,
+  recordProductViewApi,
+} from "@/lib/license/api";
 
 type LicencePageProps = {
   params: Promise<{
@@ -35,28 +35,28 @@ const LicencePage = async ({ params, searchParams }: LicencePageProps) => {
   const { source } = await searchParams;
 
   const [product, nutrition, certificates, serving, company] = await Promise.allSettled([
-    getProductInfo(code),
-    getProductNutrition(code),
-    getProductCertificates(code),
-    getProductServing(code),
-    getProductCompany(code),
+    getProductInfoApi(code),
+    getProductNutritionApi(code),
+    getProductCertificatesApi(code),
+    getProductServingApi(code),
+    getProductCompanyApi(code),
   ]);
 
-  if (product.status === "rejected" || !product.value) {
+  if (product.status === "rejected" || !product.value.success || !product.value.data) {
     return <NotFoundState />;
   }
 
-  recordProductView(code, source === "scan" ? "scan" : "view").catch(() => {});
+  recordProductViewApi(code, source === "scan" ? "scan" : "view").catch(() => {});
 
   return (
     <LicenceLayout
       code={code}
       data={{
-        product: product.value,
-        nutrition: nutrition.status === "fulfilled" ? nutrition.value : null,
-        certificates: certificates.status === "fulfilled" ? certificates.value : [],
-        serving: serving.status === "fulfilled" ? serving.value : null,
-        company: company.status === "fulfilled" ? company.value : null,
+        product: product.value.data as any,
+        nutrition: nutrition.status === "fulfilled" && nutrition.value.success ? (nutrition.value.data as any) : null,
+        certificates: certificates.status === "fulfilled" && certificates.value.success ? (certificates.value.data as any) : [],
+        serving: serving.status === "fulfilled" && serving.value.success ? (serving.value.data as any) : null,
+        company: company.status === "fulfilled" && company.value.success ? (company.value.data as any) : null,
       }}
     />
   );

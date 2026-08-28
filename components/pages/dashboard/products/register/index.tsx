@@ -128,7 +128,7 @@ export function RegistryPage() {
       })
     }
 
-    const result = await submitProduct(uuid, tenantEmail, {
+    const result = await submitProduct(tenantEmail, {
       product: {
         name: productData.productName,
         brand: productData.brandName,
@@ -163,7 +163,7 @@ export function RegistryPage() {
     })
 
     if (result) {
-      toast.success("Produk berhasil didaftarkan", { description: "QR Code dan barcode telah dikirim ke email Anda." })
+      toast.success("Produk berhasil didaftarkan", { description: "QR Code telah dikirim ke email Anda." })
       setSuccess(true)
     }
   }
@@ -201,7 +201,7 @@ export function RegistryPage() {
           <div className="mt-8 flex w-full max-w-2xl items-center justify-center gap-2 rounded-lg bg-[#EFF6FF] px-4 py-3">
             <Info className="h-4 w-4 shrink-0 text-blue-600" />
             <p className="text-sm font-medium text-blue-600">
-              QR Code dan barcode telah dikirim ke email Anda.
+              QR Code telah dikirim ke email Anda.
             </p>
           </div>
           <Button

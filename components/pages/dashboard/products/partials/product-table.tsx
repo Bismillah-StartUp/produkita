@@ -26,7 +26,7 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
 
     const fetchProducts = async () => {
       setIsFetching(true)
-      const result = await getProductsByTenant(uuid)
+      const result = await getProductsByTenant()
       if (result) {
         setProducts(result)
         onTotalChange(result.length)
@@ -42,7 +42,7 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
   )
 
   const hasCert = (product: any, type: string) =>
-    product.certificates?.some((c: any) => c.type === type) ?? false
+    product.certificate_types?.includes(type) ?? false
 
   const handleDelete = async (productUuid: string) => {
     if (!confirm("Yakin ingin menghapus produk ini?")) return
@@ -110,7 +110,7 @@ export function ProductTable({ search, onTotalChange }: IProductTable) {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-center font-medium text-gray-700">
-                  {(product._count?.views ?? 0).toLocaleString("id-ID")}
+                  {(product.views_count ?? 0).toLocaleString("id-ID")}
                 </td>
                 <td className="px-6 py-4 text-center">
                   {product.qr_code_url ? (

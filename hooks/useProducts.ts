@@ -1,34 +1,46 @@
 "use client"
 
 import { useState } from "react"
-import {
-  getProduct,
-  getProductsByTenant,
-  submitProduct,
-  softDeleteProduct,
-  softDeleteProductImage,
-  softDeleteServingImage,
-  updateProductBasic,
-  updateProductImages,
-  updateNutrition,
-  updateServing,
-  updateServingImages,
-  createCertificate,
-  updateCertificate,
-  softDeleteCertificate,
-} from "@/servers/products/product.actions"
 import { CertificateType, ProductCategory, WeightUnits } from "@prisma/client"
 import { toBase64 } from "@/lib/utils"
+import type {
+  ProductData,
+  ProductListItemData,
+  CertificateData,
+  NutritionInfoData,
+  ProductServingData,
+  ProductSubmitResultData,
+} from "@/lib/product/api"
+
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
+
+async function apiCall<T>(path: string, method: string, body?: unknown): Promise<ApiResult<T>> {
+  const res = await fetch(path, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const json = await res.json()
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: json.error ?? "Terjadi kesalahan" }
+  }
+  return { ok: true, data: json.data }
+}
 
 export const useProduct = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handle = async <T>(fn: () => Promise<T>): Promise<T | null> => {
+  const handle = async <T>(fn: () => Promise<ApiResult<T>>): Promise<T | null> => {
     setLoading(true)
     setError(null)
     try {
-      return await fn()
+      const result = await fn()
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } catch (err: any) {
       setError(err.message)
       return null
@@ -38,16 +50,15 @@ export const useProduct = () => {
   }
 
   const handleGetProduct = async (uuid: string) =>
-    handle(() => getProduct(uuid))
+    handle(() => apiCall<ProductData>(`/api/products/${uuid}`, "GET"))
 
-  const handleGetProductsByTenant = async (tenantUuid: string) =>
-    handle(() => getProductsByTenant(tenantUuid))
+  const handleGetProductsByTenant = async () =>
+    handle(() => apiCall<ProductListItemData[]>("/api/products", "GET"))
 
   const handleSoftDeleteProduct = async (uuid: string) =>
-    handle(() => softDeleteProduct(uuid))
+    handle(() => apiCall(`/api/products/${uuid}`, "DELETE"))
 
   const handleSubmitProduct = async (
-    tenantUuid: string,
     tenantEmail: string,
     data: {
       product: {
@@ -91,26 +102,27 @@ export const useProduct = () => {
     }
   ) =>
     handle(async () => {
-      const productImages = await Promise.all(
-        data.productImages.map(toBase64)
-      )
+      const productImages = await Promise.all(data.productImages.map(toBase64))
 
       const certificates = await Promise.all(
         data.certificates.map(async (cert) => ({
           ...cert,
+          registered_at: cert.registered_at?.toISOString(),
+          valid_until: cert.valid_until?.toISOString(),
           file: cert.file ? await toBase64(cert.file) : undefined,
         }))
       )
 
-      const servingImages = await Promise.all(
-        (data.serving.images ?? []).map(toBase64)
-      )
+      const servingImages = await Promise.all((data.serving.images ?? []).map(toBase64))
 
-      return await submitProduct(tenantUuid, tenantEmail, {
-        ...data,
+      return apiCall<ProductSubmitResultData>("/api/products", "POST", {
+        tenant_email: tenantEmail,
+        product: data.product,
         productImages,
+        nutrition: data.nutrition,
         certificates,
-        serving: { ...data.serving, images: servingImages },
+        serving: data.serving,
+        servingImages,
       })
     })
 
@@ -125,21 +137,18 @@ export const useProduct = () => {
       weight?: number
       weight_unit?: WeightUnits
     }
-  ) => handle(() => updateProductBasic(uuid, data))
+  ) => handle(() => apiCall<ProductData>(`/api/products/${uuid}`, "PUT", data))
 
-  const handleUpdateProductImages = async (
-    uuid: string,
-    changes: { index: number; file: File }[]
-  ) =>
+  const handleUpdateProductImages = async (uuid: string, changes: { index: number; file: File }[]) =>
     handle(async () => {
       const encoded = await Promise.all(
         changes.map(async (c) => ({ index: c.index, file: await toBase64(c.file) }))
       )
-      return await updateProductImages(uuid, encoded)
+      return apiCall<ProductData>(`/api/products/${uuid}/images`, "PUT", { changes: encoded })
     })
 
   const handleSoftDeleteProductImage = async (imageUuid: string) =>
-    handle(() => softDeleteProductImage(imageUuid))
+    handle(() => apiCall(`/api/products/images/${imageUuid}`, "DELETE"))
 
   const handleUpdateNutrition = async (
     productUuid: string,
@@ -156,7 +165,7 @@ export const useProduct = () => {
       composition?: string
       allergens?: string[]
     }
-  ) => handle(() => updateNutrition(productUuid, data))
+  ) => handle(() => apiCall<NutritionInfoData>(`/api/products/${productUuid}/nutrition`, "PUT", data))
 
   const handleUpdateServing = async (
     productUuid: string,
@@ -166,17 +175,14 @@ export const useProduct = () => {
       storage_info?: string
       video_url?: string
     }
-  ) => handle(() => updateServing(productUuid, data))
+  ) => handle(() => apiCall<ProductServingData>(`/api/products/${productUuid}/serving`, "PUT", data))
 
-  const handleUpdateServingImages = async (
-    productUuid: string,
-    changes: { index: number; file: File }[]
-  ) =>
+  const handleUpdateServingImages = async (productUuid: string, changes: { index: number; file: File }[]) =>
     handle(async () => {
       const encoded = await Promise.all(
         changes.map(async (c) => ({ index: c.index, file: await toBase64(c.file) }))
       )
-      return await updateServingImages(productUuid, encoded)
+      return apiCall<ProductServingData>(`/api/products/${productUuid}/serving/images`, "PUT", { changes: encoded })
     })
 
   const handleCreateCertificate = async (
@@ -191,8 +197,13 @@ export const useProduct = () => {
     }
   ) =>
     handle(async () => {
-      const buffer = data.file ? Buffer.from(await data.file.arrayBuffer()) : undefined
-      return await createCertificate(productUuid, { ...data, file: buffer })
+      const file = data.file ? await toBase64(data.file) : undefined
+      return apiCall<CertificateData>(`/api/products/${productUuid}/certificates`, "POST", {
+        ...data,
+        registered_at: data.registered_at?.toISOString(),
+        valid_until: data.valid_until?.toISOString(),
+        file,
+      })
     })
 
   const handleUpdateCertificate = async (
@@ -206,15 +217,20 @@ export const useProduct = () => {
     }
   ) =>
     handle(async () => {
-      const buffer = data.file ? Buffer.from(await data.file.arrayBuffer()) : undefined
-      return await updateCertificate(certificateUuid, { ...data, file: buffer })
+      const file = data.file ? await toBase64(data.file) : undefined
+      return apiCall<CertificateData>(`/api/products/certificates/${certificateUuid}`, "PUT", {
+        ...data,
+        registered_at: data.registered_at?.toISOString(),
+        valid_until: data.valid_until?.toISOString(),
+        file,
+      })
     })
 
   const handleSoftDeleteCertificate = async (certificateUuid: string) =>
-    handle(() => softDeleteCertificate(certificateUuid))
+    handle(() => apiCall(`/api/products/certificates/${certificateUuid}`, "DELETE"))
 
   const handleSoftDeleteServingImage = async (imageUuid: string) =>
-    handle(() => softDeleteServingImage(imageUuid))
+    handle(() => apiCall(`/api/products/serving/images/${imageUuid}`, "DELETE"))
 
   return {
     loading,
