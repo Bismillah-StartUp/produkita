@@ -1,14 +1,23 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import {
-  getHpps,
-  getHpp,
-  createHpp,
-  updateHpp,
-  deleteHpp,
-} from "@/servers/hpp/hpp.actions"
 import { HppMethod, HppCategory } from "@prisma/client"
+import type { HppCalculationData } from "@/lib/hpp/api"
+
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
+
+async function apiCall<T>(path: string, method: string, body?: unknown): Promise<ApiResult<T>> {
+  const res = await fetch(path, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const json = await res.json()
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: json.error ?? "Terjadi kesalahan" }
+  }
+  return { ok: true, data: json.data }
+}
 
 export type CostItem = {
   id: string
@@ -167,11 +176,16 @@ export const useHppCalculator = () => {
   // ========================
   // DB ACTIONS
   // ========================
-  const handle = async <T>(fn: () => Promise<T>): Promise<T | null> => {
+  const handle = async <T>(fn: () => Promise<ApiResult<T>>): Promise<T | null> => {
     setLoading(true)
     setError(null)
     try {
-      return await fn()
+      const result = await fn()
+      if (!result.ok) {
+        setError(result.error)
+        return null
+      }
+      return result.data
     } catch (err: any) {
       setError(err.message)
       return null
@@ -180,32 +194,32 @@ export const useHppCalculator = () => {
     }
   }
 
-  const handleGetHpps = async (tenantUuid: string) =>
-    handle(() => getHpps(tenantUuid))
+  const handleGetHpps = async () =>
+    handle(() => apiCall<HppCalculationData[]>("/api/hpp", "GET"))
 
-  const handleGetHpp = async (uuid: string, tenantUuid: string) =>
-    handle(() => getHpp(uuid, tenantUuid))
+  const handleGetHpp = async (uuid: string) =>
+    handle(() => apiCall<HppCalculationData>(`/api/hpp/${uuid}`, "GET"))
 
-  const handleCreateHpp = async (tenantUuid: string) =>
-    handle(() => createHpp(tenantUuid, buildPayload()))
+  const handleCreateHpp = async () =>
+    handle(() => apiCall<HppCalculationData>("/api/hpp", "POST", buildPayload()))
 
-  const handleUpdateHpp = async (uuid: string, tenantUuid: string) =>
-    handle(() => updateHpp(uuid, tenantUuid, buildPayload()))
+  const handleUpdateHpp = async (uuid: string) =>
+    handle(() => apiCall<HppCalculationData>(`/api/hpp/${uuid}`, "PUT", buildPayload()))
 
-  const handleDeleteHpp = async (uuid: string, tenantUuid: string) =>
-    handle(() => deleteHpp(uuid, tenantUuid))
+  const handleDeleteHpp = async (uuid: string) =>
+    handle(() => apiCall<{ deleted: boolean }>(`/api/hpp/${uuid}`, "DELETE"))
 
   // ========================
   // LOAD KALKULASI KE STATE
   // ========================
-  const loadHpp = async (uuid: string, tenantUuid: string) => {
-    const result = await handleGetHpp(uuid, tenantUuid)
+  const loadHpp = async (uuid: string) => {
+    const result = await handleGetHpp(uuid)
     if (!result) return
 
     set_product_name(result.product_name)
     set_production_unit(result.production_unit)
     set_production_qty(result.production_qty)
-    set_calculation_method(result.calculation_method)
+    set_calculation_method(result.calculation_method as HppMethod)
     set_margin_percentage(result.margin_percentage)
 
     const toStateItem = (item: any): CostItem => ({
@@ -217,11 +231,12 @@ export const useHppCalculator = () => {
       subtotal: item.subtotal,
     })
 
-    set_bbb_items(result.items.filter((i: any) => i.category === "bbb").map(toStateItem))
-    set_btkl_items(result.items.filter((i: any) => i.category === "btkl").map(toStateItem))
-    set_packaging_items(result.items.filter((i: any) => i.category === "packaging").map(toStateItem))
-    set_bop_var_items(result.items.filter((i: any) => i.category === "bop_var").map(toStateItem))
-    set_bop_fix_items(result.items.filter((i: any) => i.category === "bop_fix").map(toStateItem))
+    const items = result.items ?? []
+    set_bbb_items(items.filter((i) => i.category === "bbb").map(toStateItem))
+    set_btkl_items(items.filter((i) => i.category === "btkl").map(toStateItem))
+    set_packaging_items(items.filter((i) => i.category === "packaging").map(toStateItem))
+    set_bop_var_items(items.filter((i) => i.category === "bop_var").map(toStateItem))
+    set_bop_fix_items(items.filter((i) => i.category === "bop_fix").map(toStateItem))
   }
 
   return {

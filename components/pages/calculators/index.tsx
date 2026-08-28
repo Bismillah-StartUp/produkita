@@ -21,7 +21,7 @@ export default function CalculatorsPage() {
 
   const handleSave = async () => {
     if (!uuid) return
-    const result = await createHpp(uuid)
+    const result = await createHpp()
     if (result) {
       toast.success("Kalkulasi HPP berhasil disimpan")
     }
