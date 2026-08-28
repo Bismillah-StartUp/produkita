@@ -29,7 +29,7 @@ export function TopProducts() {
     if (!uuid) return
 
     const fetchTopProducts = async () => {
-      const result = await getTopProducts(uuid)
+      const result = await getTopProducts()
       if (result) setTopProducts(result)
     }
 

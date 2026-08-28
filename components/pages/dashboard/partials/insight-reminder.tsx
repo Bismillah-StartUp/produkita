@@ -99,7 +99,7 @@ export function InsightReminder() {
     if (!uuid) return
 
     const fetchInsights = async () => {
-      const result = await getInsights(uuid)
+      const result = await getInsights()
       if (result) setInsights(result)
     }
 

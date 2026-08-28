@@ -42,7 +42,7 @@ export function RevenueChart() {
     if (!uuid) return;
 
     const fetchChart = async () => {
-      const result = await getRevenueChart(uuid);
+      const result = await getRevenueChart();
       if (result) setChartData(result);
     };
 

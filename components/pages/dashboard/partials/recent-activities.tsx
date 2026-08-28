@@ -12,7 +12,7 @@ import { useDashboard } from "@/hooks/useDashboard"
 interface Activity {
   id: number
   message: string
-  created_at: Date
+  created_at: string
 }
 
 export function RecentActivities() {
@@ -24,7 +24,7 @@ export function RecentActivities() {
     if (!uuid) return
 
     const fetchActivities = async () => {
-      const result = await getRecentActivities(uuid)
+      const result = await getRecentActivities()
       if (result) setActivities(result)
     }
 

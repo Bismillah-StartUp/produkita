@@ -20,7 +20,7 @@ export function OverviewStats() {
     if (!uuid) return;
 
     const fetchStats = async () => {
-      const result = await getOverviewStats(uuid);
+      const result = await getOverviewStats();
       if (result) setStats(result);
     };
 
