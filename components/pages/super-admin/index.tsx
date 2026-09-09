@@ -20,7 +20,7 @@ import { Logo } from "@/components/ui/logo"
 const menuItems = [
   { id: "dashboard", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "List User", icon: Users },
-  { id: "packages", label: "Package Permission", icon: Package },
+  { id: "packages", label: "Permission", icon: Package },
 ]
 
 export function SuperAdminPage() {

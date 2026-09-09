@@ -10,7 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, ChevronDown, Eye } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users, Eye, ChevronDown } from "lucide-react";
 
 interface User {
   id: string;
@@ -57,34 +64,33 @@ export function UserTable({ users, onEdit }: UserTableProps) {
               <TableCell className="py-4 text-sm font-medium text-slate-900">{user.tenant}</TableCell>
               <TableCell className="py-4 text-sm text-slate-900">5</TableCell>
               <TableCell className="py-4">
-                <div className="relative inline-block">
-                  <select
-                    className="appearance-none bg-white border border-slate-200 rounded-xl pl-3 pr-8 py-1.5 text-sm text-slate-700 cursor-pointer"
-                    defaultValue="Paket A"
-                  >
-                    <option>Paket A</option>
-                    <option>Paket B</option>
-                  </select>
-                  <ChevronDown className="h-3.5 w-3.5 text-slate-700 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                <Select defaultValue="gratis">
+                  <SelectTrigger className="w-27.5 rounded-xl border-slate-200 bg-white text-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gratis">Gratis</SelectItem>
+                    <SelectItem value="umkm">UMKM</SelectItem>
+                    <SelectItem value="bisnis">Bisnis</SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell className="py-4">
-                <div className="relative inline-block">
-                  <select
-                    className={`appearance-none rounded-xl pl-3 pr-8 py-1.5 text-sm font-semibold border cursor-pointer ${
+                <Select defaultValue={user.status}>
+                  <SelectTrigger
+                    className={`w-27.5 rounded-xl font-semibold border ${
                       user.status === "active"
                         ? "bg-emerald-50 border-emerald-200 text-emerald-600"
                         : "bg-slate-50 border-slate-200 text-slate-500"
                     }`}
-                    defaultValue={user.status}
                   >
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Non Aktif</option>
-                  </select>
-                  <ChevronDown className={`h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                    user.status === "active" ? "text-emerald-600" : "text-slate-500"
-                  }`} />
-                </div>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Aktif</SelectItem>
+                    <SelectItem value="inactive">Non Aktif</SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell className="py-4">
                 <button

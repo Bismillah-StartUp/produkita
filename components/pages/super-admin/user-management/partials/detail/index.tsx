@@ -73,7 +73,7 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export function UserDetailPage() {
-  const [tab, setTab] = useState<"info" | "produk" | "riwayat">("info")
+  const [tab, setTab] = useState<"info" | "produk">("info")
   const [selectedProduct, setSelectedProduct] = useState<{name: string, active: boolean, url: string | null} | null>(null)
   const company = mockCompany
 
@@ -123,17 +123,6 @@ export function UserDetailPage() {
           }`}
         >
           Daftar Produk
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={() => setTab("riwayat")}
-          className={`rounded-full h-9 px-5 text-sm font-semibold transition-all ${
-            tab === "riwayat"
-              ? "bg-violet-600 text-white hover:bg-violet-600 hover:text-white"
-              : "text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          Riwayat Aktivitas
         </Button>
       </div>
 
@@ -248,11 +237,6 @@ export function UserDetailPage() {
         </Card>
       )}
 
-      {tab === "riwayat" && (
-        <Card className="shadow-none border-slate-200 rounded-3xl p-6">
-          <p className="text-sm text-slate-400">Riwayat aktivitas perusahaan ini.</p>
-        </Card>
-      )}
     </div>
   )
 }
